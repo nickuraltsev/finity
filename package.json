@@ -1,0 +1,31 @@
+{
+    "name": "fluent-state-machine",
+    "version": "0.0.1",
+    "description": "A finite state machine library",
+    "keywords": [
+        "state",
+        "machine",
+        "state machine",
+        "finite state machine",
+        "fsm"
+    ],
+    "bugs": {
+        "url": "https://github.com/nickuraltsev/fluent-state-machine/issues"
+    },
+    "license": "MIT",
+    "author": {
+        "name": "Nick Uraltsev",
+        "email": "nick.uraltsev@gmail.com"
+    },
+    "main": "lib/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nickuraltsev/fluent-state-machine.git"
+    },
+    "devDependencies": {
+      "babel": "^5.8.29"
+    },
+    "scripts": {
+      "build": "babel src --out-dir lib"
+    }
+}
