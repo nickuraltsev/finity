@@ -23,9 +23,15 @@
         "url": "https://github.com/nickuraltsev/fluent-state-machine.git"
     },
     "devDependencies": {
-      "babel": "^5.8.29"
+      "babel": "^5.8.29",
+      "jest-cli": "^0.7.1",
+      "babel-jest": "^5.3.0"
     },
     "scripts": {
-      "build": "babel src --out-dir lib"
+      "build": "babel src --out-dir lib --ignore __tests__",
+      "test": "jest"
+    },
+    "jest": {
+      "scriptPreprocessor": "<rootDir>/node_modules/babel-jest"
     }
 }
