@@ -7,6 +7,10 @@ export default class StateMachine {
     this.isHandlingEvent = false;
   }
 
+  getCurrentState() {
+    return this.currentState;
+  }
+
   handle(event) {
     if (this.isHandlingEvent) {
       return;
@@ -15,6 +19,7 @@ export default class StateMachine {
     this.isHandlingEvent = true;
     try {
       this.handleCore(event);
+      return this;
     }
     finally {
       this.isHandlingEvent = false;
@@ -42,11 +47,11 @@ export default class StateMachine {
       : this.currentState
 
     if (!transitionConfig.isInternal) {
-      if (stateConfig.exitAction) {
-        stateConfig.exitAction(this.currentState)
-      }
       if (this.config.stateExitHandler) {
         this.config.stateExitHandler(this.currentState);
+      }
+      if (stateConfig.exitAction) {
+        stateConfig.exitAction(this.currentState)
       }
     }
 

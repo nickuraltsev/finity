@@ -32,6 +32,9 @@
       "test": "jest"
     },
     "jest": {
-      "scriptPreprocessor": "<rootDir>/node_modules/babel-jest"
+      "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+      "testPathDirs": [
+        "<rootDir>/src"
+      ]
     }
 }
