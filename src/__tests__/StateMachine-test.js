@@ -149,4 +149,24 @@ describe('StateMachine', () => {
     expect(stateEnterHandler).not.toBeCalled();
     expect(entryAction).not.toBeCalled();
   });
+
+  describe('canHandle', () => {
+    it('returns true when event can be handled', () => {
+      const stateMachine = StateMachine
+        .getBuilder()
+        .initialState('State1').on('event').transition('State2')
+        .build();
+
+        expect(stateMachine.canHandle('event')).toBe(true);
+    });
+
+    it('returns false when event cannot be handled', () => {
+      const stateMachine = StateMachine
+        .getBuilder()
+        .initialState('State')
+        .build();
+
+        expect(stateMachine.canHandle('event')).toBe(false);
+    });
+  });
 });

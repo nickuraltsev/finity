@@ -11,6 +11,10 @@ export default class StateMachine {
     return this.currentState;
   }
 
+  canHandle(event) {
+    return !this.isHandlingEvent && !!this.getTransition(event);
+  }
+
   handle(event) {
     if (this.isHandlingEvent) {
       return;
@@ -27,19 +31,9 @@ export default class StateMachine {
   }
 
   handleCore(event) {
-    const stateConfig = this.config.states[this.currentState];
-    if (!stateConfig) {
-      return;
-    }
-
-    const eventConfig = stateConfig.events[event];
-    if (!eventConfig) {
-      return;
-    }
-
-    const transitionConfig = eventConfig.transitions.find(t => !t.condition || t.condition());
+    const transitionConfig = this.getTransition(event);
     if (!transitionConfig) {
-      return;
+      return null;
     }
 
     const nextState = transitionConfig.targetState !== null
@@ -50,6 +44,7 @@ export default class StateMachine {
       if (this.config.stateExitHandler) {
         this.config.stateExitHandler(this.currentState);
       }
+      const stateConfig = this.config.states[this.currentState];
       if (stateConfig.exitAction) {
         stateConfig.exitAction(this.currentState)
       }
@@ -72,5 +67,16 @@ export default class StateMachine {
       }
       this.currentState = nextState;
     }
+  }
+
+  getTransition(event) {
+    const stateConfig = this.config.states[this.currentState];
+    if (stateConfig) {
+      const eventConfig = stateConfig.events[event];
+      return eventConfig
+        ? eventConfig.transitions.find(t => !t.condition || t.condition())
+        : null;
+    }
+    return null;
   }
 }

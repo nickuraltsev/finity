@@ -1,6 +1,6 @@
 {
     "name": "fluent-state-machine",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "A finite state machine library",
     "keywords": [
         "state",
@@ -35,6 +35,7 @@
       "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
       "testPathDirs": [
         "<rootDir>/src"
-      ]
+      ],
+      "verbose": true
     }
 }
