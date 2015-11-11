@@ -17,8 +17,7 @@ describe('StateMachine', () => {
   it('transitions to next state on event', () => {
     const stateMachine = StateMachine
       .getBuilder()
-      .initialState('State1')
-        .on('event').transition('State2')
+      .initialState('State1').on('event').transition('State2')
       .build()
       .handle('event');
 
@@ -38,10 +37,39 @@ describe('StateMachine', () => {
     expect(stateMachine.getCurrentState()).toBe('State3');
   });
 
+  it('calls handlers with correct parameters', () => {
+    const stateEnterHandler = jest.genMockFunction();
+    const stateExitHandler = jest.genMockFunction();
+    const transitionHandler = jest.genMockFunction();
+    const entryAction = jest.genMockFunction();
+    const exitAction = jest.genMockFunction();
+    const transitionAction = jest.genMockFunction();
+
+    StateMachine
+      .getBuilder()
+      .onStateEnter(stateEnterHandler)
+      .onStateExit(stateExitHandler)
+      .onTransition(transitionHandler)
+      .initialState('State1')
+        .on('event').transition('State2').withAction(transitionAction)
+        .onExit(exitAction)
+      .state('State2')
+        .onEnter(entryAction)
+      .build()
+      .handle('event');
+
+    expect(stateExitHandler).toBeCalledWith('State1');
+    expect(exitAction).toBeCalledWith('State1');
+    expect(transitionHandler).toBeCalledWith('State1', 'State2');
+    expect(transitionAction).toBeCalledWith('State1', 'State2');
+    expect(stateEnterHandler).toBeCalledWith('State2');
+    expect(entryAction).toBeCalledWith('State2');
+  });
+
   it('calls handlers in correct order', () => {
     const calledHandlers = [];
 
-    const stateMachine = StateMachine
+    StateMachine
       .getBuilder()
       .onStateEnter(() => calledHandlers.push('StateMachine: stateEnter'))
       .onStateExit(() => calledHandlers.push('StateMachine: stateExit'))
@@ -64,5 +92,61 @@ describe('StateMachine', () => {
       'StateMachine: stateEnter',
       'State2 entry action'
     ]);
+  });
+
+  it('calls all handlers for self-transition', () => {
+    const stateEnterHandler = jest.genMockFunction();
+    const stateExitHandler = jest.genMockFunction();
+    const transitionHandler = jest.genMockFunction();
+    const entryAction = jest.genMockFunction();
+    const exitAction = jest.genMockFunction();
+    const transitionAction = jest.genMockFunction();
+
+    StateMachine
+      .getBuilder()
+      .onStateEnter(stateEnterHandler)
+      .onStateExit(stateExitHandler)
+      .onTransition(transitionHandler)
+      .initialState('State')
+        .onEnter(entryAction)
+        .onExit(exitAction)
+        .on('event').selfTransition().withAction(transitionAction)
+      .build()
+      .handle('event');
+
+    expect(stateExitHandler).toBeCalledWith('State');
+    expect(exitAction).toBeCalledWith('State');
+    expect(transitionHandler).toBeCalledWith('State', 'State');
+    expect(transitionAction).toBeCalledWith('State', 'State');
+    expect(stateEnterHandler).toBeCalledWith('State');
+    expect(entryAction).toBeCalledWith('State');
+  });
+
+  it('calls only transition handlers for internal transition', () => {
+    const stateEnterHandler = jest.genMockFunction();
+    const stateExitHandler = jest.genMockFunction();
+    const transitionHandler = jest.genMockFunction();
+    const entryAction = jest.genMockFunction();
+    const exitAction = jest.genMockFunction();
+    const transitionAction = jest.genMockFunction();
+
+    StateMachine
+      .getBuilder()
+      .onStateEnter(stateEnterHandler)
+      .onStateExit(stateExitHandler)
+      .onTransition(transitionHandler)
+      .initialState('State')
+        .onEnter(entryAction)
+        .onExit(exitAction)
+        .on('event').internalTransition().withAction(transitionAction)
+      .build()
+      .handle('event');
+
+    expect(stateExitHandler).not.toBeCalled();
+    expect(exitAction).not.toBeCalled();
+    expect(transitionHandler).toBeCalledWith('State', 'State');
+    expect(transitionAction).toBeCalledWith('State', 'State');
+    expect(stateEnterHandler).not.toBeCalled();
+    expect(entryAction).not.toBeCalled();
   });
 });

@@ -90,20 +90,20 @@ class StateBuilder extends ChildBuilder {
 }
 
 class EventBuilder extends ChildBuilder {
-  transition(targetState) {
+  transition(targetState, isInternal) {
     const transitionConfig = Object.create(null);
     transitionConfig.targetState = targetState;
+    transitionConfig.isInternal = targetState === null && isInternal;
     this.config.transitions.push(transitionConfig);
     return new TransitionBuilder(this, transitionConfig);
   }
 
   selfTransition() {
-    return this.transition(null);
+    return this.transition(null, false);
   }
 
   internalTransition() {
-    // TODO: set isInternal to true
-    return this.transition(null);
+    return this.transition(null, true);
   }
 }
 
