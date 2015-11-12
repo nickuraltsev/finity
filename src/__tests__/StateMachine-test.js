@@ -5,12 +5,22 @@ jest.autoMockOff();
 const StateMachine = require('..');
 
 describe('StateMachine', () => {
-  it('starts in initial state', () => {
+  it('can be created using build method', () => {
     const stateMachine = StateMachine
       .getBuilder()
       .initialState('State')
       .build();
 
+    expect(stateMachine.getCurrentState()).toBe('State');
+  });
+
+  it('can be created by passing configuration to its constructor', () => {
+    const config = StateMachine
+      .getBuilder()
+      .initialState('State')
+      .getConfiguration();
+
+    const stateMachine = new StateMachine(config);
     expect(stateMachine.getCurrentState()).toBe('State');
   });
 
