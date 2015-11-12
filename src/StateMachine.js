@@ -2,6 +2,15 @@
 
 export default class StateMachine {
   constructor(config) {
+    if (config === undefined || config === null) {
+      throw new Error('Configuration must be specified.');
+    }
+    if (typeof config !== 'object') {
+      throw new Error('Configuration must be an object.');
+    }
+    if (config.initialState === undefined) {
+      throw new Error('Initial state must be specified.');
+    }
     this.config = config;
     this.currentState = config.initialState;
     this.isHandlingEvent = false;
