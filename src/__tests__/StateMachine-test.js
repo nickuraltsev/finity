@@ -125,7 +125,7 @@ describe('StateMachine', () => {
       .initialState('state1')
         .on('event')
           .transition('state2')
-          .withAction(() => calledHandlers.push('state1->state2 transition action'))
+            .withAction(() => calledHandlers.push('state1->state2 transition action'))
         .onExit(() => calledHandlers.push('state1 exit action'))
       .state('state2')
         .onEnter(() => calledHandlers.push('state2 entry action'))
@@ -186,6 +186,58 @@ describe('StateMachine', () => {
     expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
     expect(mocks.stateEnterHandler).not.toBeCalled();
     expect(mocks.entryAction).not.toBeCalled();
+  });
+
+  it('handles event fired from action', () => {
+    const stateMachine = StateMachine
+      .getBuilder()
+      .initialState('state1')
+        .on('event1').transition('state2')
+      .state('state2')
+        .onEnter(() => stateMachine.handle('event2'))
+        .on('event2').transition('state3')
+      .build();
+
+    stateMachine.handle('event1');
+
+    expect(stateMachine.getCurrentState()).toBe('state3');
+  });
+
+  it('handles event fired from action after current transition is completed', () => {
+    const executedActions = [];
+
+    const stateMachine = StateMachine
+      .getBuilder()
+      .initialState('state1')
+        .on('event1')
+          .transition('state2')
+            .withAction(() => executedActions.push('state1->state2 transition action'))
+        .onExit(() => {
+          stateMachine.handle('event2');
+          executedActions.push('state1 exit action');
+        })
+      .state('state2')
+        .onEnter(() => executedActions.push('state2 entry action'))
+        .on('event2')
+          .transition('state3')
+            .withAction(() => executedActions.push('state2->state3 transition action'))
+        .onExit(() => executedActions.push('state2 exit action'))
+      .state('state3')
+        .onEnter(() => executedActions.push('state3 entry action'))
+      .build();
+
+    stateMachine.handle('event1');
+
+    expect(stateMachine.getCurrentState()).toBe('state3');
+
+    expect(executedActions).toEqual([
+      'state1 exit action',
+      'state1->state2 transition action',
+      'state2 entry action',
+      'state2 exit action',
+      'state2->state3 transition action',
+      'state3 entry action'
+    ]);
   });
 
   describe('canHandle', () => {
