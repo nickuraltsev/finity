@@ -8,20 +8,20 @@ describe('StateMachine', () => {
   it('can be created using build method', () => {
     const stateMachine = StateMachine
       .getBuilder()
-      .initialState('State')
+      .initialState('state1')
       .build();
 
-    expect(stateMachine.getCurrentState()).toBe('State');
+    expect(stateMachine.getCurrentState()).toBe('state1');
   });
 
   it('can be created by passing configuration to its constructor', () => {
     const config = StateMachine
       .getBuilder()
-      .initialState('State')
+      .initialState('state1')
       .getConfiguration();
 
     const stateMachine = new StateMachine(config);
-    expect(stateMachine.getCurrentState()).toBe('State');
+    expect(stateMachine.getCurrentState()).toBe('state1');
   });
 
   it('throws if configuration is undefined', () => {
@@ -47,34 +47,34 @@ describe('StateMachine', () => {
   it('transitions to next state', () => {
     const stateMachine = StateMachine
       .getBuilder()
-      .initialState('State1').on('event').transition('State2')
+      .initialState('state1').on('event1').transition('state2')
       .build()
-      .handle('event');
+      .handle('event1');
 
-      expect(stateMachine.getCurrentState()).toBe('State2');
+      expect(stateMachine.getCurrentState()).toBe('state2');
   });
 
   it('selects first transition for which condition is true', () => {
     const stateMachine = StateMachine
       .getBuilder()
-      .initialState('State1')
-        .on('event')
-          .transition('State2').withCondition(() => false)
-          .transition('State3').withCondition(() => true)
+      .initialState('state1')
+        .on('event1')
+          .transition('state2').withCondition(() => false)
+          .transition('state3').withCondition(() => true)
       .build()
-      .handle('event');
+      .handle('event1');
 
-    expect(stateMachine.getCurrentState()).toBe('State3');
+    expect(stateMachine.getCurrentState()).toBe('state3');
   });
 
   it('throws if event cannot be handled', () => {
     expect(() =>
       StateMachine
         .getBuilder()
-        .initialState('State1')
+        .initialState('state1')
         .build()
         .handle('event1')
-    ).toThrow('State \'State1\' cannot handle event \'event1\'.')
+    ).toThrow('State \'state1\' cannot handle event \'event1\'.')
   });
 
   it('calls unhandledEvent handler', () => {
@@ -83,11 +83,11 @@ describe('StateMachine', () => {
     StateMachine
       .getBuilder()
       .onUnhandledEvent(handler)
-      .initialState('State1')
+      .initialState('state1')
       .build()
       .handle('event1');
 
-    expect(handler).toBeCalledWith('event1', 'State1');
+    expect(handler).toBeCalledWith('event1', 'state1');
   });
 
   it('calls handlers with correct parameters', () => {
@@ -98,20 +98,20 @@ describe('StateMachine', () => {
       .onStateEnter(mocks.stateEnterHandler)
       .onStateExit(mocks.stateExitHandler)
       .onTransition(mocks.transitionHandler)
-      .initialState('State1')
-        .on('event').transition('State2').withAction(mocks.transitionAction)
+      .initialState('state1')
+        .on('event1').transition('state2').withAction(mocks.transitionAction)
         .onExit(mocks.exitAction)
-      .state('State2')
+      .state('state2')
         .onEnter(mocks.entryAction)
       .build()
-      .handle('event');
+      .handle('event1');
 
-    expect(mocks.stateExitHandler).toBeCalledWith('State1');
-    expect(mocks.exitAction).toBeCalledWith('State1');
-    expect(mocks.transitionHandler).toBeCalledWith('State1', 'State2');
-    expect(mocks.transitionAction).toBeCalledWith('State1', 'State2');
-    expect(mocks.stateEnterHandler).toBeCalledWith('State2');
-    expect(mocks.entryAction).toBeCalledWith('State2');
+    expect(mocks.stateExitHandler).toBeCalledWith('state1');
+    expect(mocks.exitAction).toBeCalledWith('state1');
+    expect(mocks.transitionHandler).toBeCalledWith('state1', 'state2');
+    expect(mocks.transitionAction).toBeCalledWith('state1', 'state2');
+    expect(mocks.stateEnterHandler).toBeCalledWith('state2');
+    expect(mocks.entryAction).toBeCalledWith('state2');
   });
 
   it('calls handlers in correct order', () => {
@@ -119,26 +119,26 @@ describe('StateMachine', () => {
 
     StateMachine
       .getBuilder()
-      .onStateEnter(() => calledHandlers.push('StateMachine: stateEnter'))
-      .onStateExit(() => calledHandlers.push('StateMachine: stateExit'))
-      .onTransition(() => calledHandlers.push('StateMachine: transition'))
-      .initialState('State1')
+      .onStateEnter(() => calledHandlers.push('stateEnter handler'))
+      .onStateExit(() => calledHandlers.push('stateExit handler'))
+      .onTransition(() => calledHandlers.push('transition handler'))
+      .initialState('state1')
         .on('event')
-          .transition('State2')
-          .withAction(() => calledHandlers.push('Transition action'))
-        .onExit(() => calledHandlers.push('State1 exit action'))
-      .state('State2')
-        .onEnter(() => calledHandlers.push('State2 entry action'))
+          .transition('state2')
+          .withAction(() => calledHandlers.push('state1->state2 transition action'))
+        .onExit(() => calledHandlers.push('state1 exit action'))
+      .state('state2')
+        .onEnter(() => calledHandlers.push('state2 entry action'))
       .build()
       .handle('event');
 
     expect(calledHandlers).toEqual([
-      'StateMachine: stateExit',
-      'State1 exit action',
-      'StateMachine: transition',
-      'Transition action',
-      'StateMachine: stateEnter',
-      'State2 entry action'
+      'stateExit handler',
+      'state1 exit action',
+      'transition handler',
+      'state1->state2 transition action',
+      'stateEnter handler',
+      'state2 entry action'
     ]);
   });
 
@@ -150,19 +150,19 @@ describe('StateMachine', () => {
       .onStateEnter(mocks.stateEnterHandler)
       .onStateExit(mocks.stateExitHandler)
       .onTransition(mocks.transitionHandler)
-      .initialState('State')
+      .initialState('state1')
         .onEnter(mocks.entryAction)
         .onExit(mocks.exitAction)
-        .on('event').selfTransition().withAction(mocks.transitionAction)
+        .on('event1').selfTransition().withAction(mocks.transitionAction)
       .build()
-      .handle('event');
+      .handle('event1');
 
-    expect(mocks.stateExitHandler).toBeCalledWith('State');
-    expect(mocks.exitAction).toBeCalledWith('State');
-    expect(mocks.transitionHandler).toBeCalledWith('State', 'State');
-    expect(mocks.transitionAction).toBeCalledWith('State', 'State');
-    expect(mocks.stateEnterHandler).toBeCalledWith('State');
-    expect(mocks.entryAction).toBeCalledWith('State');
+    expect(mocks.stateExitHandler).toBeCalledWith('state1');
+    expect(mocks.exitAction).toBeCalledWith('state1');
+    expect(mocks.transitionHandler).toBeCalledWith('state1', 'state1');
+    expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
+    expect(mocks.stateEnterHandler).toBeCalledWith('state1');
+    expect(mocks.entryAction).toBeCalledWith('state1');
   });
 
   it('calls only transition handlers for internal transition', () => {
@@ -173,17 +173,17 @@ describe('StateMachine', () => {
       .onStateEnter(mocks.stateEnterHandler)
       .onStateExit(mocks.stateExitHandler)
       .onTransition(mocks.transitionHandler)
-      .initialState('State')
+      .initialState('state1')
         .onEnter(mocks.entryAction)
         .onExit(mocks.exitAction)
-        .on('event').internalTransition().withAction(mocks.transitionAction)
+        .on('event1').internalTransition().withAction(mocks.transitionAction)
       .build()
-      .handle('event');
+      .handle('event1');
 
     expect(mocks.stateExitHandler).not.toBeCalled();
     expect(mocks.exitAction).not.toBeCalled();
-    expect(mocks.transitionHandler).toBeCalledWith('State', 'State');
-    expect(mocks.transitionAction).toBeCalledWith('State', 'State');
+    expect(mocks.transitionHandler).toBeCalledWith('state1', 'state1');
+    expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
     expect(mocks.stateEnterHandler).not.toBeCalled();
     expect(mocks.entryAction).not.toBeCalled();
   });
@@ -192,19 +192,19 @@ describe('StateMachine', () => {
     it('returns true when event can be handled', () => {
       const stateMachine = StateMachine
         .getBuilder()
-        .initialState('State1').on('event').transition('State2')
+        .initialState('state1').on('event1').transition('state2')
         .build();
 
-        expect(stateMachine.canHandle('event')).toBe(true);
+        expect(stateMachine.canHandle('event1')).toBe(true);
     });
 
     it('returns false when event cannot be handled', () => {
       const stateMachine = StateMachine
         .getBuilder()
-        .initialState('State')
+        .initialState('state1')
         .build();
 
-        expect(stateMachine.canHandle('event')).toBe(false);
+        expect(stateMachine.canHandle('event1')).toBe(false);
     });
   });
 });
