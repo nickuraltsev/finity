@@ -42,7 +42,11 @@ export default class StateMachine {
   handleCore(event) {
     const transitionConfig = this.getTransition(event);
     if (!transitionConfig) {
-      return null;
+      if (this.config.unhandledEventHandler) {
+        this.config.unhandledEventHandler(event, this.currentState);
+        return;
+      }
+      throw new Error(`State '${this.currentState}' cannot handle event '${event}'.`);
     }
 
     const nextState = transitionConfig.targetState !== null

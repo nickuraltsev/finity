@@ -67,6 +67,29 @@ describe('StateMachine', () => {
     expect(stateMachine.getCurrentState()).toBe('State3');
   });
 
+  it('throws if event cannot be handled', () => {
+    expect(() =>
+      StateMachine
+        .getBuilder()
+        .initialState('State1')
+        .build()
+        .handle('event1')
+    ).toThrow('State \'State1\' cannot handle event \'event1\'.')
+  });
+
+  it('calls unhandledEvent handler', () => {
+    const handler = jest.genMockFn();
+
+    StateMachine
+      .getBuilder()
+      .onUnhandledEvent(handler)
+      .initialState('State1')
+      .build()
+      .handle('event1');
+
+    expect(handler).toBeCalledWith('event1', 'State1');
+  });
+
   it('calls handlers with correct parameters', () => {
     const mocks = getHandlerMocks();
 

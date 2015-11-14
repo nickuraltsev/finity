@@ -23,6 +23,11 @@ export default class StateMachineBuilder {
     return this;
   }
 
+  onUnhandledEvent(handler) {
+    this.config.unhandledEventHandler = handler;
+    return this;
+  }
+
   initialState(state) {
     this.config.initialState = state;
     return this.state(state);
