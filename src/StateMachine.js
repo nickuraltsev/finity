@@ -50,41 +50,31 @@ export default class StateMachine {
   handleCore(event) {
     const transitionConfig = this.getTransition(event);
     if (!transitionConfig) {
-      if (this.config.unhandledEventHandler) {
-        this.config.unhandledEventHandler(event, this.currentState);
+      if (this.config.unhandledEventHandlers.length > 0) {
+        execute(this.config.unhandledEventHandlers, event, this.currentState);
         return;
       }
       throw new Error(`State '${this.currentState}' cannot handle event '${event}'.`);
     }
 
     if (!transitionConfig.isInternal) {
-      if (this.config.stateExitHandler) {
-        this.config.stateExitHandler(this.currentState);
-      }
+      execute(this.config.stateExitHandlers, this.currentState);
       const stateConfig = this.config.states[this.currentState];
-      if (stateConfig.exitAction) {
-        stateConfig.exitAction(this.currentState)
-      }
+      execute(stateConfig.exitActions, this.currentState);
     }
 
     const nextState = transitionConfig.targetState !== null
       ? transitionConfig.targetState
       : this.currentState
 
-    if (this.config.transitionHandler) {
-      this.config.transitionHandler(this.currentState, nextState);
-    }
-    if (transitionConfig.action) {
-      transitionConfig.action(this.currentState, nextState);
-    }
+    execute(this.config.transitionHandlers, this.currentState, nextState);
+    execute(transitionConfig.actions, this.currentState, nextState);
 
     if (!transitionConfig.isInternal) {
-      if (this.config.stateEnterHandler) {
-        this.config.stateEnterHandler(nextState);
-      }
+      execute(this.config.stateEnterHandlers, nextState);
       const nextStateConfig = this.config.states[nextState];
-      if (nextStateConfig && nextStateConfig.entryAction) {
-        nextStateConfig.entryAction(nextState);
+      if (nextStateConfig) {
+        execute(nextStateConfig.entryActions, nextState);
       }
       this.currentState = nextState;
     }
@@ -92,12 +82,16 @@ export default class StateMachine {
 
   getTransition(event) {
     const stateConfig = this.config.states[this.currentState];
-    if (stateConfig) {
-      const eventConfig = stateConfig.events[event];
-      return eventConfig
-        ? eventConfig.transitions.find(t => !t.condition || t.condition())
-        : null;
+    if (!stateConfig) {
+      return null;
     }
-    return null;
+    const eventConfig = stateConfig.events[event];
+    return eventConfig
+      ? eventConfig.transitions.find(t => !t.condition || t.condition())
+      : null;
   }
+}
+
+function execute(handlers, ...args) {
+  handlers.forEach(handler => handler(...args));
 }

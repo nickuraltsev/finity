@@ -3,28 +3,27 @@
 import StateMachine from './StateMachine';
 
 export default class StateMachineBuilder {
-  constructor() {
-    this.config = Object.create(null);
-    this.config.states = Object.create(null);
+  constructor(config) {
+    this.config = config || StateMachineBuilder.createConfig();
   }
 
   onStateEnter(handler) {
-    this.config.stateEnterHandler = handler;
+    this.config.stateEnterHandlers.push(handler);
     return this;
   }
 
   onStateExit(handler) {
-    this.config.stateExitHandler = handler;
+    this.config.stateExitHandlers.push(handler);
     return this;
   }
 
   onTransition(handler) {
-    this.config.transitionHandler = handler;
+    this.config.transitionHandlers.push(handler);
     return this;
   }
 
   onUnhandledEvent(handler) {
-    this.config.unhandledEventHandler = handler;
+    this.config.unhandledEventHandlers.push(handler);
     return this;
   }
 
@@ -34,10 +33,9 @@ export default class StateMachineBuilder {
   }
 
   state(state) {
-    if (!this.config.states[state]) {
-      this.config.states[state] = StateMachineBuilder.createStateConfig();
-    }
-    return new StateBuilder(this, this.config.states[state]);
+    const stateBuilder = new StateBuilder(this, this.config.states[state]);
+    this.config.states[state] = stateBuilder.config;
+    return stateBuilder;
   }
 
   getConfiguration() {
@@ -48,17 +46,20 @@ export default class StateMachineBuilder {
     return new StateMachine(this.config);
   }
 
-  static createStateConfig() {
-    const stateConfig = Object.create(null);
-    stateConfig.events = Object.create(null);
-    return stateConfig;
+  static createConfig() {
+    const config = Object.create(null);
+    config.states = Object.create(null);
+    config.stateEnterHandlers = [];
+    config.stateExitHandlers = [];
+    config.transitionHandlers = [];
+    config.unhandledEventHandlers = [];
+    return config;
   }
 }
 
 class ChildBuilder {
-  constructor(parent, config) {
+  constructor(parent) {
     this.parent = parent;
-    this.config = config;
   }
 
   getAncestor(type) {
@@ -70,37 +71,46 @@ class ChildBuilder {
 
 @delegateToAncestor(StateMachineBuilder)
 class StateBuilder extends ChildBuilder {
+  constructor(parent, config) {
+    super(parent);
+    this.config = config || StateBuilder.createConfig();
+  }
+
   onEnter(action) {
-    this.config.entryAction = action;
+    this.config.entryActions.push(action);
     return this;
   }
 
   onExit(action) {
-    this.config.exitAction = action;
+    this.config.exitActions.push(action);
     return this;
   }
 
   on(event) {
-    if (!this.config.events[event]) {
-      this.config.events[event] = StateBuilder.createEventConfig();
-    }
-    return new EventBuilder(this, this.config.events[event]);
+    const eventBuilder = new EventBuilder(this, this.config.events[event]);
+    this.config.events[event] = eventBuilder.config;
+    return eventBuilder;
   }
 
-  static createEventConfig() {
-    const eventConfig = Object.create(null);
-    eventConfig.transitions = [];
-    return eventConfig;
+  static createConfig() {
+    const config = Object.create(null);
+    config.entryActions = [];
+    config.exitActions = [];
+    config.events = Object.create(null);
+    return config;
   }
 }
 
 class EventBuilder extends ChildBuilder {
+  constructor(parent, config) {
+    super(parent);
+    this.config = config || EventBuilder.createConfig();
+  }
+
   transition(targetState, isInternal) {
-    const transitionConfig = Object.create(null);
-    transitionConfig.targetState = targetState;
-    transitionConfig.isInternal = targetState === null && isInternal;
-    this.config.transitions.push(transitionConfig);
-    return new TransitionBuilder(this, transitionConfig);
+    const transitionBuilder = new TransitionBuilder(this, targetState, isInternal);
+    this.config.transitions.push(transitionBuilder.config);
+    return transitionBuilder;
   }
 
   selfTransition() {
@@ -110,12 +120,26 @@ class EventBuilder extends ChildBuilder {
   internalTransition() {
     return this.transition(null, true);
   }
+
+  static createConfig() {
+    const config = Object.create(null);
+    config.transitions = [];
+    return config;
+  }
 }
 
 @delegateToAncestor(StateBuilder, EventBuilder)
 class TransitionBuilder extends ChildBuilder {
+  constructor(parent, targetState, isInternal) {
+    super(parent);
+    this.config = Object.create(null);
+    this.config.targetState = targetState;
+    this.config.isInternal = targetState === null && isInternal;
+    this.config.actions = [];
+  }
+
   withAction(action) {
-    this.config.action = action;
+    this.config.actions.push(action);
     return this;
   }
 
