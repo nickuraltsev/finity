@@ -3,6 +3,10 @@
 import StateMachine from './StateMachine';
 import StateMachineBuilder from './StateMachineBuilder';
 
-StateMachine.getBuilder = () => new StateMachineBuilder();
+export default {
+  getBuilder() {
+    return new StateMachineBuilder();
+  },
 
-export default StateMachine;
+  start: StateMachine.start
+};

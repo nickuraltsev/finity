@@ -42,8 +42,8 @@ export default class StateMachineBuilder {
     return this.config;
   }
 
-  build() {
-    return new StateMachine(this.config);
+  start() {
+    return StateMachine.start(this.config);
   }
 
   static createConfig() {

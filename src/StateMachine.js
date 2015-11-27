@@ -12,9 +12,19 @@ export default class StateMachine {
       throw new Error('Initial state must be specified.');
     }
     this.config = config;
-    this.currentState = config.initialState;
+    this.currentState = null;
     this.isHandlingEvent = false;
     this.eventQueue = [];
+  }
+
+  static start(config) {
+    return new StateMachine(config).start();
+  }
+
+  start() {
+    this.executeEntryHandlers(this.config.initialState);
+    this.currentState = this.config.initialState;
+    return this;
   }
 
   getCurrentState() {
@@ -58,24 +68,17 @@ export default class StateMachine {
     }
 
     if (!transitionConfig.isInternal) {
-      execute(this.config.stateExitHandlers, this.currentState);
-      const stateConfig = this.config.states[this.currentState];
-      execute(stateConfig.exitActions, this.currentState);
+      this.executeExitHandlers(this.currentState);
     }
 
     const nextState = transitionConfig.targetState !== null
       ? transitionConfig.targetState
       : this.currentState
 
-    execute(this.config.transitionHandlers, this.currentState, nextState);
-    execute(transitionConfig.actions, this.currentState, nextState);
+    this.executeTransitionHandlers(this.currentState, nextState, transitionConfig);
 
     if (!transitionConfig.isInternal) {
-      execute(this.config.stateEnterHandlers, nextState);
-      const nextStateConfig = this.config.states[nextState];
-      if (nextStateConfig) {
-        execute(nextStateConfig.entryActions, nextState);
-      }
+      this.executeEntryHandlers(nextState);
       this.currentState = nextState;
     }
   }
@@ -89,6 +92,27 @@ export default class StateMachine {
     return eventConfig
       ? eventConfig.transitions.find(t => !t.condition || t.condition())
       : null;
+  }
+
+  executeEntryHandlers(state) {
+    execute(this.config.stateEnterHandlers, state);
+    const stateConfig = this.config.states[state];
+    if (stateConfig) {
+      execute(stateConfig.entryActions, state);
+    }
+  }
+
+  executeExitHandlers(state) {
+    execute(this.config.stateExitHandlers, state);
+    const stateConfig = this.config.states[state];
+    if (stateConfig) {
+      execute(stateConfig.exitActions, state);
+    }
+  }
+
+  executeTransitionHandlers(sourceState, targetState, transitionConfig) {
+    execute(this.config.transitionHandlers, sourceState, targetState);
+    execute(transitionConfig.actions, sourceState, targetState);
   }
 }
 
