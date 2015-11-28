@@ -9,7 +9,7 @@ describe('StateMachine', () => {
   describe('start', () => {
     it('starts state machine', () => {
       const config = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1')
         .getConfiguration();
 
@@ -21,7 +21,7 @@ describe('StateMachine', () => {
       const mocks = getHandlerMocks();
 
       const config = StateMachine
-        .getBuilder()
+        .configure()
         .onStateEnter(mocks.stateEnterHandler)
         .initialState('state1').onEnter(mocks.entryAction)
         .getConfiguration();
@@ -50,7 +50,7 @@ describe('StateMachine', () => {
   describe('canHandle', () => {
     it('returns true when event can be handled', () => {
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1').on('event1').transition('state2')
         .start();
 
@@ -59,7 +59,7 @@ describe('StateMachine', () => {
 
     it('returns false when event cannot be handled', () => {
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1')
         .start();
 
@@ -70,7 +70,7 @@ describe('StateMachine', () => {
   describe('handle', () => {
     it('transitions to next state', () => {
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1').on('event1').transition('state2')
         .start()
         .handle('event1');
@@ -80,7 +80,7 @@ describe('StateMachine', () => {
 
     it('selects first transition for which condition is true', () => {
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1')
           .on('event1')
             .transition('state2').withCondition(() => false)
@@ -94,7 +94,7 @@ describe('StateMachine', () => {
     it('throws if event cannot be handled', () => {
       expect(() =>
         StateMachine
-          .getBuilder()
+          .configure()
           .initialState('state1')
           .start()
           .handle('event1')
@@ -105,7 +105,7 @@ describe('StateMachine', () => {
       const handler = jest.genMockFn();
 
       StateMachine
-        .getBuilder()
+        .configure()
         .onUnhandledEvent(handler)
         .initialState('state1')
         .start()
@@ -118,7 +118,7 @@ describe('StateMachine', () => {
       const mocks = getHandlerMocks();
 
       StateMachine
-        .getBuilder()
+        .configure()
         .onStateEnter(mocks.stateEnterHandler)
         .onStateExit(mocks.stateExitHandler)
         .onTransition(mocks.transitionHandler)
@@ -143,7 +143,7 @@ describe('StateMachine', () => {
       const calledHandlers = [];
 
       StateMachine
-        .getBuilder()
+        .configure()
         .onStateEnter(() => calledHandlers.push('stateEnter handler'))
         .onStateExit(() => calledHandlers.push('stateExit handler'))
         .onTransition(() => calledHandlers.push('transition handler'))
@@ -174,7 +174,7 @@ describe('StateMachine', () => {
       const mocks = getHandlerMocks();
 
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .onStateEnter(mocks.stateEnterHandler)
         .onStateExit(mocks.stateExitHandler)
         .onTransition(mocks.transitionHandler)
@@ -200,7 +200,7 @@ describe('StateMachine', () => {
       const mocks = getHandlerMocks();
 
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .onStateEnter(mocks.stateEnterHandler)
         .onStateExit(mocks.stateExitHandler)
         .onTransition(mocks.transitionHandler)
@@ -224,7 +224,7 @@ describe('StateMachine', () => {
 
     it('handles event fired from action', () => {
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1')
           .on('event1').transition('state2')
         .state('state2')
@@ -241,7 +241,7 @@ describe('StateMachine', () => {
       const executedActions = [];
 
       const stateMachine = StateMachine
-        .getBuilder()
+        .configure()
         .initialState('state1')
           .on('event1')
             .transition('state2')

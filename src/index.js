@@ -1,11 +1,11 @@
 'use strict';
 
+import ConfiguratorFactory from './configuration/ConfiguratorFactory';
 import StateMachine from './StateMachine';
-import StateMachineBuilder from './StateMachineBuilder';
 
 export default {
-  getBuilder() {
-    return new StateMachineBuilder();
+  configure() {
+    return ConfiguratorFactory.createStateMachineConfigurator();
   },
 
   start: StateMachine.start

@@ -71,9 +71,9 @@ export default class StateMachine {
       this.executeExitHandlers(this.currentState);
     }
 
-    const nextState = transitionConfig.targetState !== null
-      ? transitionConfig.targetState
-      : this.currentState
+    const nextState = transitionConfig.targetState !== null ?
+      transitionConfig.targetState :
+      this.currentState
 
     this.executeTransitionHandlers(this.currentState, nextState, transitionConfig);
 
@@ -89,9 +89,9 @@ export default class StateMachine {
       return null;
     }
     const eventConfig = stateConfig.events[event];
-    return eventConfig
-      ? eventConfig.transitions.find(t => !t.condition || t.condition())
-      : null;
+    return eventConfig ?
+      eventConfig.transitions.find(t => !t.condition || t.condition()) :
+      null;
   }
 
   executeEntryHandlers(state) {
