@@ -11,7 +11,7 @@ describe('StateMachine', () => {
       const config = StateMachine
         .configure()
         .initialState('state1')
-        .getConfiguration();
+        .getConfig();
 
       const stateMachine = StateMachine.start(config);
       expect(stateMachine.getCurrentState()).toBe('state1');
@@ -24,7 +24,7 @@ describe('StateMachine', () => {
         .configure()
         .onStateEnter(mocks.stateEnterHandler)
         .initialState('state1').onEnter(mocks.entryAction)
-        .getConfiguration();
+        .getConfig();
 
       StateMachine.start(config);
       expect(mocks.stateEnterHandler).toBeCalledWith('state1');

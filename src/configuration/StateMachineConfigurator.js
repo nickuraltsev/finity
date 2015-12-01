@@ -35,7 +35,7 @@ export default class StateMachineConfigurator extends BaseConfigurator {
     return stateConfigurator;
   }
 
-  getConfiguration() {
+  getConfig() {
     return this.config;
   }
 
