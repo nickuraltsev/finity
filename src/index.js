@@ -4,9 +4,6 @@ import ConfiguratorFactory from './configuration/ConfiguratorFactory';
 import StateMachine from './StateMachine';
 
 export default {
-  configure() {
-    return ConfiguratorFactory.createStateMachineConfigurator();
-  },
-
+  configure: ::ConfiguratorFactory.createStateMachineConfigurator,
   start: StateMachine.start
 };

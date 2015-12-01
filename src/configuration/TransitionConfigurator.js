@@ -3,16 +3,12 @@
 import delegateToAncestor from './delegateToAncestor';
 import StateConfigurator from './StateConfigurator';
 import EventConfigurator from './EventConfigurator';
-import ChildConfigurator from './ChildConfigurator';
+import BaseConfigurator from './BaseConfigurator';
 
 @delegateToAncestor(StateConfigurator, EventConfigurator)
-export default class TransitionConfigurator extends ChildConfigurator {
-  constructor(parent, targetState, isInternal) {
-    super(parent);
-    this.config = Object.create(null);
-    this.config.targetState = targetState;
-    this.config.isInternal = targetState === null && isInternal;
-    this.config.actions = [];
+export default class TransitionConfigurator extends BaseConfigurator {
+  constructor(factory, parent, targetState, isInternal) {
+    super(factory, parent, TransitionConfigurator.createConfig(targetState, isInternal));
   }
 
   withAction(action) {
@@ -23,5 +19,13 @@ export default class TransitionConfigurator extends ChildConfigurator {
   withCondition(condition) {
     this.config.condition = condition;
     return this;
+  }
+
+  static createConfig(targetState, isInternal) {
+    const config = Object.create(null);
+    config.targetState = targetState;
+    config.isInternal = targetState === null && isInternal;
+    config.actions = [];
+    return config;
   }
 }

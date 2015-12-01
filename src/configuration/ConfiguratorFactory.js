@@ -5,22 +5,20 @@ import StateConfigurator from './StateConfigurator';
 import EventConfigurator from './EventConfigurator';
 import TransitionConfigurator from './TransitionConfigurator';
 
-const ConfiguratorFactory = {
-  createStateMachineConfigurator() {
-    return new StateMachineConfigurator(this);
-  },
+export default createFactory({
+  createStateMachineConfigurator: StateMachineConfigurator,
+  createStateConfigurator: StateConfigurator,
+  createEventConfigurator: EventConfigurator,
+  createTransitionConfigurator: TransitionConfigurator
+});
 
-  createStateConfigurator(parent, config) {
-    return new StateConfigurator(parent, config);
-  },
-
-  createEventConfigurator(parent, config) {
-    return new EventConfigurator(parent, config);
-  },
-
-  createTransitionConfigurator(parent, targetState, isInternal) {
-    return new TransitionConfigurator(parent, targetState, isInternal);
-  }
-};
-
-export default ConfiguratorFactory;
+function createFactory(methodToTypeMap) {
+  const factory = {};
+  Object.keys(methodToTypeMap).forEach(method => {
+    const Type = methodToTypeMap[method];
+    factory[method] = function(...args) {
+      return new Type(this, ...args);
+    };
+  });
+  return factory;
+}

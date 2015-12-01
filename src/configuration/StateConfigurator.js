@@ -2,15 +2,10 @@
 
 import delegateToAncestor from './delegateToAncestor';
 import StateMachineConfigurator from './StateMachineConfigurator';
-import ChildConfigurator from './ChildConfigurator';
+import BaseConfigurator from './BaseConfigurator';
 
 @delegateToAncestor(StateMachineConfigurator)
-export default class StateConfigurator extends ChildConfigurator {
-  constructor(parent, config) {
-    super(parent);
-    this.config = config || StateConfigurator.createConfig();
-  }
-
+export default class StateConfigurator extends BaseConfigurator {
   onEnter(action) {
     this.config.entryActions.push(action);
     return this;
@@ -22,9 +17,7 @@ export default class StateConfigurator extends ChildConfigurator {
   }
 
   on(event) {
-    const eventConfigurator = this.configuratorFactory.createEventConfigurator(
-      this, this.config.events[event]
-    );
+    const eventConfigurator = this.factory.createEventConfigurator(this, this.config.events[event]);
     this.config.events[event] = eventConfigurator.config;
     return eventConfigurator;
   }

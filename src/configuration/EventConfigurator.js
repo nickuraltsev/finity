@@ -1,15 +1,10 @@
 'use strict';
 
-import ChildConfigurator from './ChildConfigurator';
+import BaseConfigurator from './BaseConfigurator';
 
-export default class EventConfigurator extends ChildConfigurator {
-  constructor(parent, config) {
-    super(parent);
-    this.config = config || EventConfigurator.createConfig();
-  }
-
+export default class EventConfigurator extends BaseConfigurator {
   transition(targetState, isInternal) {
-    const transitionConfigurator = this.configuratorFactory.createTransitionConfigurator(
+    const transitionConfigurator = this.factory.createTransitionConfigurator(
       this, targetState, isInternal
     );
     this.config.transitions.push(transitionConfigurator.config);

@@ -1,13 +1,9 @@
 'use strict';
 
+import BaseConfigurator from './BaseConfigurator';
 import StateMachine from '../StateMachine';
 
-export default class StateMachineConfigurator {
-  constructor(configuratorFactory, config) {
-    this.configuratorFactory = configuratorFactory;
-    this.config = config || StateMachineConfigurator.createConfig();
-  }
-
+export default class StateMachineConfigurator extends BaseConfigurator {
   onStateEnter(handler) {
     this.config.stateEnterHandlers.push(handler);
     return this;
@@ -34,9 +30,7 @@ export default class StateMachineConfigurator {
   }
 
   state(state) {
-    const stateConfigurator = this.configuratorFactory.createStateConfigurator(
-      this, this.config.states[state]
-    );
+    const stateConfigurator = this.factory.createStateConfigurator(this, this.config.states[state]);
     this.config.states[state] = stateConfigurator.config;
     return stateConfigurator;
   }
