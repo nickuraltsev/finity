@@ -1,11 +1,13 @@
 'use strict';
 
 import StateMachineConfigurator from './StateMachineConfigurator';
+import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
 import EventConfigurator from './EventConfigurator';
 import TransitionConfigurator from './TransitionConfigurator';
 
 export default createFactory({
+  createGlobalConfigurator: GlobalConfigurator,
   createStateMachineConfigurator: StateMachineConfigurator,
   createStateConfigurator: StateConfigurator,
   createEventConfigurator: EventConfigurator,

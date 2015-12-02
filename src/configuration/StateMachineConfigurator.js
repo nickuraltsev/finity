@@ -4,26 +4,10 @@ import BaseConfigurator from './BaseConfigurator';
 import StateMachine from '../StateMachine';
 
 export default class StateMachineConfigurator extends BaseConfigurator {
-  onStateEnter(handler) {
-    this.config.stateEnterHandlers.push(handler);
-    return this;
+  global() {
+    return this.factory.createGlobalConfigurator(this, this.config);
   }
-
-  onStateExit(handler) {
-    this.config.stateExitHandlers.push(handler);
-    return this;
-  }
-
-  onTransition(handler) {
-    this.config.transitionHandlers.push(handler);
-    return this;
-  }
-
-  onUnhandledEvent(handler) {
-    this.config.unhandledEventHandlers.push(handler);
-    return this;
-  }
-
+  
   initialState(state) {
     this.config.initialState = state;
     return this.state(state);

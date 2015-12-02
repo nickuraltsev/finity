@@ -22,7 +22,7 @@ describe('StateMachine', () => {
 
       const config = StateMachine
         .configure()
-        .onStateEnter(mocks.stateEnterHandler)
+        .global().onStateEnter(mocks.stateEnterHandler)
         .initialState('state1').onEnter(mocks.entryAction)
         .getConfig();
 
@@ -106,7 +106,7 @@ describe('StateMachine', () => {
 
       StateMachine
         .configure()
-        .onUnhandledEvent(handler)
+        .global().onUnhandledEvent(handler)
         .initialState('state1')
         .start()
         .handle('event1');
@@ -119,9 +119,10 @@ describe('StateMachine', () => {
 
       StateMachine
         .configure()
-        .onStateEnter(mocks.stateEnterHandler)
-        .onStateExit(mocks.stateExitHandler)
-        .onTransition(mocks.transitionHandler)
+        .global()
+          .onStateEnter(mocks.stateEnterHandler)
+          .onStateExit(mocks.stateExitHandler)
+          .onTransition(mocks.transitionHandler)
         .initialState('state1')
           .on('event1').transition('state2').withAction(mocks.transitionAction)
           .onExit(mocks.exitAction)
@@ -144,9 +145,10 @@ describe('StateMachine', () => {
 
       StateMachine
         .configure()
-        .onStateEnter(() => calledHandlers.push('stateEnter handler'))
-        .onStateExit(() => calledHandlers.push('stateExit handler'))
-        .onTransition(() => calledHandlers.push('transition handler'))
+        .global()
+          .onStateEnter(() => calledHandlers.push('stateEnter handler'))
+          .onStateExit(() => calledHandlers.push('stateExit handler'))
+          .onTransition(() => calledHandlers.push('transition handler'))
         .initialState('state1')
           .onEnter(() => calledHandlers.push('state1 entry action'))
           .on('event')
@@ -175,9 +177,10 @@ describe('StateMachine', () => {
 
       const stateMachine = StateMachine
         .configure()
-        .onStateEnter(mocks.stateEnterHandler)
-        .onStateExit(mocks.stateExitHandler)
-        .onTransition(mocks.transitionHandler)
+        .global()
+          .onStateEnter(mocks.stateEnterHandler)
+          .onStateExit(mocks.stateExitHandler)
+          .onTransition(mocks.transitionHandler)
         .initialState('state1')
           .onEnter(mocks.entryAction)
           .onExit(mocks.exitAction)
@@ -201,9 +204,10 @@ describe('StateMachine', () => {
 
       const stateMachine = StateMachine
         .configure()
-        .onStateEnter(mocks.stateEnterHandler)
-        .onStateExit(mocks.stateExitHandler)
-        .onTransition(mocks.transitionHandler)
+        .global()
+          .onStateEnter(mocks.stateEnterHandler)
+          .onStateExit(mocks.stateExitHandler)
+          .onTransition(mocks.transitionHandler)
         .initialState('state1')
           .onEnter(mocks.entryAction)
           .onExit(mocks.exitAction)
