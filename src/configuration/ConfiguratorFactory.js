@@ -7,8 +7,8 @@ import EventConfigurator from './EventConfigurator';
 import TransitionConfigurator from './TransitionConfigurator';
 
 export default createFactory({
-  createGlobalConfigurator: GlobalConfigurator,
   createStateMachineConfigurator: StateMachineConfigurator,
+  createGlobalConfigurator: GlobalConfigurator,
   createStateConfigurator: StateConfigurator,
   createEventConfigurator: EventConfigurator,
   createTransitionConfigurator: TransitionConfigurator

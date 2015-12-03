@@ -16,6 +16,11 @@ export default class GlobalConfigurator extends BaseConfigurator {
     return this;
   }
 
+  onStateChange(handler) {
+    this.config.stateChangeHandlers.push(handler);
+    return this;
+  }
+
   onTransition(handler) {
     this.config.transitionHandlers.push(handler);
     return this;

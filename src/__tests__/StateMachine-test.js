@@ -8,27 +8,37 @@ const StateMachine = require('..');
 describe('StateMachine', () => {
   describe('start', () => {
     it('starts state machine', () => {
-      const config = StateMachine
+      const stateMachine = StateMachine
         .configure()
         .initialState('state1')
-        .getConfig();
+        .start();
 
-      const stateMachine = StateMachine.start(config);
       expect(stateMachine.getCurrentState()).toBe('state1');
     });
 
     it('calls handlers with correct parameters', () => {
       const mocks = getHandlerMocks();
 
-      const config = StateMachine
+      StateMachine
         .configure()
         .global().onStateEnter(mocks.stateEnterHandler)
         .initialState('state1').onEnter(mocks.entryAction)
-        .getConfig();
+        .start();
 
-      StateMachine.start(config);
       expect(mocks.stateEnterHandler).toBeCalledWith('state1');
       expect(mocks.entryAction).toBeCalledWith('state1');
+    });
+
+    it('does not call stateChange handler', () => {
+      const stateChangeHandler = jest.genMockFn();
+
+      StateMachine
+        .configure()
+        .global().onStateChange(stateChangeHandler)
+        .initialState('state1')
+        .start();
+
+      expect(stateChangeHandler).not.toBeCalled();
     });
 
     it('throws if configuration is undefined', () => {
@@ -122,6 +132,7 @@ describe('StateMachine', () => {
         .global()
           .onStateEnter(mocks.stateEnterHandler)
           .onStateExit(mocks.stateExitHandler)
+          .onStateChange(mocks.stateChangeHandler)
           .onTransition(mocks.transitionHandler)
         .initialState('state1')
           .on('event1').transition('state2').withAction(mocks.transitionAction)
@@ -138,6 +149,7 @@ describe('StateMachine', () => {
       expect(mocks.transitionAction).toBeCalledWith('state1', 'state2');
       expect(mocks.stateEnterHandler).toBeCalledWith('state2');
       expect(mocks.entryAction).toBeCalledWith('state2');
+      expect(mocks.stateChangeHandler).toBeCalledWith('state1', 'state2');
     });
 
     it('calls handlers in correct order', () => {
@@ -148,6 +160,7 @@ describe('StateMachine', () => {
         .global()
           .onStateEnter(() => calledHandlers.push('stateEnter handler'))
           .onStateExit(() => calledHandlers.push('stateExit handler'))
+          .onStateChange(() => calledHandlers.push('stateChange handler'))
           .onTransition(() => calledHandlers.push('transition handler'))
         .initialState('state1')
           .onEnter(() => calledHandlers.push('state1 entry action'))
@@ -168,11 +181,12 @@ describe('StateMachine', () => {
         'transition handler',
         'state1->state2 transition action',
         'stateEnter handler',
-        'state2 entry action'
+        'state2 entry action',
+        'stateChange handler'
       ]);
     });
 
-    it('calls all handlers for self-transition', () => {
+    it('calls handlers for self-transition', () => {
       const mocks = getHandlerMocks();
 
       const stateMachine = StateMachine
@@ -199,6 +213,20 @@ describe('StateMachine', () => {
       expect(mocks.entryAction).toBeCalledWith('state1');
     });
 
+    it('does not call stateChange handler for self-transition', () => {
+      const stateChangeHandler = jest.genMockFn();
+
+      StateMachine
+        .configure()
+        .global().onStateChange(stateChangeHandler)
+        .initialState('state1')
+          .on('event1').selfTransition()
+        .start()
+        .handle('event1');
+
+      expect(stateChangeHandler).not.toBeCalled();
+    });
+
     it('calls only transition handlers for internal transition', () => {
       const mocks = getHandlerMocks();
 
@@ -207,6 +235,7 @@ describe('StateMachine', () => {
         .global()
           .onStateEnter(mocks.stateEnterHandler)
           .onStateExit(mocks.stateExitHandler)
+          .onStateChange(mocks.stateChangeHandler)
           .onTransition(mocks.transitionHandler)
         .initialState('state1')
           .onEnter(mocks.entryAction)
@@ -224,6 +253,7 @@ describe('StateMachine', () => {
       expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
       expect(mocks.stateEnterHandler).not.toBeCalled();
       expect(mocks.entryAction).not.toBeCalled();
+      expect(mocks.stateChangeHandler).not.toBeCalled();
     });
 
     it('handles event fired from action', () => {
@@ -284,6 +314,7 @@ function getHandlerMocks() {
   return {
     stateEnterHandler: jest.genMockFn(),
     stateExitHandler: jest.genMockFn(),
+    stateChangeHandler: jest.genMockFn(),
     transitionHandler: jest.genMockFn(),
     entryAction: jest.genMockFn(),
     exitAction: jest.genMockFn(),

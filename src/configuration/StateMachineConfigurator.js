@@ -7,7 +7,7 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   global() {
     return this.factory.createGlobalConfigurator(this, this.config);
   }
-  
+
   initialState(state) {
     this.config.initialState = state;
     return this.state(state);
@@ -32,6 +32,7 @@ export default class StateMachineConfigurator extends BaseConfigurator {
     config.states = Object.create(null);
     config.stateEnterHandlers = [];
     config.stateExitHandlers = [];
+    config.stateChangeHandlers = [];
     config.transitionHandlers = [];
     config.unhandledEventHandlers = [];
     return config;

@@ -79,7 +79,10 @@ export default class StateMachine {
 
     if (!transitionConfig.isInternal) {
       this.executeEntryHandlers(nextState);
-      this.currentState = nextState;
+      if (this.currentState !== nextState) {
+        execute(this.config.stateChangeHandlers, this.currentState, nextState);
+        this.currentState = nextState;
+      }
     }
   }
 
