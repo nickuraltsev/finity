@@ -1,6 +1,6 @@
 {
     "name": "fluent-state-machine",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "A finite state machine library",
     "keywords": [
         "state",
