@@ -61,7 +61,7 @@ describe('StateMachine', () => {
     it('returns true when event can be handled', () => {
       const stateMachine = StateMachine
         .configure()
-        .initialState('state1').on('event1').transition('state2')
+        .initialState('state1').on('event1').transitionTo('state2')
         .start();
 
         expect(stateMachine.canHandle('event1')).toBe(true);
@@ -81,7 +81,7 @@ describe('StateMachine', () => {
     it('transitions to next state', () => {
       const stateMachine = StateMachine
         .configure()
-        .initialState('state1').on('event1').transition('state2')
+        .initialState('state1').on('event1').transitionTo('state2')
         .start()
         .handle('event1');
 
@@ -93,8 +93,8 @@ describe('StateMachine', () => {
         .configure()
         .initialState('state1')
           .on('event1')
-            .transition('state2').withCondition(() => false)
-            .transition('state3').withCondition(() => true)
+            .transitionTo('state2').withCondition(() => false)
+            .transitionTo('state3').withCondition(() => true)
         .start()
         .handle('event1');
 
@@ -135,7 +135,7 @@ describe('StateMachine', () => {
           .onStateChange(mocks.stateChangeHandler)
           .onTransition(mocks.transitionHandler)
         .initialState('state1')
-          .on('event1').transition('state2').withAction(mocks.transitionAction)
+          .on('event1').transitionTo('state2').withAction(mocks.transitionAction)
           .onExit(mocks.exitAction)
         .state('state2')
           .onEnter(mocks.entryAction)
@@ -165,7 +165,7 @@ describe('StateMachine', () => {
         .initialState('state1')
           .onEnter(() => calledHandlers.push('state1 entry action'))
           .on('event')
-            .transition('state2')
+            .transitionTo('state2')
               .withAction(() => calledHandlers.push('state1->state2 transition action'))
           .onExit(() => calledHandlers.push('state1 exit action'))
         .state('state2')
@@ -260,10 +260,10 @@ describe('StateMachine', () => {
       const stateMachine = StateMachine
         .configure()
         .initialState('state1')
-          .on('event1').transition('state2')
+          .on('event1').transitionTo('state2')
         .state('state2')
           .onEnter(() => stateMachine.handle('event2'))
-          .on('event2').transition('state3')
+          .on('event2').transitionTo('state3')
         .start();
 
       stateMachine.handle('event1');
@@ -278,7 +278,7 @@ describe('StateMachine', () => {
         .configure()
         .initialState('state1')
           .on('event1')
-            .transition('state2')
+            .transitionTo('state2')
               .withAction(() => executedActions.push('state1->state2 transition action'))
           .onExit(() => {
             stateMachine.handle('event2');
@@ -287,7 +287,7 @@ describe('StateMachine', () => {
         .state('state2')
           .onEnter(() => executedActions.push('state2 entry action'))
           .on('event2')
-            .transition('state3')
+            .transitionTo('state3')
               .withAction(() => executedActions.push('state2->state3 transition action'))
           .onExit(() => executedActions.push('state2 exit action'))
         .state('state3')
