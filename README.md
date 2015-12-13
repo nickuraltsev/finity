@@ -1,5 +1,7 @@
 # fluent-state-machine
 
+A finite state machine library
+
 ## Installation
 
 Install using [npm](https://www.npmjs.org/):
@@ -19,9 +21,8 @@ let attemptCount = 0;
 // Create a new state machine which controls the execution of some asynchronous operation.
 // This state machine will begin in the 'ready' state. When the 'run' event is received, it will
 // transition to the 'running' state and start the async operation
-const stateMachine =
-  StateMachine
-    .configure()
+const stateMachine = StateMachine
+  .configure()
     .initialState('ready')
       .on('run').transitionTo('running')
       .on('cancel').transitionTo('cancelled')
@@ -37,12 +38,12 @@ const stateMachine =
         .transitionTo('failed')
     .global()
       .onStateEnter(state => console.log(`Entering state '${state}'`))
-    .start();
+  .start();
     
 let timer;
 
 function startAsyncOperation() {
-  // Simulate an async operation.
+  // Simulate an async operation
   timer = setTimeout(() => stateMachine.handle('success'), 3000);
 }
 
