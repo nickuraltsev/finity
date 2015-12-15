@@ -1,5 +1,7 @@
 # fluent-state-machine
 
+[![npm version](https://badge.fury.io/js/fluent-state-machine.svg)](https://badge.fury.io/js/fluent-state-machine)
+
 A finite state machine library
 
 ## Installation
