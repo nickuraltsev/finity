@@ -1,0 +1,7 @@
+{
+  "extends": "eslint-config-airbnb",
+  "env": {
+    "node": true,
+    "jest": true
+  }
+}
