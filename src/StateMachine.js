@@ -1,3 +1,5 @@
+import executeHandlers from './utils/executeHandlers';
+
 export default class StateMachine {
   constructor(config) {
     if (config === undefined || config === null) {
@@ -66,7 +68,7 @@ export default class StateMachine {
 
     const nextState = transitionConfig.targetState !== null ?
       transitionConfig.targetState :
-      this.currentState
+      this.currentState;
 
     this.executeTransitionHandlers(this.currentState, nextState, transitionConfig);
 
@@ -119,8 +121,4 @@ export default class StateMachine {
     executeHandlers(this.config.transitionHandlers, sourceState, targetState);
     executeHandlers(transitionConfig.actions, sourceState, targetState);
   }
-}
-
-function executeHandlers(handlers, ...args) {
-  handlers.forEach(handler => handler(...args));
 }

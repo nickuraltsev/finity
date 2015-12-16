@@ -1,5 +1,6 @@
 {
   "extends": "eslint-config-airbnb",
+  "parser": "babel-eslint",
   "env": {
     "node": true,
     "jest": true

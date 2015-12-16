@@ -3,6 +3,18 @@ jest.autoMockOff();
 const _ = require('lodash');
 const StateMachine = require('..');
 
+function getHandlerMocks() {
+  return {
+    stateEnterHandler: jest.genMockFn(),
+    stateExitHandler: jest.genMockFn(),
+    stateChangeHandler: jest.genMockFn(),
+    transitionHandler: jest.genMockFn(),
+    entryAction: jest.genMockFn(),
+    exitAction: jest.genMockFn(),
+    transitionAction: jest.genMockFn(),
+  };
+}
+
 describe('StateMachine', () => {
   describe('start', () => {
     it('starts state machine', () => {
@@ -62,7 +74,7 @@ describe('StateMachine', () => {
         .initialState('state1').on('event1').transitionTo('state2')
         .start();
 
-        expect(stateMachine.canHandle('event1')).toBe(true);
+      expect(stateMachine.canHandle('event1')).toBe(true);
     });
 
     it('returns false when event cannot be handled', () => {
@@ -71,7 +83,7 @@ describe('StateMachine', () => {
         .initialState('state1')
         .start();
 
-        expect(stateMachine.canHandle('event1')).toBe(false);
+      expect(stateMachine.canHandle('event1')).toBe(false);
     });
   });
 
@@ -83,7 +95,7 @@ describe('StateMachine', () => {
         .start()
         .handle('event1');
 
-        expect(stateMachine.getCurrentState()).toBe('state2');
+      expect(stateMachine.getCurrentState()).toBe('state2');
     });
 
     it('selects first transition for which condition is true', () => {
@@ -106,7 +118,7 @@ describe('StateMachine', () => {
           .initialState('state1')
           .start()
           .handle('event1')
-      ).toThrow('State \'state1\' cannot handle event \'event1\'.')
+      ).toThrow('State \'state1\' cannot handle event \'event1\'.');
     });
 
     it('calls unhandledEvent handler', () => {
@@ -180,7 +192,7 @@ describe('StateMachine', () => {
         'state1->state2 transition action',
         'stateEnter handler',
         'state2 entry action',
-        'stateChange handler'
+        'stateChange handler',
       ]);
     });
 
@@ -302,20 +314,8 @@ describe('StateMachine', () => {
         'state2 entry action',
         'state2 exit action',
         'state2->state3 transition action',
-        'state3 entry action'
+        'state3 entry action',
       ]);
     });
   });
 });
-
-function getHandlerMocks() {
-  return {
-    stateEnterHandler: jest.genMockFn(),
-    stateExitHandler: jest.genMockFn(),
-    stateChangeHandler: jest.genMockFn(),
-    transitionHandler: jest.genMockFn(),
-    entryAction: jest.genMockFn(),
-    exitAction: jest.genMockFn(),
-    transitionAction: jest.genMockFn()
-  };
-}
