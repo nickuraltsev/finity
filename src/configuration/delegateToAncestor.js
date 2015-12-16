@@ -1,5 +1,3 @@
-'use strict';
-
 export default function delegateToAncestor(...ancestorTypes) {
   return currentType => ancestorTypes.forEach(ancestorType =>
     createMethods(currentType, ancestorType));

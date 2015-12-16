@@ -1,5 +1,3 @@
-'use strict';
-
 import BaseConfigurator from './BaseConfigurator';
 
 export default class EventConfigurator extends BaseConfigurator {

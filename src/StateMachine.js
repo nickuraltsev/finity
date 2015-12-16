@@ -1,5 +1,3 @@
-'use strict';
-
 export default class StateMachine {
   constructor(config) {
     if (config === undefined || config === null) {

@@ -1,5 +1,3 @@
-'use strict';
-
 import StateMachine from '../../lib';
 
 const maxAttempts = 3;

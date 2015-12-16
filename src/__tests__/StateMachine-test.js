@@ -1,5 +1,3 @@
-'use strict';
-
 jest.autoMockOff();
 
 const _ = require('lodash');

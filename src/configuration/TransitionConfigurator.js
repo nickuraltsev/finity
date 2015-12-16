@@ -1,5 +1,3 @@
-'use strict';
-
 import delegateToAncestor from './delegateToAncestor';
 import StateConfigurator from './StateConfigurator';
 import EventConfigurator from './EventConfigurator';

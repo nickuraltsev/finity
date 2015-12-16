@@ -1,5 +1,3 @@
-'use strict';
-
 import StateMachineConfigurator from './StateMachineConfigurator';
 import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
