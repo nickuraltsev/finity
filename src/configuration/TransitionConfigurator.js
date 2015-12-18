@@ -3,8 +3,7 @@ import StateConfigurator from './StateConfigurator';
 import EventConfigurator from './EventConfigurator';
 import BaseConfigurator from './BaseConfigurator';
 
-@delegateToAncestor(StateConfigurator, EventConfigurator)
-export default class TransitionConfigurator extends BaseConfigurator {
+class TransitionConfigurator extends BaseConfigurator {
   constructor(factory, parent, targetState, isInternal) {
     super(factory, parent, TransitionConfigurator.createConfig(targetState, isInternal));
   }
@@ -27,3 +26,8 @@ export default class TransitionConfigurator extends BaseConfigurator {
     return config;
   }
 }
+
+delegateToAncestor(TransitionConfigurator, StateConfigurator);
+delegateToAncestor(TransitionConfigurator, EventConfigurator);
+
+export default TransitionConfigurator;

@@ -2,8 +2,7 @@ import delegateToAncestor from './delegateToAncestor';
 import StateMachineConfigurator from './StateMachineConfigurator';
 import BaseConfigurator from './BaseConfigurator';
 
-@delegateToAncestor(StateMachineConfigurator)
-export default class StateConfigurator extends BaseConfigurator {
+class StateConfigurator extends BaseConfigurator {
   onEnter(action) {
     this.config.entryActions.push(action);
     return this;
@@ -28,3 +27,7 @@ export default class StateConfigurator extends BaseConfigurator {
     return config;
   }
 }
+
+delegateToAncestor(StateConfigurator, StateMachineConfigurator);
+
+export default StateConfigurator;

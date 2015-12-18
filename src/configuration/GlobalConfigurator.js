@@ -2,8 +2,7 @@ import delegateToAncestor from './delegateToAncestor';
 import StateMachineConfigurator from './StateMachineConfigurator';
 import BaseConfigurator from './BaseConfigurator';
 
-@delegateToAncestor(StateMachineConfigurator)
-export default class GlobalConfigurator extends BaseConfigurator {
+class GlobalConfigurator extends BaseConfigurator {
   onStateEnter(handler) {
     this.config.stateEnterHandlers.push(handler);
     return this;
@@ -29,3 +28,7 @@ export default class GlobalConfigurator extends BaseConfigurator {
     return this;
   }
 }
+
+delegateToAncestor(GlobalConfigurator, StateMachineConfigurator);
+
+export default GlobalConfigurator;
