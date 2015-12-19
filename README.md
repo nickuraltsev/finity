@@ -23,7 +23,7 @@ let attemptCount = 0;
 
 // Create a new state machine which controls the execution of some asynchronous operation.
 // If the operation fails, it will be retried until it succeeds or the number of attempts reaches the limit.
-// If a cancellation request is recieved, the operation is cancelled.
+// If a cancellation request is recieved, the operation will be cancelled.
 const stateMachine = StateMachine
   .configure()
     .initialState('ready')
