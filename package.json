@@ -1,7 +1,7 @@
 {
     "name": "fluent-state-machine",
     "version": "0.1.0",
-    "description": "A finite state machine library",
+    "description": "A finite state machine library for Node.js and the browser with a friendly configuration DSL",
     "keywords": [
         "state",
         "machine",
