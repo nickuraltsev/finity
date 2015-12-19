@@ -22,6 +22,8 @@ const maxAttempts = 3;
 let attemptCount = 0;
 
 // Create a new state machine which controls the execution of some asynchronous operation.
+// If the operation fails, it will be retried until it succeeds or the number of attempts reaches the limit.
+// If a cancellation request is recieved, the operation is cancelled.
 const stateMachine = StateMachine
   .configure()
     .initialState('ready')
@@ -45,9 +47,8 @@ const stateMachine = StateMachine
 
 // Fire the 'run' event to start execution
 stateMachine.handle('run');
-
-// Fire the 'cancel' event after one second delay
-setTimeout(() => stateMachine.handle('cancel'), 1000);
+// Fire the 'cancel' event to cancel execution
+stateMachine.handle('cancel');
 ```
 
 ## License
