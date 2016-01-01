@@ -3,6 +3,6 @@
   "parser": "babel-eslint",
   "env": {
     "node": true,
-    "jest": true
+    "jasmine": true
   }
 }

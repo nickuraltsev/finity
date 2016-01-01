@@ -1,0 +1,9 @@
+{
+  "spec_dir": "spec",
+  "spec_files": [
+    "**/*Spec.js"
+  ],
+  "helpers": [
+    "../node_modules/babel-core/register.js"
+  ]
+}

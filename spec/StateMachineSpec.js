@@ -1,17 +1,15 @@
-jest.autoMockOff();
-
-const _ = require('lodash');
-const StateMachine = require('..');
+import _ from 'lodash';
+import StateMachine from '../src';
 
 function getHandlerMocks() {
   return {
-    stateEnterHandler: jest.genMockFn(),
-    stateExitHandler: jest.genMockFn(),
-    stateChangeHandler: jest.genMockFn(),
-    transitionHandler: jest.genMockFn(),
-    entryAction: jest.genMockFn(),
-    exitAction: jest.genMockFn(),
-    transitionAction: jest.genMockFn(),
+    stateEnterHandler: jasmine.createSpy(),
+    stateExitHandler: jasmine.createSpy(),
+    stateChangeHandler: jasmine.createSpy(),
+    transitionHandler: jasmine.createSpy(),
+    entryAction: jasmine.createSpy(),
+    exitAction: jasmine.createSpy(),
+    transitionAction: jasmine.createSpy(),
   };
 }
 
@@ -35,12 +33,12 @@ describe('StateMachine', () => {
         .initialState('state1').onEnter(mocks.entryAction)
         .start();
 
-      expect(mocks.stateEnterHandler).toBeCalledWith('state1');
-      expect(mocks.entryAction).toBeCalledWith('state1');
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
+      expect(mocks.entryAction).toHaveBeenCalledWith('state1');
     });
 
     it('does not call stateChange handler', () => {
-      const stateChangeHandler = jest.genMockFn();
+      const stateChangeHandler = jasmine.createSpy();
 
       StateMachine
         .configure()
@@ -48,22 +46,22 @@ describe('StateMachine', () => {
         .initialState('state1')
         .start();
 
-      expect(stateChangeHandler).not.toBeCalled();
+      expect(stateChangeHandler).not.toHaveBeenCalled();
     });
 
     it('throws if configuration is undefined', () => {
       expect(() => StateMachine.start())
-        .toThrow('Configuration must be specified.');
+        .toThrowError('Configuration must be specified.');
     });
 
     it('throws if configuration is null', () => {
       expect(() => StateMachine.start(null))
-        .toThrow('Configuration must be specified.');
+        .toThrowError('Configuration must be specified.');
     });
 
     it('throws if configuration is not an object', () => {
       expect(() => StateMachine.start(100))
-        .toThrow('Configuration must be an object.');
+        .toThrowError('Configuration must be an object.');
     });
   });
 
@@ -118,11 +116,11 @@ describe('StateMachine', () => {
           .initialState('state1')
           .start()
           .handle('event1')
-      ).toThrow('State \'state1\' cannot handle event \'event1\'.');
+      ).toThrowError('State \'state1\' cannot handle event \'event1\'.');
     });
 
     it('calls unhandledEvent handler', () => {
-      const handler = jest.genMockFn();
+      const handler = jasmine.createSpy();
 
       StateMachine
         .configure()
@@ -131,7 +129,7 @@ describe('StateMachine', () => {
         .start()
         .handle('event1');
 
-      expect(handler).toBeCalledWith('event1', 'state1');
+      expect(handler).toHaveBeenCalledWith('event1', 'state1');
     });
 
     it('calls handlers with correct parameters', () => {
@@ -152,14 +150,14 @@ describe('StateMachine', () => {
         .start()
         .handle('event1');
 
-      expect(mocks.stateEnterHandler).toBeCalledWith('state1');
-      expect(mocks.stateExitHandler).toBeCalledWith('state1');
-      expect(mocks.exitAction).toBeCalledWith('state1');
-      expect(mocks.transitionHandler).toBeCalledWith('state1', 'state2');
-      expect(mocks.transitionAction).toBeCalledWith('state1', 'state2');
-      expect(mocks.stateEnterHandler).toBeCalledWith('state2');
-      expect(mocks.entryAction).toBeCalledWith('state2');
-      expect(mocks.stateChangeHandler).toBeCalledWith('state1', 'state2');
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
+      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1');
+      expect(mocks.exitAction).toHaveBeenCalledWith('state1');
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state2');
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state2');
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state2');
+      expect(mocks.entryAction).toHaveBeenCalledWith('state2');
+      expect(mocks.stateChangeHandler).toHaveBeenCalledWith('state1', 'state2');
     });
 
     it('calls handlers in correct order', () => {
@@ -211,20 +209,20 @@ describe('StateMachine', () => {
           .on('event1').selfTransition().withAction(mocks.transitionAction)
         .start();
 
-      _.forOwn(mocks, handler => handler.mockClear());
+      _.forOwn(mocks, handler => handler.calls.reset());
 
       stateMachine.handle('event1');
 
-      expect(mocks.stateExitHandler).toBeCalledWith('state1');
-      expect(mocks.exitAction).toBeCalledWith('state1');
-      expect(mocks.transitionHandler).toBeCalledWith('state1', 'state1');
-      expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
-      expect(mocks.stateEnterHandler).toBeCalledWith('state1');
-      expect(mocks.entryAction).toBeCalledWith('state1');
+      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1');
+      expect(mocks.exitAction).toHaveBeenCalledWith('state1');
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1');
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1');
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
+      expect(mocks.entryAction).toHaveBeenCalledWith('state1');
     });
 
     it('does not call stateChange handler for self-transition', () => {
-      const stateChangeHandler = jest.genMockFn();
+      const stateChangeHandler = jasmine.createSpy();
 
       StateMachine
         .configure()
@@ -234,7 +232,7 @@ describe('StateMachine', () => {
         .start()
         .handle('event1');
 
-      expect(stateChangeHandler).not.toBeCalled();
+      expect(stateChangeHandler).not.toHaveBeenCalled();
     });
 
     it('calls only transition handlers for internal transition', () => {
@@ -253,17 +251,17 @@ describe('StateMachine', () => {
           .on('event1').internalTransition().withAction(mocks.transitionAction)
         .start();
 
-      _.forOwn(mocks, handler => handler.mockClear());
+      _.forOwn(mocks, handler => handler.calls.reset());
 
       stateMachine.handle('event1');
 
-      expect(mocks.stateExitHandler).not.toBeCalled();
-      expect(mocks.exitAction).not.toBeCalled();
-      expect(mocks.transitionHandler).toBeCalledWith('state1', 'state1');
-      expect(mocks.transitionAction).toBeCalledWith('state1', 'state1');
-      expect(mocks.stateEnterHandler).not.toBeCalled();
-      expect(mocks.entryAction).not.toBeCalled();
-      expect(mocks.stateChangeHandler).not.toBeCalled();
+      expect(mocks.stateExitHandler).not.toHaveBeenCalled();
+      expect(mocks.exitAction).not.toHaveBeenCalled();
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1');
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1');
+      expect(mocks.stateEnterHandler).not.toHaveBeenCalled();
+      expect(mocks.entryAction).not.toHaveBeenCalled();
+      expect(mocks.stateChangeHandler).not.toHaveBeenCalled();
     });
 
     it('handles event fired from action', () => {
