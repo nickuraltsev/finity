@@ -34,12 +34,13 @@
       "eslint-config-airbnb": "^2.1.1",
       "eslint-plugin-react": "^3.11.3",
       "babel-eslint": "^4.1.6",
-      "isparta": "^4.0.0"
+      "isparta": "^4.0.0",
+      "coveralls": "^2.11.6"
     },
     "scripts": {
       "build": "babel src --out-dir lib",
       "test": "babel-node node_modules/jasmine/bin/jasmine",
-      "coverage": "babel-node node_modules/isparta/bin/isparta cover --root ./src --report text --report html jasmine",
+      "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly jasmine",
       "lint": "eslint src spec examples"
     }
 }
