@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/fluent-state-machine.svg)](https://badge.fury.io/js/fluent-state-machine)
 [![Build Status](https://api.travis-ci.org/nickuraltsev/fluent-state-machine.svg?branch=master)](https://travis-ci.org/nickuraltsev/fluent-state-machine)
+[![Coverage Status](https://coveralls.io/repos/nickuraltsev/fluent-state-machine/badge.svg?branch=master&service=github)](https://coveralls.io/github/nickuraltsev/fluent-state-machine?branch=master)
 
 A finite state machine library for Node.js and the browser with a friendly configuration DSL.
 
