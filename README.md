@@ -42,7 +42,7 @@ const stateMachine = StateMachine
         .selfTransition().withCondition(() => attemptCount < maxAttempts)
         .transitionTo('failed')
     .global()
-      .onStateEnter(state => console.log(`Entering state '${state}'.`))
+      .onStateEnter(state => console.log(`Entering state ${state}.`))
   .start();
 
 // Send the 'run' event to the state machine to start execution
@@ -93,9 +93,9 @@ A state can have entry and exit actions, which are executed when the state machi
 StateMachine
   .configure()
     .initialState('state1')
-      .onEnter(state => console.log(`Entering ${state}`))
-      .onExit(state => console.log(`Exiting ${state}`))
-      .on('event1').transitionTo('state2')
+      .onEnter(state => console.log(`Entering state ${state}`))
+      .onExit(state => console.log(`Exiting state ${state}`))
+      .on('eventA').transitionTo('state2')
 ```
 
 You can add multiple entry actions to a state. They will be executed in the same order as they have been added. The same is true for exit actions.
@@ -110,7 +110,7 @@ StateMachine
     .initialState('state1')
       .on('eventA')
         .transitionTo('state2')
-          .withAction((fromState, toState) => console.log(`Transitioning from '${fromState}' to '${toState}'`))
+          .withAction((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
 ```
 
 You can add multiple actions to a transition. They will be executed in the same order as they have been added.
@@ -154,12 +154,12 @@ Self-transitions and internal transitions can have actions and guard conditions.
 StateMachine
   .configure()
     .initialState('state1')
-      .on('event1').transitionTo('state2')
+      .on('eventA').transitionTo('state2')
     .global()
-      .onStateEnter(state => console.log(`Entering state '${state}'`))
-      .onStateExit(state => console.log(`Exiting state '${state}'`))
-      .onStateChange((oldState, newState) => console.log(`Changing state from '${oldState}' to '${newState}'`))
-      .onTransition((fromState, toState) => console.log(`Transitioning from '${fromState}' to '${toState}'`))
+      .onStateEnter(state => console.log(`Entering state ${state}`))
+      .onStateExit(state => console.log(`Exiting state ${state}`))
+      .onStateChange((oldState, newState) => console.log(`Changing state from ${oldState} to ${newState}`))
+      .onTransition((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
 ```
 
 You can register multiple handlers of the same type. They will be executed in the same order as they have been registered.
@@ -169,7 +169,7 @@ StateMachine
   .configure()
     .initialState('state1')
     .global()
-      .onStateEnter(state => console.log(`Entering state '${state}'`))
+      .onStateEnter(state => console.log(`Entering state ${state}`))
       .onStateEnter(state => console.log('We are almost there!'))
 ```
 
@@ -189,7 +189,7 @@ You can register multiple `onUnhandledEvent` handlers. They will be executed in 
 
 ### Creating and starting a state machine
 
-There are two ways to create and start a state machine. The easiest way is to call the `start` method of the configuration API.
+Once you have created a configuration, you can create and start a state machine. There are two ways to do this. The easiest way is to call the `start` method of the configuration API.
 
 ```javascript
 const stateMachine = StateMachine
@@ -229,7 +229,7 @@ const stateMachine = StateMachine
 stateMachine.handle('eventA');
 ```
 
-If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` handlers if any are registered (see Unhandled events).
+If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` handlers if any are registered (see [Unhandled events](#unhandled-events)).
 
 You can check whether a state machine can handle a given event via the `canHandle` method.
 
