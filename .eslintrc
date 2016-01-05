@@ -1,8 +1,11 @@
 {
-  "extends": "eslint-config-airbnb",
+  "extends": "airbnb/base",
   "parser": "babel-eslint",
   "env": {
     "node": true,
     "jasmine": true
+  },
+  "rules": {
+    "no-param-reassign": [2, { "props": false }]
   }
 }

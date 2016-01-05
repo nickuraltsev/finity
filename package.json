@@ -31,8 +31,7 @@
       "jasmine": "^2.4.1",
       "lodash": "^3.10.0",
       "eslint": "^1.10.3",
-      "eslint-config-airbnb": "^2.1.1",
-      "eslint-plugin-react": "^3.11.3",
+      "eslint-config-airbnb": "^3.0.0",
       "babel-eslint": "^4.1.6",
       "isparta": "^4.0.0",
       "coveralls": "^2.11.6"
