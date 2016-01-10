@@ -22,8 +22,14 @@ export default class StateMachine {
   }
 
   start() {
-    this.executeEntryHandlers(this.config.initialState);
-    this.currentState = this.config.initialState;
+    this.isProcessing = true;
+    try {
+      this.executeEntryHandlers(this.config.initialState, { stateMachine: this });
+      this.currentState = this.config.initialState;
+      this.processQueue();
+    } finally {
+      this.isProcessing = false;
+    }
     return this;
   }
 
@@ -31,94 +37,113 @@ export default class StateMachine {
     return this.currentState;
   }
 
-  canHandle(event) {
-    return !!this.getTransition(event);
+  canHandle(event, payload) {
+    const context = this.createContext(event, payload);
+    return !!this.getTransition(context);
   }
 
-  handle(event) {
-    this.eventQueue.push(event);
-    if (this.isProcessing) {
-      return this;
-    }
-
-    this.isProcessing = true;
-    try {
-      while (this.eventQueue.length > 0) {
-        this.process(this.eventQueue.shift());
+  handle(event, payload) {
+    this.eventQueue.push({ event, payload });
+    if (!this.isProcessing) {
+      this.isProcessing = true;
+      try {
+        this.processQueue();
+      } finally {
+        this.isProcessing = false;
       }
-    } finally {
-      if (this.eventQueue.length > 0) {
-        this.eventQueue = [];
-      }
-      this.isProcessing = false;
     }
     return this;
   }
 
-  process(event) {
-    const transitionConfig = this.getTransition(event);
+  processQueue() {
+    try {
+      while (this.eventQueue.length > 0) {
+        const { event, payload } = this.eventQueue.shift();
+        this.process(event, payload);
+      }
+    } catch (error) {
+      if (this.eventQueue.length > 0) {
+        this.eventQueue = [];
+      }
+      throw error;
+    }
+  }
+
+  process(event, payload) {
+    const context = this.createContext(event, payload);
+
+    const transitionConfig = this.getTransition(context);
     if (!transitionConfig) {
-      this.onUnhandledEvent(this.currentState, event);
+      this.onUnhandledEvent(context);
       return;
     }
 
     if (!transitionConfig.isInternal) {
-      this.executeExitHandlers(this.currentState);
+      this.executeExitHandlers(context);
     }
 
     const nextState = transitionConfig.targetState !== null ?
       transitionConfig.targetState :
       this.currentState;
 
-    this.executeTransitionHandlers(this.currentState, nextState, transitionConfig);
+    executeHandlers(this.config.transitionHandlers, this.currentState, nextState, context);
+    executeHandlers(transitionConfig.actions, this.currentState, nextState, context);
 
     if (!transitionConfig.isInternal) {
-      this.executeEntryHandlers(nextState);
+      this.executeEntryHandlers(nextState, context);
       if (this.currentState !== nextState) {
-        executeHandlers(this.config.stateChangeHandlers, this.currentState, nextState);
+        executeHandlers(this.config.stateChangeHandlers, this.currentState, nextState, context);
         this.currentState = nextState;
       }
     }
   }
 
-  getTransition(event) {
+  createContext(event, payload) {
+    const context = { stateMachine: this, event };
+    if (payload !== undefined) {
+      context.payload = payload;
+    }
+    return context;
+  }
+
+  getTransition(context) {
     const stateConfig = this.config.states[this.currentState];
     if (!stateConfig) {
       return null;
     }
 
-    const eventConfig = stateConfig.events[event];
+    const eventConfig = stateConfig.events[context.event];
     return eventConfig ?
-      eventConfig.transitions.find(t => !t.condition || t.condition()) :
+      eventConfig.transitions.find(t => !t.condition || t.condition(context)) :
       null;
   }
 
-  onUnhandledEvent(state, event) {
+  onUnhandledEvent(context) {
     if (this.config.unhandledEventHandlers.length > 0) {
-      executeHandlers(this.config.unhandledEventHandlers, event, state);
+      executeHandlers(
+        this.config.unhandledEventHandlers,
+        context.event,
+        this.currentState,
+        context
+      );
     } else {
-      throw new Error(`State '${state}' cannot handle event '${event}'.`);
+      throw new Error(`State '${this.currentState}' cannot handle event '${context.event}'.`);
     }
   }
 
-  executeEntryHandlers(state) {
-    executeHandlers(this.config.stateEnterHandlers, state);
+  executeEntryHandlers(state, context) {
+    executeHandlers(this.config.stateEnterHandlers, state, context);
     const stateConfig = this.config.states[state];
     if (stateConfig) {
-      executeHandlers(stateConfig.entryActions, state);
+      executeHandlers(stateConfig.entryActions, state, context);
     }
   }
 
-  executeExitHandlers(state) {
-    executeHandlers(this.config.stateExitHandlers, state);
-    const stateConfig = this.config.states[state];
+  executeExitHandlers(context) {
+    executeHandlers(this.config.stateExitHandlers, this.currentState, context);
+    const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
-      executeHandlers(stateConfig.exitActions, state);
+      executeHandlers(stateConfig.exitActions, this.currentState, context);
     }
-  }
-
-  executeTransitionHandlers(sourceState, targetState, transitionConfig) {
-    executeHandlers(this.config.transitionHandlers, sourceState, targetState);
-    executeHandlers(transitionConfig.actions, sourceState, targetState);
   }
 }

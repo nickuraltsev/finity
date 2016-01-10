@@ -27,14 +27,15 @@ describe('StateMachine', () => {
     it('calls handlers with correct parameters', () => {
       const mocks = getHandlerMocks();
 
-      StateMachine
+      const stateMachine = StateMachine
         .configure()
         .global().onStateEnter(mocks.stateEnterHandler)
         .initialState('state1').onEnter(mocks.entryAction)
         .start();
 
-      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
-      expect(mocks.entryAction).toHaveBeenCalledWith('state1');
+      const context = { stateMachine };
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1', context);
+      expect(mocks.entryAction).toHaveBeenCalledWith('state1', context);
     });
 
     it('does not call stateChange handler', () => {
@@ -122,20 +123,21 @@ describe('StateMachine', () => {
     it('calls unhandledEvent handler', () => {
       const handler = jasmine.createSpy();
 
-      StateMachine
+      const stateMachine = StateMachine
         .configure()
         .global().onUnhandledEvent(handler)
         .initialState('state1')
         .start()
         .handle('event1');
 
-      expect(handler).toHaveBeenCalledWith('event1', 'state1');
+      const context = { stateMachine, event: 'event1' };
+      expect(handler).toHaveBeenCalledWith('event1', 'state1', context);
     });
 
     it('calls handlers with correct parameters', () => {
       const mocks = getHandlerMocks();
 
-      StateMachine
+      const stateMachine = StateMachine
         .configure()
         .global()
           .onStateEnter(mocks.stateEnterHandler)
@@ -148,16 +150,19 @@ describe('StateMachine', () => {
         .state('state2')
           .onEnter(mocks.entryAction)
         .start()
-        .handle('event1');
+        .handle('event1', 'payload1');
 
-      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
-      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1');
-      expect(mocks.exitAction).toHaveBeenCalledWith('state1');
-      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state2');
-      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state2');
-      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state2');
-      expect(mocks.entryAction).toHaveBeenCalledWith('state2');
-      expect(mocks.stateChangeHandler).toHaveBeenCalledWith('state1', 'state2');
+      const startContext = { stateMachine };
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1', startContext);
+
+      const eventContext = { stateMachine, event: 'event1', payload: 'payload1' };
+      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1', eventContext);
+      expect(mocks.exitAction).toHaveBeenCalledWith('state1', eventContext);
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state2', eventContext);
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state2', eventContext);
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state2', eventContext);
+      expect(mocks.entryAction).toHaveBeenCalledWith('state2', eventContext);
+      expect(mocks.stateChangeHandler).toHaveBeenCalledWith('state1', 'state2', eventContext);
     });
 
     it('calls handlers in correct order', () => {
@@ -213,12 +218,13 @@ describe('StateMachine', () => {
 
       stateMachine.handle('event1');
 
-      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1');
-      expect(mocks.exitAction).toHaveBeenCalledWith('state1');
-      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1');
-      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1');
-      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1');
-      expect(mocks.entryAction).toHaveBeenCalledWith('state1');
+      const context = { stateMachine, event: 'event1' };
+      expect(mocks.stateExitHandler).toHaveBeenCalledWith('state1', context);
+      expect(mocks.exitAction).toHaveBeenCalledWith('state1', context);
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1', context);
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1', context);
+      expect(mocks.stateEnterHandler).toHaveBeenCalledWith('state1', context);
+      expect(mocks.entryAction).toHaveBeenCalledWith('state1', context);
     });
 
     it('does not call stateChange handler for self-transition', () => {
@@ -255,10 +261,11 @@ describe('StateMachine', () => {
 
       stateMachine.handle('event1');
 
+      const context = { stateMachine, event: 'event1' };
       expect(mocks.stateExitHandler).not.toHaveBeenCalled();
       expect(mocks.exitAction).not.toHaveBeenCalled();
-      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1');
-      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1');
+      expect(mocks.transitionHandler).toHaveBeenCalledWith('state1', 'state1', context);
+      expect(mocks.transitionAction).toHaveBeenCalledWith('state1', 'state1', context);
       expect(mocks.stateEnterHandler).not.toHaveBeenCalled();
       expect(mocks.entryAction).not.toHaveBeenCalled();
       expect(mocks.stateChangeHandler).not.toHaveBeenCalled();
