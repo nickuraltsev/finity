@@ -29,6 +29,7 @@
       "babel-preset-es2015": "^6.3.13",
       "babel-preset-stage-0": "^6.3.13",
       "jasmine": "^2.4.1",
+      "jasmine-spec-reporter": "^2.4.0",
       "lodash": "^3.10.0",
       "eslint": "^1.10.3",
       "eslint-config-airbnb": "^3.0.0",
@@ -38,8 +39,8 @@
     },
     "scripts": {
       "build": "babel src --out-dir lib",
-      "test": "babel-node node_modules/jasmine/bin/jasmine",
-      "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly jasmine",
+      "test": "babel-node spec/support/jasmineRunner",
+      "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly spec/support/jasmineRunner.js",
       "lint": "eslint src spec examples"
     }
 }
