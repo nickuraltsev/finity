@@ -5,7 +5,7 @@ const handlerNames = [
   'transitionHandler',
   'entryAction',
   'exitAction',
-  'transitionAction'
+  'transitionAction',
 ];
 
 export default class HandlerMocks {
