@@ -30,7 +30,6 @@
       "babel-preset-stage-0": "^6.3.13",
       "jasmine": "^2.4.1",
       "jasmine-spec-reporter": "^2.4.0",
-      "lodash": "^3.10.0",
       "eslint": "^1.10.3",
       "eslint-config-airbnb": "^3.0.0",
       "babel-eslint": "^4.1.6",
