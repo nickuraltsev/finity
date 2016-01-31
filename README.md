@@ -6,6 +6,15 @@
 
 A finite state machine library for Node.js and the browser with a friendly configuration DSL.
 
+## Features
+
+- Entry, exit, and transition actions
+- Guard conditions
+- Self-transitions and internal transitions
+- State machine event hooks
+- Fluent configuration API
+- No external dependencies
+
 ## Installation
 
 Install using [npm](https://www.npmjs.org/):
@@ -22,9 +31,9 @@ import StateMachine from 'fluent-state-machine';
 const maxAttempts = 3;
 let attemptCount = 0;
 
-// Create a state machine which controls the execution of some asynchronous operation.
-// If the operation fails, it will be retried until it succeeds or the number of attempts reaches the limit.
-// If a cancellation request is received, the operation will be cancelled.
+// Create a state machine which controls the execution of some asynchronous task.
+// If the task fails, it will be retried until it succeeds or the number of attempts reaches the limit.
+// If a cancellation request is received, the task will be stopped.
 const stateMachine = StateMachine
   .configure()
     .initialState('ready')
@@ -33,11 +42,11 @@ const stateMachine = StateMachine
     .state('running')
       .onEnter(() => {
         attemptCount++;
-        // ... start the async operation
+        // ... start the task
       })
       .on('success').transitionTo('succeeded')
       .on('cancel').transitionTo('cancelled').withAction(() => {
-        // ... cancel the async operation
+        // ... stop the task
       })
       .on('error')
         .selfTransition().withCondition(() => attemptCount < maxAttempts)
@@ -57,11 +66,11 @@ stateMachine.handle('cancel');
 
 ### Configuration
 
-Before you can create and start a state machine, you need to create a state machine configuration. To do this, first call the `StateMachine.configure` method, which is the entry point for the configuration DSL. Then use the DSL to define states, transitions, entry and exit actions, and so on.
+Before you can create and start a state machine, you need to create a state machine configuration. 
 
 #### States
 
-To define the initial state, use the `initialState` method. To add other states, use the `state` method. Both methods take the state name as the parameter.
+To define the initial state, use the `initialState` method. To add other states, use the `state` method. Both methods take the state name as a parameter.
 
 ```javascript
 StateMachine
@@ -88,7 +97,14 @@ StateMachine
 
 #### Entry and exit actions
 
-A state can have entry and exit actions, which are executed when the state machine is entering or exiting the state, respectively. To add an entry action to a state, use the `onEnter` method. To add an exit action, use the `onExit` method.
+A state can have entry and exit actions associated with it, which are functions that are called when the state is about to be entered or exited, respectively.
+
+Entry and exit actions receive two parameters:
+
+- `state` - the state to be entered or exited
+- `context` - the current [context](#context)
+
+Use the `onEnter` method to add an entry action to a state, and the `onExit` method to add an exit action.
 
 ```javascript
 StateMachine
@@ -103,7 +119,15 @@ You can add multiple entry actions to a state. They will be executed in the same
 
 #### Transition actions
 
-Transition actions are executed after the exit actions of the source state and before the entry actions of the target state. To add an action to a transition, use the `withAction` method.
+Transitions can have actions associated with them. Transition actions are functions that are called when the transition is executed.
+
+A transition action receives three parameters:
+
+- `fromState` - the source state of the transition
+- `toState` - the target state of the transition
+- `context` - the current [context](#context)
+
+To add an action to a transition, use the `withAction` method.
 
 ```javascript
 StateMachine
@@ -118,7 +142,11 @@ You can add multiple actions to a transition. They will be executed in the same 
 
 #### Guard conditions
 
-A transition can have a guard condition. To set a guard condition for a transition, use the `withCondition` method.
+A transition can have a guard condition attached, which is a function that is used to determine if the transition is allowed. A transition with a guard condition can be executed only if the guard condition returns a truthy value.
+
+A guard condition function receives the current [context](#context) as a parameter.
+
+To set a guard condition for a transition, use the `withCondition` method.
 
 ```javascript
 StateMachine
@@ -135,6 +163,8 @@ A transition cannot have more than one guard condition.
 
 Self-transitions and internal transitions are transitions from a state to itself.
 
+Self-transitions and internal transitions are transitions from a state to itself.
+
 When a self-transition is executed, the state is exited and re-entered, and thus the entry and exit actions are executed. In contrast, an internal transition does not cause exit and reentry to the state.
 
 To add a self-transition to a state, use the `selfTransition` method. To add an internal transition, call the `internalTransition` method.
@@ -147,9 +177,9 @@ StateMachine
       .on('eventB').internalTransition()
 ```
 
-Self-transitions and internal transitions can have actions and guard conditions.
+Self-transitions and internal transitions can have actions and guard conditions attached.
 
-#### Global handlers
+#### Global hooks
 
 ```javascript
 StateMachine
@@ -163,7 +193,7 @@ StateMachine
       .onTransition((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
 ```
 
-You can register multiple handlers of the same type. They will be executed in the same order as they have been registered.
+You can register multiple hooks of the same type. They will be executed in the same order as they have been registered.
 
 ```javascript
 StateMachine
@@ -176,7 +206,13 @@ StateMachine
 
 #### Unhandled events
 
-By default, if a state machine receives an event that it cannot handle, it will throw an error. You can override this behavior by setting a custom `onUnhandledEvent` handler.
+By default, if a state machine receives an event that it cannot handle, it will throw an error. You can override this behavior by registering an `onUnhandledEvent` hook.
+
+An `onUnhandledEvent` hook receives three arguments:
+
+- `event` - the event
+- `state` - the state
+- `context` - the current [context](#context)
 
 ```javascript
 StateMachine
@@ -186,7 +222,7 @@ StateMachine
       .onUnhandledEvent((event, state) => console.log(`Unhandled event ${event} in state ${state}.`))
 ```
 
-You can register multiple `onUnhandledEvent` handlers. They will be executed in the same order as they have been registered.
+You can register multiple `onUnhandledEvent` hooks. They will be executed in the same order as they have been registered.
 
 ### Creating and starting a state machine
 
@@ -211,7 +247,7 @@ const firstInstance = StateMachine.start(config);
 const secondInstance = StateMachine.start(config);
 ```
 
-When a state machine is started, it enters the initial state and all the `onStateEnter` handlers and the initial state's entry actions (if any) are executed. However, the `onTransition` and `onStateChange` handlers are not executed.
+When a state machine is started, it enters the initial state and all the `onStateEnter` hooks and the initial state's entry actions are executed. However, the `onTransition` and `onStateChange` hooks are not executed.
 
 ### Sending an event to a state machine
 
@@ -230,7 +266,7 @@ const stateMachine = StateMachine
 stateMachine.handle('eventA');
 ```
 
-If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` handlers if any are registered (see [Unhandled events](#unhandled-events)).
+If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` hooks if any are registered (see [Unhandled events](#unhandled-events)).
 
 You can check whether a state machine can handle a given event via the `canHandle` method.
 
@@ -257,6 +293,12 @@ const stateMachine = StateMachine
 
 console.log(stateMachine.getCurrentState()); // state1
 ```
+
+### Context
+
+A context object is passed to all entry, exit, and transition actions, guard conditions, and global hooks. It has the following properties:
+
+- `stateMachine` - the current state machine instance
 
 ## License
 
