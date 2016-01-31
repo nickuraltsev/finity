@@ -163,8 +163,6 @@ A transition cannot have more than one guard condition.
 
 Self-transitions and internal transitions are transitions from a state to itself.
 
-Self-transitions and internal transitions are transitions from a state to itself.
-
 When a self-transition is executed, the state is exited and re-entered, and thus the entry and exit actions are executed. In contrast, an internal transition does not cause exit and reentry to the state.
 
 To add a self-transition to a state, use the `selfTransition` method. To add an internal transition, call the `internalTransition` method.
