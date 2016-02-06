@@ -179,19 +179,73 @@ Self-transitions and internal transitions can have actions and guard conditions 
 
 #### Global hooks
 
+##### `onStateEnter`
+
+Called when the state machine is about to enter a state.
+
+###### Parameters
+
+- `state` - the state to be entered
+- `context` - the current [context](#context)
+
 ```javascript
 StateMachine
   .configure()
-    .initialState('state1')
-      .on('eventA').transitionTo('state2')
     .global()
       .onStateEnter(state => console.log(`Entering state ${state}`))
+```
+
+##### `onStateExit`
+
+Called when the state machine is about to exit a state.
+
+###### Parameters
+
+- `state` - the state to be exited
+- `context` - the current [context](#context)
+
+```javascript
+StateMachine
+  .configure()
+    .global()
       .onStateExit(state => console.log(`Exiting state ${state}`))
-      .onStateChange((oldState, newState) => console.log(`Changing state from ${oldState} to ${newState}`))
+```
+
+##### `onTransition`
+
+Called when the state machine is executing a transition.
+
+###### Parameters
+
+- `fromState` - the source state of the transition
+- `toState` - the target state of the transition
+- `context` - the current [context](#context)
+
+```javascript
+StateMachine
+  .configure()
+    .global()
       .onTransition((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
 ```
 
-You can register multiple hooks of the same type. They will be executed in the same order as they have been registered.
+##### `onStateChange`
+
+Called when the state of the state machine is about to change.
+
+###### Parameters
+
+- `oldState` - the old state
+- `newState` - the new state
+- `context` - the current [context](#context)
+
+```javascript
+StateMachine
+  .configure()
+    .global()
+      .onStateChange((oldState, newState) => console.log(`Changing state from ${oldState} to ${newState}`))
+```
+
+You can register multiple global hooks of the same type. They will be called in the same order as they have been registered.
 
 ```javascript
 StateMachine
