@@ -31,8 +31,8 @@
       "jasmine": "^2.4.1",
       "jasmine-spec-reporter": "^2.4.0",
       "eslint": "^1.10.3",
-      "eslint-config-airbnb": "^3.0.0",
-      "babel-eslint": "^4.1.6",
+      "eslint-config-airbnb": "^5.0.1",
+      "babel-eslint": "^5.0.0",
       "isparta": "^4.0.0",
       "coveralls": "^2.11.6"
     },
