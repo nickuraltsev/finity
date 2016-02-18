@@ -1,19 +1,25 @@
 const handlerNames = [
-  'stateEnterHandler',
-  'stateExitHandler',
-  'stateChangeHandler',
-  'transitionHandler',
-  'entryAction',
-  'exitAction',
+  'onStateEnterHook',
+  'onStateExitHook',
+  'onTransitionHook',
+  'onStateChangeHook',
+  'stateEntryAction',
+  'stateExitAction',
   'transitionAction',
 ];
 
 export default class HandlerMocks {
   constructor() {
-    handlerNames.forEach(name => this[name] = jasmine.createSpy(name));
+    this.calledHandlers = [];
+    handlerNames.forEach(name =>
+      this[name] = jasmine.createSpy(name).and.callFake((...args) =>
+        this.calledHandlers.push([name, ...args])
+      )
+    );
   }
 
   reset() {
     handlerNames.forEach(name => this[name].calls.reset());
+    this.calledHandlers = [];
   }
 }
