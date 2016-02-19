@@ -101,7 +101,7 @@ A state can have entry and exit actions associated with it, which are functions 
 
 Entry and exit actions receive two parameters:
 
-- `state` - The state to be entered or exited.
+- `state` - The name of the state to be entered or exited.
 - `context` - The current [context](#context).
 
 Use the `onEnter` method to add an entry action to a state, and the `onExit` method to add an exit action.
@@ -123,8 +123,8 @@ Transitions can have actions associated with them. Transition actions are functi
 
 A transition action receives three parameters:
 
-- `fromState` - The source state of the transition.
-- `toState` - The target state of the transition.
+- `fromState` - The name of the transition's source state.
+- `toState` - The name of the transition's target state.
 - `context` - The current [context](#context).
 
 To add an action to a transition, use the `withAction` method.
@@ -189,7 +189,7 @@ Called when the state machine is about to enter a state.
 
 ###### Parameters
 
-- `state` - The state to be entered.
+- `state` - The name of the state to be entered.
 - `context` - The current [context](#context).
 
 ```javascript
@@ -205,7 +205,7 @@ Called when the state machine is about to exit a state.
 
 ###### Parameters
 
-- `state` - The state to be exited.
+- `state` - The name of the state to be exited.
 - `context` - The current [context](#context).
 
 ```javascript
@@ -221,8 +221,8 @@ Called when the state machine is executing a transition.
 
 ###### Parameters
 
-- `fromState` - The source state of the transition.
-- `toState` - The target state of the transition.
+- `fromState` - The name of the transition's source state.
+- `toState` - The name of the transition's target state.
 - `context` - The current [context](#context).
 
 ```javascript
@@ -240,8 +240,8 @@ In contrast to `onTransition` hooks, `onStateChange` hooks are not called when e
 
 ###### Parameters
 
-- `oldState` - The old state.
-- `newState` - The new state.
+- `oldState` - The name of the old state.
+- `newState` - The name of the new state.
 - `context` - The current [context](#context).
 
 ```javascript
@@ -268,8 +268,8 @@ By default, if a state machine receives an event that it cannot handle, it will 
 
 An `onUnhandledEvent` hook receives three parameters:
 
-- `event` - The event.
-- `state` - The state.
+- `event` - The name of the event.
+- `state` - The name of the state.
 - `context` - The current [context](#context).
 
 ```javascript
@@ -323,6 +323,19 @@ stateMachine.handle('eventA');
 ```
 
 You can send an event with a payload by passing the payload as the optional second parameter. The event payload can be accessed in entry, exit, and transition actions, guard conditions, and global hooks through a [context](#context) object passed to them.
+
+```javascript
+const stateMachine = StateMachine
+  .configure()
+    .initialState('state1')
+      .on('eventA').transitionTo('state2').withAction((fromState, toState, context) => {
+        // Do something with the payload
+        console.log('Payload:', context.eventPayload);
+      })
+  .start();
+
+stateMachine.handle('eventA', { foo: 'bar' }); // Payloads can be of any type, including objects.
+```
 
 If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` hooks if any are registered (see [Unhandled events](#unhandled-events)).
 
