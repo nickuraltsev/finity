@@ -66,7 +66,7 @@ stateMachine.handle('cancel');
 
 ### Configuration
 
-Before you can create and start a state machine, you need to create a state machine configuration. 
+Before you can create and start a state machine, you need to create a state machine configuration.
 
 #### States
 
@@ -362,7 +362,7 @@ A context object is passed to all entry, exit, and transition actions, guard con
 
 - `stateMachine` - The current state machine instance.
 - `event` - The name of the event. This property is only present when the state machine is handling an event.
-- `payload` - The payload of the event. This property is only present when the state machine is handling an event that has a payload.
+- `eventPayload` - The payload of the event. This property is only present when the state machine is handling an event that has a payload.
 
 ## License
 

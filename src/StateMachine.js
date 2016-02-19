@@ -37,13 +37,13 @@ export default class StateMachine {
     return this.currentState;
   }
 
-  canHandle(event, payload) {
-    const context = this.createContext(event, payload);
+  canHandle(event, eventPayload) {
+    const context = this.createContext(event, eventPayload);
     return !!this.getTransition(context);
   }
 
-  handle(event, payload) {
-    this.eventQueue.push({ event, payload });
+  handle(event, eventPayload) {
+    this.eventQueue.push({ event, eventPayload });
     if (!this.isProcessing) {
       this.isProcessing = true;
       try {
@@ -58,8 +58,8 @@ export default class StateMachine {
   processQueue() {
     try {
       while (this.eventQueue.length > 0) {
-        const { event, payload } = this.eventQueue.shift();
-        this.process(event, payload);
+        const { event, eventPayload } = this.eventQueue.shift();
+        this.process(event, eventPayload);
       }
     } catch (error) {
       if (this.eventQueue.length > 0) {
@@ -69,8 +69,8 @@ export default class StateMachine {
     }
   }
 
-  process(event, payload) {
-    const context = this.createContext(event, payload);
+  process(event, eventPayload) {
+    const context = this.createContext(event, eventPayload);
 
     const transitionConfig = this.getTransition(context);
     if (!transitionConfig) {
@@ -98,10 +98,10 @@ export default class StateMachine {
     }
   }
 
-  createContext(event, payload) {
+  createContext(event, eventPayload) {
     const context = { stateMachine: this, event };
-    if (payload !== undefined) {
-      context.payload = payload;
+    if (eventPayload !== undefined) {
+      context.eventPayload = eventPayload;
     }
     return context;
   }

@@ -107,7 +107,11 @@ describe('handle', () => {
       .start()
       .handle('event1', 'payload1');
 
-    expect(condition).toHaveBeenCalledWith({ stateMachine, event: 'event1', payload: 'payload1' });
+    expect(condition).toHaveBeenCalledWith({
+      stateMachine,
+      event: 'event1',
+      eventPayload: 'payload1',
+    });
   });
 
   it('calls onUnhandledEvent hooks', () => {

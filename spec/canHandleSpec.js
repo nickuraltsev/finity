@@ -94,6 +94,10 @@ describe('canHandle', () => {
 
     stateMachine.canHandle('event1', 'payload1');
 
-    expect(condition).toHaveBeenCalledWith({ stateMachine, event: 'event1', payload: 'payload1' });
+    expect(condition).toHaveBeenCalledWith({
+      stateMachine,
+      event: 'event1',
+      eventPayload: 'payload1',
+    });
   });
 });

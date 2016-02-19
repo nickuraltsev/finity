@@ -23,7 +23,7 @@ describe('transition', () => {
 
     stateMachine.handle('event1', 'payload1');
 
-    const context = { stateMachine, event: 'event1', payload: 'payload1' };
+    const context = { stateMachine, event: 'event1', eventPayload: 'payload1' };
 
     expect(mocks.calledHandlers).toEqual([
       ['onStateExitHook', 'state1', context],
