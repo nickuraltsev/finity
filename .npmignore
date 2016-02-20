@@ -4,4 +4,5 @@ examples
 coverage
 node_modules
 npm-debug.log
+ROADMAP.md
 **/.*
