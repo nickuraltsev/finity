@@ -2,7 +2,7 @@
 
 ## New Features
 
-- [ ] Event payloads
+- [x] Event payloads
 - [ ] Time triggers
 - [ ] Hierarchical state machines
 - [ ] Ignoring events: `state('state1').on('eventA').ignore()`
