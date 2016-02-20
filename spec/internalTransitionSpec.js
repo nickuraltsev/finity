@@ -9,7 +9,7 @@ describe('internal transition', () => {
 
       const stateMachine = StateMachine
         .configure()
-        .global().onTransition(mocks.onTransitionHook)
+        .global().onTransition(mocks.transitionHook)
         .initialState('state1')
           .on('event1').internalTransition().withAction(mocks.transitionAction)
         .start();
@@ -21,7 +21,7 @@ describe('internal transition', () => {
       const context = { stateMachine, event: 'event1' };
 
       expect(mocks.calledHandlers).toEqual([
-        ['onTransitionHook', 'state1', 'state1', context],
+        ['transitionHook', 'state1', 'state1', context],
         ['transitionAction', 'state1', 'state1', context],
       ]);
     }
@@ -35,9 +35,9 @@ describe('internal transition', () => {
       const stateMachine = StateMachine
         .configure()
         .global()
-          .onStateEnter(mocks.onStateEnterHook)
-          .onStateExit(mocks.onStateExitHook)
-          .onStateChange(mocks.onStateChangeHook)
+          .onStateEnter(mocks.stateEnterHook)
+          .onStateExit(mocks.stateExitHook)
+          .onStateChange(mocks.stateChangeHook)
         .initialState('state1')
           .onEnter(mocks.stateEntryAction)
           .onExit(mocks.stateExitAction)
@@ -48,9 +48,9 @@ describe('internal transition', () => {
 
       stateMachine.handle('event1');
 
-      expect(mocks.onStateEnterHook).not.toHaveBeenCalled();
-      expect(mocks.onStateExitHook).not.toHaveBeenCalled();
-      expect(mocks.onStateChangeHook).not.toHaveBeenCalled();
+      expect(mocks.stateEnterHook).not.toHaveBeenCalled();
+      expect(mocks.stateExitHook).not.toHaveBeenCalled();
+      expect(mocks.stateChangeHook).not.toHaveBeenCalled();
       expect(mocks.stateEntryAction).not.toHaveBeenCalled();
       expect(mocks.stateExitAction).not.toHaveBeenCalled();
     }

@@ -16,14 +16,14 @@ describe('start', () => {
 
     const stateMachine = StateMachine
       .configure()
-      .global().onStateEnter(mocks.onStateEnterHook)
+      .global().onStateEnter(mocks.stateEnterHook)
       .initialState('state1').onEnter(mocks.stateEntryAction)
       .start();
 
     const context = { stateMachine };
 
     expect(mocks.calledHandlers).toEqual([
-      ['onStateEnterHook', 'state1', context],
+      ['stateEnterHook', 'state1', context],
       ['stateEntryAction', 'state1', context],
     ]);
   });
@@ -34,13 +34,13 @@ describe('start', () => {
     StateMachine
       .configure()
       .global()
-        .onTransition(mocks.onTransitionHook)
-        .onStateChange(mocks.onStateChangeHook)
+        .onTransition(mocks.transitionHook)
+        .onStateChange(mocks.stateChangeHook)
       .initialState('state1')
       .start();
 
-    expect(mocks.onTransitionHook).not.toHaveBeenCalled();
-    expect(mocks.onStateChangeHook).not.toHaveBeenCalled();
+    expect(mocks.transitionHook).not.toHaveBeenCalled();
+    expect(mocks.stateChangeHook).not.toHaveBeenCalled();
   });
 
   it('completes the execution of initial state\'s entry actions before processing events', () => {

@@ -28,11 +28,11 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   static createConfig() {
     const config = Object.create(null);
     config.states = Object.create(null);
-    config.stateEnterHandlers = [];
-    config.stateExitHandlers = [];
-    config.stateChangeHandlers = [];
-    config.transitionHandlers = [];
-    config.unhandledEventHandlers = [];
+    config.stateEnterHooks = [];
+    config.stateExitHooks = [];
+    config.stateChangeHooks = [];
+    config.transitionHooks = [];
+    config.unhandledEventHooks = [];
     return config;
   }
 }

@@ -1,8 +1,8 @@
 const handlerNames = [
-  'onStateEnterHook',
-  'onStateExitHook',
-  'onTransitionHook',
-  'onStateChangeHook',
+  'stateEnterHook',
+  'stateExitHook',
+  'transitionHook',
+  'stateChangeHook',
   'stateEntryAction',
   'stateExitAction',
   'transitionAction',

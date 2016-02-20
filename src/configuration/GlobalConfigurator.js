@@ -3,28 +3,28 @@ import StateMachineConfigurator from './StateMachineConfigurator';
 import BaseConfigurator from './BaseConfigurator';
 
 class GlobalConfigurator extends BaseConfigurator {
-  onStateEnter(handler) {
-    this.config.stateEnterHandlers.push(handler);
+  onStateEnter(hook) {
+    this.config.stateEnterHooks.push(hook);
     return this;
   }
 
-  onStateExit(handler) {
-    this.config.stateExitHandlers.push(handler);
+  onStateExit(hook) {
+    this.config.stateExitHooks.push(hook);
     return this;
   }
 
-  onStateChange(handler) {
-    this.config.stateChangeHandlers.push(handler);
+  onStateChange(hook) {
+    this.config.stateChangeHooks.push(hook);
     return this;
   }
 
-  onTransition(handler) {
-    this.config.transitionHandlers.push(handler);
+  onTransition(hook) {
+    this.config.transitionHooks.push(hook);
     return this;
   }
 
-  onUnhandledEvent(handler) {
-    this.config.unhandledEventHandlers.push(handler);
+  onUnhandledEvent(hook) {
+    this.config.unhandledEventHooks.push(hook);
     return this;
   }
 }

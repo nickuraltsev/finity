@@ -24,7 +24,7 @@ export default class StateMachine {
   start() {
     this.isProcessing = true;
     try {
-      this.executeEntryHandlers(this.config.initialState, { stateMachine: this });
+      this.executeStateEnterHandlers(this.config.initialState, { stateMachine: this });
       this.currentState = this.config.initialState;
       this.processQueue();
     } finally {
@@ -79,20 +79,20 @@ export default class StateMachine {
     }
 
     if (!transitionConfig.isInternal) {
-      this.executeExitHandlers(context);
+      this.executeStateExitHandlers(context);
     }
 
     const nextState = transitionConfig.targetState !== null ?
       transitionConfig.targetState :
       this.currentState;
 
-    executeHandlers(this.config.transitionHandlers, this.currentState, nextState, context);
+    executeHandlers(this.config.transitionHooks, this.currentState, nextState, context);
     executeHandlers(transitionConfig.actions, this.currentState, nextState, context);
 
     if (!transitionConfig.isInternal) {
-      this.executeEntryHandlers(nextState, context);
+      this.executeStateEnterHandlers(nextState, context);
       if (this.currentState !== nextState) {
-        executeHandlers(this.config.stateChangeHandlers, this.currentState, nextState, context);
+        executeHandlers(this.config.stateChangeHooks, this.currentState, nextState, context);
         this.currentState = nextState;
       }
     }
@@ -119,28 +119,28 @@ export default class StateMachine {
   }
 
   onUnhandledEvent(context) {
-    if (this.config.unhandledEventHandlers.length > 0) {
+    if (this.config.unhandledEventHooks.length > 0) {
       executeHandlers(
-        this.config.unhandledEventHandlers,
+        this.config.unhandledEventHooks,
         context.event,
         this.currentState,
         context
       );
     } else {
-      throw new Error(`State '${this.currentState}' cannot handle event '${context.event}'.`);
+      throw new Error(`Unhandled event '${context.event}' in state '${this.currentState}'.`);
     }
   }
 
-  executeEntryHandlers(state, context) {
-    executeHandlers(this.config.stateEnterHandlers, state, context);
+  executeStateEnterHandlers(state, context) {
+    executeHandlers(this.config.stateEnterHooks, state, context);
     const stateConfig = this.config.states[state];
     if (stateConfig) {
       executeHandlers(stateConfig.entryActions, state, context);
     }
   }
 
-  executeExitHandlers(context) {
-    executeHandlers(this.config.stateExitHandlers, this.currentState, context);
+  executeStateExitHandlers(context) {
+    executeHandlers(this.config.stateExitHooks, this.currentState, context);
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
       executeHandlers(stateConfig.exitActions, this.currentState, context);

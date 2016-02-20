@@ -8,9 +8,9 @@ describe('self-transition', () => {
     const stateMachine = StateMachine
       .configure()
       .global()
-        .onStateEnter(mocks.onStateEnterHook)
-        .onStateExit(mocks.onStateExitHook)
-        .onTransition(mocks.onTransitionHook)
+        .onStateEnter(mocks.stateEnterHook)
+        .onStateExit(mocks.stateExitHook)
+        .onTransition(mocks.transitionHook)
       .initialState('state1')
         .onEnter(mocks.stateEntryAction)
         .onExit(mocks.stateExitAction)
@@ -24,26 +24,26 @@ describe('self-transition', () => {
     const context = { stateMachine, event: 'event1' };
 
     expect(mocks.calledHandlers).toEqual([
-      ['onStateExitHook', 'state1', context],
+      ['stateExitHook', 'state1', context],
       ['stateExitAction', 'state1', context],
-      ['onTransitionHook', 'state1', 'state1', context],
+      ['transitionHook', 'state1', 'state1', context],
       ['transitionAction', 'state1', 'state1', context],
-      ['onStateEnterHook', 'state1', context],
+      ['stateEnterHook', 'state1', context],
       ['stateEntryAction', 'state1', context],
     ]);
   });
 
   it('does not execute onStateChange hooks', () => {
-    const onStateChangeHook = jasmine.createSpy('onStateChangeHook');
+    const stateChangeHook = jasmine.createSpy('stateChangeHook');
 
     StateMachine
       .configure()
-      .global().onStateChange(onStateChangeHook)
+      .global().onStateChange(stateChangeHook)
       .initialState('state1')
         .on('event1').selfTransition()
       .start()
       .handle('event1');
 
-    expect(onStateChangeHook).not.toHaveBeenCalled();
+    expect(stateChangeHook).not.toHaveBeenCalled();
   });
 });

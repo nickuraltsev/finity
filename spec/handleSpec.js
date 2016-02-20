@@ -10,7 +10,7 @@ describe('handle', () => {
           .initialState('state1')
           .start()
           .handle('event1')
-      ).toThrowError('State \'state1\' cannot handle event \'event1\'.');
+      ).toThrowError('Unhandled event \'event1\' in state \'state1\'.');
     });
   });
 
@@ -44,7 +44,7 @@ describe('handle', () => {
             .on('event1').transitionTo('state2').withCondition(() => false)
           .start()
           .handle('event1')
-      ).toThrowError('State \'state1\' cannot handle event \'event1\'.');
+      ).toThrowError('Unhandled event \'event1\' in state \'state1\'.');
     });
   });
 
@@ -115,17 +115,17 @@ describe('handle', () => {
   });
 
   it('calls onUnhandledEvent hooks', () => {
-    const onUnhandledEventHook = jasmine.createSpy('onUnhandledEventHook');
+    const unhandledEventHook = jasmine.createSpy('unhandledEventHook');
 
     const stateMachine = StateMachine
       .configure()
-      .global().onUnhandledEvent(onUnhandledEventHook)
+      .global().onUnhandledEvent(unhandledEventHook)
       .initialState('state1')
       .start()
       .handle('event1');
 
     const context = { stateMachine, event: 'event1' };
-    expect(onUnhandledEventHook).toHaveBeenCalledWith('event1', 'state1', context);
+    expect(unhandledEventHook).toHaveBeenCalledWith('event1', 'state1', context);
   });
 
   it('completes the processing of the current event before processing the next event', () => {
@@ -140,7 +140,8 @@ describe('handle', () => {
         .onExit((...args) => {
           // send a new event in the middle of processing another event
           stateMachine.handle('event2');
-          mocks.stateExitAction(...args); // this should be called before processing the new event
+          // this should be called before processing the new event
+          mocks.stateExitAction(...args);
         })
       .state('state2')
         .onEnter(mocks.stateEntryAction)
