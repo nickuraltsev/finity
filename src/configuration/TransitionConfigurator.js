@@ -1,6 +1,6 @@
 import delegateToAncestor from './delegateToAncestor';
 import StateConfigurator from './StateConfigurator';
-import EventConfigurator from './EventConfigurator';
+import TriggerConfigurator from './TriggerConfigurator';
 import BaseConfigurator from './BaseConfigurator';
 
 class TransitionConfigurator extends BaseConfigurator {
@@ -28,6 +28,6 @@ class TransitionConfigurator extends BaseConfigurator {
 }
 
 delegateToAncestor(TransitionConfigurator, StateConfigurator);
-delegateToAncestor(TransitionConfigurator, EventConfigurator);
+delegateToAncestor(TransitionConfigurator, TriggerConfigurator);
 
 export default TransitionConfigurator;

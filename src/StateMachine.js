@@ -13,8 +13,10 @@ export default class StateMachine {
     }
     this.config = config;
     this.currentState = null;
-    this.isProcessing = false;
+    this.isBusy = false;
     this.eventQueue = [];
+    this.timerIDs = null;
+    this.handleTimeout = ::this.handleTimeout;
   }
 
   static start(config) {
@@ -22,13 +24,8 @@ export default class StateMachine {
   }
 
   start() {
-    this.isProcessing = true;
-    try {
-      this.executeStateEnterHandlers(this.config.initialState, { stateMachine: this });
-      this.currentState = this.config.initialState;
-      this.processQueue();
-    } finally {
-      this.isProcessing = false;
+    if (!this.isBusy) {
+      this.execute(() => this.enterState(this.config.initialState, this.createContext()));
     }
     return this;
   }
@@ -39,47 +36,71 @@ export default class StateMachine {
 
   canHandle(event, eventPayload) {
     const context = this.createContext(event, eventPayload);
-    return !!this.getTransition(context);
+    return !!this.getTransitionForEvent(context);
   }
 
   handle(event, eventPayload) {
-    this.eventQueue.push({ event, eventPayload });
-    if (!this.isProcessing) {
-      this.isProcessing = true;
-      try {
-        this.processQueue();
-      } finally {
-        this.isProcessing = false;
-      }
+    if (!this.isBusy) {
+      this.execute(() => this.processEvent(event, eventPayload));
+    } else {
+      this.eventQueue.push({ event, eventPayload });
     }
     return this;
   }
 
-  processQueue() {
+  execute(operation) {
+    this.isBusy = true;
     try {
+      operation();
+
+      // Process all events
       while (this.eventQueue.length > 0) {
         const { event, eventPayload } = this.eventQueue.shift();
-        this.process(event, eventPayload);
+        this.processEvent(event, eventPayload);
       }
-    } catch (error) {
+    } finally {
+      // Clean up
       if (this.eventQueue.length > 0) {
         this.eventQueue = [];
       }
-      throw error;
+      this.isBusy = false;
     }
   }
 
-  process(event, eventPayload) {
+  processEvent(event, eventPayload) {
     const context = this.createContext(event, eventPayload);
+    const transitionConfig = this.getTransitionForEvent(context);
+    if (transitionConfig) {
+      this.executeTransition(transitionConfig, context);
+    } else {
+      this.handleUnhandledEvent(context);
+    }
+  }
 
-    const transitionConfig = this.getTransition(context);
-    if (!transitionConfig) {
-      this.onUnhandledEvent(context);
-      return;
+  createContext(event, eventPayload) {
+    const context = { stateMachine: this };
+    if (event !== undefined) {
+      context.event = event;
+    }
+    if (eventPayload !== undefined) {
+      context.eventPayload = eventPayload;
+    }
+    return context;
+  }
+
+  getTransitionForEvent(context) {
+    const stateConfig = this.config.states[this.currentState];
+    if (!stateConfig) {
+      return null;
     }
 
+    const eventConfig = stateConfig.events[context.event];
+    return eventConfig ? this.selectTransition(eventConfig.transitions, context) : null;
+  }
+
+  executeTransition(transitionConfig, context) {
     if (!transitionConfig.isInternal) {
-      this.executeStateExitHandlers(context);
+      this.exitState(context);
     }
 
     const nextState = transitionConfig.targetState !== null ?
@@ -90,35 +111,11 @@ export default class StateMachine {
     executeHandlers(transitionConfig.actions, this.currentState, nextState, context);
 
     if (!transitionConfig.isInternal) {
-      this.executeStateEnterHandlers(nextState, context);
-      if (this.currentState !== nextState) {
-        executeHandlers(this.config.stateChangeHooks, this.currentState, nextState, context);
-        this.currentState = nextState;
-      }
+      this.enterState(nextState, context);
     }
   }
 
-  createContext(event, eventPayload) {
-    const context = { stateMachine: this, event };
-    if (eventPayload !== undefined) {
-      context.eventPayload = eventPayload;
-    }
-    return context;
-  }
-
-  getTransition(context) {
-    const stateConfig = this.config.states[this.currentState];
-    if (!stateConfig) {
-      return null;
-    }
-
-    const eventConfig = stateConfig.events[context.event];
-    return eventConfig ?
-      eventConfig.transitions.find(t => !t.condition || t.condition(context)) :
-      null;
-  }
-
-  onUnhandledEvent(context) {
+  handleUnhandledEvent(context) {
     if (this.config.unhandledEventHooks.length > 0) {
       executeHandlers(
         this.config.unhandledEventHooks,
@@ -131,19 +128,63 @@ export default class StateMachine {
     }
   }
 
-  executeStateEnterHandlers(state, context) {
+  enterState(state, context) {
     executeHandlers(this.config.stateEnterHooks, state, context);
+
     const stateConfig = this.config.states[state];
     if (stateConfig) {
       executeHandlers(stateConfig.entryActions, state, context);
     }
+
+    if (this.currentState !== null && this.currentState !== state) {
+      executeHandlers(this.config.stateChangeHooks, this.currentState, state, context);
+    }
+
+    this.currentState = state;
+
+    this.startTimers();
   }
 
-  executeStateExitHandlers(context) {
+  exitState(context) {
+    this.stopTimers();
+
     executeHandlers(this.config.stateExitHooks, this.currentState, context);
+
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
       executeHandlers(stateConfig.exitActions, this.currentState, context);
     }
+  }
+
+  startTimers() {
+    const stateConfig = this.config.states[this.currentState];
+    if (stateConfig && stateConfig.timers.length > 0) {
+      this.timerIDs = stateConfig.timers.map(timerConfig => setTimeout(
+        this.handleTimeout,
+        timerConfig.timeout,
+        timerConfig,
+      ));
+    }
+  }
+
+  stopTimers() {
+    if (this.timerIDs) {
+      this.timerIDs.forEach(clearTimeout);
+      this.timerIDs = null;
+    }
+  }
+
+  handleTimeout(timerConfig) {
+    this.execute(() => {
+      const context = this.createContext();
+      const transitionConfig = this.selectTransition(timerConfig.transitions, context);
+      if (transitionConfig) {
+        this.executeTransition(transitionConfig, context);
+      }
+    });
+  }
+
+  selectTransition(transitions, context) {
+    return transitions.find(t => !t.condition || t.condition(context));
   }
 }

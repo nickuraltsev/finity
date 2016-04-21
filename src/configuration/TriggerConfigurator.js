@@ -1,6 +1,6 @@
 import BaseConfigurator from './BaseConfigurator';
 
-export default class EventConfigurator extends BaseConfigurator {
+export default class TriggerConfigurator extends BaseConfigurator {
   transitionTo(targetState) {
     return this.transition(targetState);
   }

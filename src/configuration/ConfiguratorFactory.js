@@ -1,7 +1,8 @@
 import StateMachineConfigurator from './StateMachineConfigurator';
 import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
-import EventConfigurator from './EventConfigurator';
+import TriggerConfigurator from './TriggerConfigurator';
+import TimerConfigurator from './TimerConfigurator';
 import TransitionConfigurator from './TransitionConfigurator';
 
 function createFactory(methodToTypeMap) {
@@ -19,6 +20,7 @@ export default createFactory({
   createStateMachineConfigurator: StateMachineConfigurator,
   createGlobalConfigurator: GlobalConfigurator,
   createStateConfigurator: StateConfigurator,
-  createEventConfigurator: EventConfigurator,
+  createTriggerConfigurator: TriggerConfigurator,
+  createTimerConfigurator: TimerConfigurator,
   createTransitionConfigurator: TransitionConfigurator,
 });

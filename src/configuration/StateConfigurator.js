@@ -14,9 +14,18 @@ class StateConfigurator extends BaseConfigurator {
   }
 
   on(event) {
-    const eventConfigurator = this.factory.createEventConfigurator(this, this.config.events[event]);
-    this.config.events[event] = eventConfigurator.config;
-    return eventConfigurator;
+    const triggerConfigurator = this.factory.createTriggerConfigurator(
+      this,
+      this.config.events[event],
+    );
+    this.config.events[event] = triggerConfigurator.config;
+    return triggerConfigurator;
+  }
+
+  onTimeout(timeout) {
+    const timerConfigurator = this.factory.createTimerConfigurator(this, timeout);
+    this.config.timers.push(timerConfigurator.config);
+    return timerConfigurator;
   }
 
   static createConfig() {
@@ -24,6 +33,7 @@ class StateConfigurator extends BaseConfigurator {
     config.entryActions = [];
     config.exitActions = [];
     config.events = Object.create(null);
+    config.timers = [];
     return config;
   }
 }
