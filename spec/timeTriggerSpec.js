@@ -1,5 +1,4 @@
 import StateMachine from '../src';
-import HandlerMocks from './support/HandlerMocks';
 
 describe('time trigger', () => {
   beforeEach(() => jasmine.clock().install());
