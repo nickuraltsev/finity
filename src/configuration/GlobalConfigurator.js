@@ -1,8 +1,18 @@
-import delegateToAncestor from './delegateToAncestor';
-import StateMachineConfigurator from './StateMachineConfigurator';
 import BaseConfigurator from './BaseConfigurator';
+import deepCopy from '../utils/deepCopy';
 
-class GlobalConfigurator extends BaseConfigurator {
+export default class GlobalConfigurator extends BaseConfigurator {
+  constructor(parent) {
+    super(parent);
+    this.config = {
+      stateEnterHooks: [],
+      stateExitHooks: [],
+      stateChangeHooks: [],
+      transitionHooks: [],
+      unhandledEventHooks: [],
+    };
+  }
+
   onStateEnter(hook) {
     this.config.stateEnterHooks.push(hook);
     return this;
@@ -27,8 +37,8 @@ class GlobalConfigurator extends BaseConfigurator {
     this.config.unhandledEventHooks.push(hook);
     return this;
   }
+
+  getConfig() {
+    return deepCopy(this.config);
+  }
 }
-
-delegateToAncestor(GlobalConfigurator, StateMachineConfigurator);
-
-export default GlobalConfigurator;

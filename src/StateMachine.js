@@ -8,7 +8,7 @@ export default class StateMachine {
     if (typeof config !== 'object') {
       throw new Error('Configuration must be an object.');
     }
-    if (config.initialState === undefined) {
+    if (config.initialState === undefined || config.initialState === null) {
       throw new Error('Initial state must be specified.');
     }
     this.config = config;

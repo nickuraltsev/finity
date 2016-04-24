@@ -1,8 +1,15 @@
 import TriggerConfigurator from './TriggerConfigurator';
+import merge from '../utils/merge';
 
 export default class TrimerConfigurator extends TriggerConfigurator {
-  constructor(factory, parent, timeout) {
-    super(factory, parent, null);
-    this.config.timeout = timeout;
+  constructor(parent, timeout) {
+    super(parent);
+    this.config = {
+      timeout
+    };
+  }
+
+  getConfig() {
+    return merge(super.getConfig(), this.config);
   }
 }

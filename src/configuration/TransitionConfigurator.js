@@ -1,11 +1,15 @@
-import delegateToAncestor from './delegateToAncestor';
-import StateConfigurator from './StateConfigurator';
-import TriggerConfigurator from './TriggerConfigurator';
 import BaseConfigurator from './BaseConfigurator';
+import deepCopy from '../utils/deepCopy';
 
-class TransitionConfigurator extends BaseConfigurator {
-  constructor(factory, parent, targetState, isInternal) {
-    super(factory, parent, TransitionConfigurator.createConfig(targetState, isInternal));
+export default class TransitionConfigurator extends BaseConfigurator {
+  constructor(parent, targetState, isInternal) {
+    super(parent);
+    this.config = {
+      targetState,
+      isInternal: targetState === null && isInternal,
+      actions: [],
+      condition: null,
+    };
   }
 
   withAction(action) {
@@ -18,16 +22,7 @@ class TransitionConfigurator extends BaseConfigurator {
     return this;
   }
 
-  static createConfig(targetState, isInternal) {
-    const config = Object.create(null);
-    config.targetState = targetState;
-    config.isInternal = targetState === null && isInternal;
-    config.actions = [];
-    return config;
+  getConfig() {
+    return deepCopy(this.config);
   }
 }
-
-delegateToAncestor(TransitionConfigurator, StateConfigurator);
-delegateToAncestor(TransitionConfigurator, TriggerConfigurator);
-
-export default TransitionConfigurator;

@@ -1,9 +1,25 @@
 import BaseConfigurator from './BaseConfigurator';
+import GlobalConfigurator from './GlobalConfigurator';
+import StateConfigurator from './StateConfigurator';
+import TriggerConfigurator from './TriggerConfigurator';
+import TransitionConfigurator from './TransitionConfigurator';
 import StateMachine from '../StateMachine';
+import { delegateToAncestor, mapToConfig } from './ConfiguratorHelper';
+import deepCopy from '../utils/deepCopy';
+import merge from '../utils/merge';
 
-export default class StateMachineConfigurator extends BaseConfigurator {
+class StateMachineConfigurator extends BaseConfigurator {
+  constructor() {
+    super();
+    this.config = {
+      initialState: null,
+    };
+    this.globalConfigurator = new GlobalConfigurator(this);
+    this.stateConfigurators = Object.create(null);
+  }
+
   global() {
-    return this.factory.createGlobalConfigurator(this, this.config);
+    return this.globalConfigurator;
   }
 
   initialState(state) {
@@ -12,27 +28,27 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   }
 
   state(state) {
-    const stateConfigurator = this.factory.createStateConfigurator(this, this.config.states[state]);
-    this.config.states[state] = stateConfigurator.config;
-    return stateConfigurator;
+    if (!this.stateConfigurators[state]) {
+      this.stateConfigurators[state] = new StateConfigurator(this);
+    }
+    return this.stateConfigurators[state];
   }
 
   getConfig() {
-    return this.config;
+    const config = deepCopy(this.config);
+    config.states = mapToConfig(this.stateConfigurators);
+    return merge(config, this.globalConfigurator.getConfig());
   }
 
   start() {
-    return StateMachine.start(this.config);
-  }
-
-  static createConfig() {
-    const config = Object.create(null);
-    config.states = Object.create(null);
-    config.stateEnterHooks = [];
-    config.stateExitHooks = [];
-    config.stateChangeHooks = [];
-    config.transitionHooks = [];
-    config.unhandledEventHooks = [];
-    return config;
+    const config = this.getConfig();
+    return StateMachine.start(config);
   }
 }
+
+delegateToAncestor(GlobalConfigurator, StateMachineConfigurator);
+delegateToAncestor(StateConfigurator, StateMachineConfigurator);
+delegateToAncestor(TransitionConfigurator, StateConfigurator);
+delegateToAncestor(TransitionConfigurator, TriggerConfigurator);
+
+export default StateMachineConfigurator;

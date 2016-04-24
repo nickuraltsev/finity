@@ -1,7 +1,7 @@
-import ConfiguratorFactory from './configuration/ConfiguratorFactory';
+import StateMachineConfigurator from './configuration/StateMachineConfigurator';
 import StateMachine from './StateMachine';
 
 export default {
-  configure: ::ConfiguratorFactory.createStateMachineConfigurator,
+  configure: () => new StateMachineConfigurator(),
   start: StateMachine.start,
 };

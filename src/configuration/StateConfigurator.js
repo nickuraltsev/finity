@@ -1,8 +1,20 @@
-import delegateToAncestor from './delegateToAncestor';
-import StateMachineConfigurator from './StateMachineConfigurator';
 import BaseConfigurator from './BaseConfigurator';
+import TriggerConfigurator from './TriggerConfigurator';
+import TimerConfigurator from './TimerConfigurator';
+import { mapToConfig } from './ConfiguratorHelper';
+import deepCopy from '../utils/deepCopy';
 
-class StateConfigurator extends BaseConfigurator {
+export default class StateConfigurator extends BaseConfigurator {
+  constructor(parent) {
+    super(parent);
+    this.config = {
+      entryActions: [],
+      exitActions: [],
+    };
+    this.eventConfigurators = Object.create(null);
+    this.timerConfigurators = [];
+  }
+
   onEnter(action) {
     this.config.entryActions.push(action);
     return this;
@@ -14,30 +26,22 @@ class StateConfigurator extends BaseConfigurator {
   }
 
   on(event) {
-    const triggerConfigurator = this.factory.createTriggerConfigurator(
-      this,
-      this.config.events[event],
-    );
-    this.config.events[event] = triggerConfigurator.config;
-    return triggerConfigurator;
+    if (!this.eventConfigurators[event]) {
+      this.eventConfigurators[event] = new TriggerConfigurator(this);
+    }
+    return this.eventConfigurators[event];
   }
 
   onTimeout(timeout) {
-    const timerConfigurator = this.factory.createTimerConfigurator(this, timeout);
-    this.config.timers.push(timerConfigurator.config);
+    const timerConfigurator = new TimerConfigurator(this, timeout);
+    this.timerConfigurators.push(timerConfigurator);
     return timerConfigurator;
   }
 
-  static createConfig() {
-    const config = Object.create(null);
-    config.entryActions = [];
-    config.exitActions = [];
-    config.events = Object.create(null);
-    config.timers = [];
+  getConfig() {
+    const config = deepCopy(this.config);
+    config.events = mapToConfig(this.eventConfigurators);
+    config.timers = mapToConfig(this.timerConfigurators);
     return config;
   }
 }
-
-delegateToAncestor(StateConfigurator, StateMachineConfigurator);
-
-export default StateConfigurator;
