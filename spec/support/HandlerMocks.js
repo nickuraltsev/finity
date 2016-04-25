@@ -11,11 +11,11 @@ const handlerNames = [
 export default class HandlerMocks {
   constructor() {
     this.calledHandlers = [];
-    handlerNames.forEach(name =>
+    handlerNames.forEach(name => {
       this[name] = jasmine.createSpy(name).and.callFake((...args) =>
         this.calledHandlers.push([name, ...args])
-      )
-    );
+      );
+    });
   }
 
   reset() {

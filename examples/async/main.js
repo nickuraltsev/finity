@@ -17,7 +17,7 @@ function cancelAsyncOperation() {
 // Create a new state machine which controls the execution of some asynchronous operation.
 // This state machine will begin in the 'ready' state. When the 'run' event is received, it will
 // transition to the 'running' state and start the async operation.
-stateMachine = StateMachine
+stateMachine = StateMachine // eslint-disable-line prefer-const
   .configure()
     .initialState('ready')
       .on('run').transitionTo('running')

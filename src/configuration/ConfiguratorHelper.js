@@ -7,12 +7,12 @@ export function delegateToAncestor(type, ancestorType) {
       ancestorType.prototype[name] instanceof Function &&
       ancestorType.prototype[name] !== ancestorType.prototype.constructor
     )
-    .forEach(name =>
+    .forEach(name => {
       type.prototype[name] = function (...args) {
         const method = ancestorType.prototype[name];
         return method.apply(this.getAncestor(ancestorType), args);
-      }
-    );
+      };
+    });
 }
 
 const getConfig = configurator => configurator.getConfig();
