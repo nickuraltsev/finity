@@ -1,4 +1,4 @@
-import StateMachine from '../../lib';
+import StateMachine from '../../src';
 
 const maxAttempts = 3;
 let attemptCount = 0;
