@@ -24,10 +24,14 @@ export default class StateMachine {
   }
 
   start() {
-    if (!this.isBusy) {
+    if (!this.isStarted()) {
       this.execute(() => this.enterState(this.config.initialState, this.createContext()));
     }
     return this;
+  }
+
+  isStarted() {
+    return this.currentState !== null;
   }
 
   getCurrentState() {
@@ -35,6 +39,9 @@ export default class StateMachine {
   }
 
   canHandle(event, eventPayload) {
+    if (!this.isStarted()) {
+      return false;
+    }
     const context = this.createContext(event, eventPayload);
     return !!this.getTransitionForEvent(context);
   }
@@ -49,6 +56,9 @@ export default class StateMachine {
   }
 
   execute(operation) {
+    if (this.isBusy) {
+      throw new Error('Operation cannot be executed because another operation is in progress.');
+    }
     this.isBusy = true;
     try {
       operation();
