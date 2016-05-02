@@ -32,4 +32,18 @@ describe('time trigger', () => {
 
     expect(stateMachine.getCurrentState()).toBe('state3');
   });
+
+  it('does not execute transition after state is exited', () => {
+    const stateMachine = StateMachine
+      .configure()
+      .initialState('state1')
+        .on('event1').transitionTo('state2')
+        .onTimeout(100).transitionTo('state3')
+      .start()
+      .handle('event1');
+
+    jasmine.clock().tick(100);
+
+    expect(stateMachine.getCurrentState()).toBe('state2');
+  });
 });
