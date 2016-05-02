@@ -8,6 +8,7 @@ A finite state machine library for Node.js and the browser with a friendly confi
 
 ## Features
 
+- Event- and time-based triggers
 - Entry, exit, and transition actions
 - Guard conditions
 - Self-transitions and internal transitions
@@ -83,7 +84,11 @@ A state machine must have one and only one initial state.
 
 #### Transitions
 
-To add a transition to a state, first call the `on` method, passing in the name of the event that triggers the transition. Then call the `transitionTo` method, passing in the name of the target state.
+A transition from one state to another can be triggered by an event or time trigger.
+
+##### Event triggers
+
+To add a transition that is triggered by an event, first call the `on` method, passing in the name of the event. Then call the `transitionTo` method, passing in the name of the target state.
 
 ```javascript
 StateMachine
@@ -93,6 +98,30 @@ StateMachine
       .on('eventB').transitionTo('state3')
     .state('state2')
       .on('eventC').transitionTo('state1')
+```
+
+##### Time triggers
+
+To add a transition that is triggered when a specific amount of time has passed since entering the state,
+use the `onTimeout` method which accepts the amount of time in milliseconds as a parameter.
+
+```javascript
+// Perform a transition from state1 to state2 when 100 milliseconds have passed
+// since entering state1
+StateMachine
+  .configure()
+    .initialState('state1')
+      .onTimeout(100).transitionTo('state2')
+```
+
+```javascript
+// If eventA occurs before 100 milliseconds have passed, perform a transition to
+// state2; otherwise, perform a transition to state3
+StateMachine
+  .configure()
+    .initialState('state1')
+      .on('eventA').transitionTo('state2')
+      .onTimeout(100).transitionTo('state3')
 ```
 
 #### Entry and exit actions
@@ -229,7 +258,9 @@ Called when the state machine is executing a transition.
 StateMachine
   .configure()
     .global()
-      .onTransition((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
+      .onTransition((fromState, toState) =>
+        console.log(`Transitioning from ${fromState} to ${toState}`)
+      )
 ```
 
 ##### `onStateChange`
@@ -248,7 +279,9 @@ In contrast to `onTransition` hooks, `onStateChange` hooks are not called when e
 StateMachine
   .configure()
     .global()
-      .onStateChange((oldState, newState) => console.log(`Changing state from ${oldState} to ${newState}`))
+      .onStateChange((oldState, newState) =>
+        console.log(`Changing state from ${oldState} to ${newState}`)
+      )
 ```
 
 You can register multiple global hooks of the same type. They will be called in the same order as they have been registered.
@@ -277,7 +310,9 @@ StateMachine
   .configure()
     .initialState('state1')
     .global()
-      .onUnhandledEvent((event, state) => console.log(`Unhandled event ${event} in state ${state}.`))
+      .onUnhandledEvent((event, state) =>
+        console.log(`Unhandled event ${event} in state ${state}.`)
+      )
 ```
 
 You can register multiple `onUnhandledEvent` hooks. They will be executed in the same order as they have been registered.
