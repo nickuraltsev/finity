@@ -147,7 +147,7 @@ describe('async trigger', () => {
       expect(asyncAction).toHaveBeenCalledWith('state2', {
         stateMachine,
         event: 'event1',
-        eventPayload: 'payload1'
+        eventPayload: 'payload1',
       });
     });
   });
