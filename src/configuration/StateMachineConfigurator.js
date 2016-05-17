@@ -1,14 +1,12 @@
 import BaseConfigurator from './BaseConfigurator';
 import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
-import TriggerConfigurator from './TriggerConfigurator';
-import TransitionConfigurator from './TransitionConfigurator';
-import StateMachine from '../StateMachine';
-import { delegateToAncestor, mapToConfig } from './ConfiguratorHelper';
+import StateMachine from '../core/StateMachine';
+import { mapToConfig } from './ConfiguratorHelper';
 import deepCopy from '../utils/deepCopy';
 import merge from '../utils/merge';
 
-class StateMachineConfigurator extends BaseConfigurator {
+export default class StateMachineConfigurator extends BaseConfigurator {
   constructor() {
     super();
     this.config = {
@@ -45,10 +43,3 @@ class StateMachineConfigurator extends BaseConfigurator {
     return StateMachine.start(config);
   }
 }
-
-delegateToAncestor(GlobalConfigurator, StateMachineConfigurator);
-delegateToAncestor(StateConfigurator, StateMachineConfigurator);
-delegateToAncestor(TransitionConfigurator, StateConfigurator);
-delegateToAncestor(TransitionConfigurator, TriggerConfigurator);
-
-export default StateMachineConfigurator;

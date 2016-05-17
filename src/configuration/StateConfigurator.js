@@ -1,6 +1,7 @@
 import BaseConfigurator from './BaseConfigurator';
 import TriggerConfigurator from './TriggerConfigurator';
 import TimerConfigurator from './TimerConfigurator';
+import AsyncActionConfigurator from './AsyncActionConfigurator';
 import { mapToConfig } from './ConfiguratorHelper';
 import deepCopy from '../utils/deepCopy';
 
@@ -13,6 +14,7 @@ export default class StateConfigurator extends BaseConfigurator {
     };
     this.eventConfigurators = Object.create(null);
     this.timerConfigurators = [];
+    this.asyncActionConfigurators = [];
   }
 
   onEnter(action) {
@@ -38,10 +40,17 @@ export default class StateConfigurator extends BaseConfigurator {
     return timerConfigurator;
   }
 
+  do(asyncAction) {
+    const asyncActionConfigurator = new AsyncActionConfigurator(this, asyncAction);
+    this.asyncActionConfigurators.push(asyncActionConfigurator);
+    return asyncActionConfigurator;
+  }
+
   getConfig() {
     const config = deepCopy(this.config);
     config.events = mapToConfig(this.eventConfigurators);
     config.timers = mapToConfig(this.timerConfigurators);
+    config.asyncActions = mapToConfig(this.asyncActionConfigurators);
     return config;
   }
 }

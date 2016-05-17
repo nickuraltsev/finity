@@ -1,4 +1,5 @@
-import executeHandlers from './utils/executeHandlers';
+import AsyncActionSubscription from './AsyncActionSubscription';
+import executeHandlers from '../utils/executeHandlers';
 
 export default class StateMachine {
   constructor(config) {
@@ -16,6 +17,7 @@ export default class StateMachine {
     this.isBusy = false;
     this.eventQueue = [];
     this.timerIDs = null;
+    this.asyncActionSubscriptions = null;
     this.handleTimeout = ::this.handleTimeout;
   }
 
@@ -152,11 +154,15 @@ export default class StateMachine {
 
     this.currentState = state;
 
+    this.startAsyncActions();
+
     this.startTimers();
   }
 
   exitState(context) {
     this.stopTimers();
+
+    this.cancelAsyncActionSubscriptions();
 
     executeHandlers(this.config.stateExitHooks, this.currentState, context);
 
@@ -164,6 +170,52 @@ export default class StateMachine {
     if (stateConfig) {
       executeHandlers(stateConfig.exitActions, this.currentState, context);
     }
+  }
+
+  startAsyncActions() {
+    const stateConfig = this.config.states[this.currentState];
+    if (stateConfig) {
+      stateConfig.asyncActions.forEach(
+        asyncActionConfig => this.startAsyncAction(asyncActionConfig)
+      );
+    }
+  }
+
+  startAsyncAction(asyncActionConfig) {
+    const action = asyncActionConfig.action;
+
+    const subscription = new AsyncActionSubscription(
+      result => this.handleAsyncActionSuccess(asyncActionConfig.onSuccess, result),
+      error => this.handleAsyncActionFailure(asyncActionConfig.onFailure, error)
+    );
+
+    // TODO: consider passing context to action()
+    action().then(
+      subscription.onSuccess,
+      subscription.onFailure
+    );
+
+    this.asyncActionSubscriptions = this.asyncActionSubscriptions || [];
+    this.asyncActionSubscriptions.push(subscription);
+  }
+
+  cancelAsyncActionSubscriptions() {
+    if (this.asyncActionSubscriptions) {
+      this.asyncActionSubscriptions.forEach(subscription => subscription.cancel());
+      this.asyncActionSubscriptions = null;
+    }
+  }
+
+  handleAsyncActionSuccess(triggerConfig, result) {
+    const context = this.createContext();
+    context.result = result;
+    this.executeTrigger(triggerConfig, context);
+  }
+
+  handleAsyncActionFailure(triggerConfig, error) {
+    const context = this.createContext();
+    context.error = error;
+    this.executeTrigger(triggerConfig, context);
   }
 
   startTimers() {
@@ -185,9 +237,12 @@ export default class StateMachine {
   }
 
   handleTimeout(timerConfig) {
+    this.executeTrigger(timerConfig, this.createContext());
+  }
+
+  executeTrigger(triggerConfig, context) {
     this.execute(() => {
-      const context = this.createContext();
-      const transitionConfig = this.selectTransition(timerConfig.transitions, context);
+      const transitionConfig = this.selectTransition(triggerConfig.transitions, context);
       if (transitionConfig) {
         this.executeTransition(transitionConfig, context);
       }

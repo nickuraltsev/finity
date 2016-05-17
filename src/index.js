@@ -1,5 +1,5 @@
-import StateMachineConfigurator from './configuration/StateMachineConfigurator';
-import StateMachine from './StateMachine';
+import { StateMachineConfigurator } from './configuration';
+import StateMachine from './core/StateMachine';
 
 export default {
   configure: () => new StateMachineConfigurator(),
