@@ -83,6 +83,17 @@ describe('async trigger', () => {
         done();
       }, 0);
     });
+
+    it('receives correct parameters', () => {
+      const asyncAction = jasmine.createSpy('asyncAction').and.returnValue(Promise.resolve());
+      const stateMachine = StateMachine
+        .configure()
+        .initialState('state1')
+          .do(asyncAction).onSuccess().transitionTo('state2')
+        .start();
+
+      expect(asyncAction).toHaveBeenCalledWith('state1', { stateMachine });
+    });
   });
 
   describe('when defined for non-initial state', () => {
@@ -120,6 +131,24 @@ describe('async trigger', () => {
         expect(stateMachine.getCurrentState()).toBe('state4');
         done();
       }, 0);
+    });
+
+    it('receives correct parameters', () => {
+      const asyncAction = jasmine.createSpy('asyncAction').and.returnValue(Promise.resolve());
+      const stateMachine = StateMachine
+        .configure()
+        .initialState('state1')
+          .on('event1').transitionTo('state2')
+        .state('state2')
+          .do(asyncAction).onSuccess().transitionTo('state3')
+        .start()
+        .handle('event1', 'payload1');
+
+      expect(asyncAction).toHaveBeenCalledWith('state2', {
+        stateMachine,
+        event: 'event1',
+        eventPayload: 'payload1'
+      });
     });
   });
 });

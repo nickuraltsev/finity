@@ -154,7 +154,7 @@ export default class StateMachine {
 
     this.currentState = state;
 
-    this.startAsyncActions();
+    this.startAsyncActions(context);
 
     this.startTimers();
   }
@@ -172,16 +172,16 @@ export default class StateMachine {
     }
   }
 
-  startAsyncActions() {
+  startAsyncActions(context) {
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
       stateConfig.asyncActions.forEach(
-        asyncActionConfig => this.startAsyncAction(asyncActionConfig)
+        asyncActionConfig => this.startAsyncAction(asyncActionConfig, context)
       );
     }
   }
 
-  startAsyncAction(asyncActionConfig) {
+  startAsyncAction(asyncActionConfig, context) {
     const action = asyncActionConfig.action;
 
     const subscription = new AsyncActionSubscription(
@@ -189,8 +189,7 @@ export default class StateMachine {
       error => this.handleAsyncActionFailure(asyncActionConfig.onFailure, error)
     );
 
-    // TODO: consider passing context to action()
-    action().then(
+    action(this.currentState, context).then(
       subscription.onSuccess,
       subscription.onFailure
     );
