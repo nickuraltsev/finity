@@ -3,7 +3,7 @@ import StateMachine from '../../src';
 const maxAttempts = 3;
 let attemptCount = 0;
 let timer;
-let stateMachine;
+let stateMachine; // eslint-disable-line prefer-const
 
 function startAsyncOperation() {
   // Simulate an async operation
