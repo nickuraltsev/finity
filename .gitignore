@@ -1,5 +1,5 @@
-lib
-node_modules
-coverage
+lib/
+node_modules/
+coverage/
 npm-debug.log
 .DS_Store

@@ -1,8 +1,8 @@
-src
-spec
-examples
-coverage
-node_modules
+src/
+spec/
+examples/
+coverage/
+node_modules/
 npm-debug.log
 ROADMAP.md
 **/.*
