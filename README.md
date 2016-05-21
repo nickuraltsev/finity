@@ -8,7 +8,7 @@ A finite state machine library for Node.js and the browser with a friendly confi
 
 ## Features
 
-- Event- and time-based triggers
+- Event-based, time-based, and Promise-based triggers
 - Entry, exit, and transition actions
 - Guard conditions
 - Self-transitions and internal transitions
@@ -84,9 +84,9 @@ A state machine must have one and only one initial state.
 
 #### Transitions
 
-A transition from one state to another can be triggered by an event or time trigger.
+A transition from one state to another can be triggered by an event-based, time-based, or Promise-based trigger.
 
-##### Event triggers
+##### Event-based triggers
 
 To add a transition that is triggered by an event, first call the `on` method, passing in the name of the event. Then call the `transitionTo` method, passing in the name of the target state.
 
@@ -100,7 +100,7 @@ StateMachine
       .on('eventC').transitionTo('state1')
 ```
 
-##### Time triggers
+##### Time-based triggers
 
 To add a transition that is triggered when a specific amount of time has passed since entering the state,
 use the `onTimeout` method which accepts the amount of time in milliseconds as a parameter.
@@ -112,9 +112,7 @@ StateMachine
   .configure()
     .initialState('state1')
       .onTimeout(100).transitionTo('state2')
-```
 
-```javascript
 // If eventA occurs before 100 milliseconds have passed, perform a transition to
 // state2; otherwise, perform a transition to state3
 StateMachine
@@ -122,6 +120,37 @@ StateMachine
     .initialState('state1')
       .on('eventA').transitionTo('state2')
       .onTimeout(100).transitionTo('state3')
+```
+
+##### Promise-based triggers
+
+A transition can be triggered by the completion of an async operation.
+
+```javascript
+StateMachine
+  .configure()
+    .initialState('state1')
+      .do(asyncOperation) // asyncOperation is a function that returns a Promise
+        .onSuccess().transitionTo('state2')
+        .onFailure().transitionTo('state3')
+```
+
+The result or error can be accessed through the [context](#context) object.
+
+```javascript
+StateMachine
+  .configure()
+    .initialState('state1')
+      // httpClient.get makes an HTTP request and returns a Promise that will
+      // resolve with the response if the request succeeds or reject if the
+      // request fails
+      .do(() => httpClient.get('https://api.github.com/users/nickuraltsev'))
+        .onSuccess().transitionTo('state2').withAction((from, to, context) => {
+          console.log('Response: ', context.result);
+        })
+        .onFailure().transitionTo('state3').withAction((from, to, context) => {
+          console.log('Error: ', context.error);
+        })
 ```
 
 #### Entry and exit actions
@@ -357,7 +386,7 @@ const stateMachine = StateMachine
 stateMachine.handle('eventA');
 ```
 
-You can send an event with a payload by passing the payload as the optional second parameter. The event payload can be accessed in entry, exit, and transition actions, guard conditions, and global hooks through a [context](#context) object passed to them.
+You can send an event with a payload by passing the payload as the optional second parameter. The event payload can be accessed in entry, exit, and transition actions, guard conditions, async operations, and global hooks through the [context](#context) object.
 
 ```javascript
 const stateMachine = StateMachine
@@ -404,13 +433,15 @@ console.log(stateMachine.getCurrentState()); // state1
 
 ### Context
 
-A context object is passed to all entry, exit, and transition actions, guard conditions, and global hooks.
+A context object is passed to all entry, exit, and transition actions, guard conditions, async operations, and global hooks.
 
 #### Properties
 
 - `stateMachine` - The current state machine instance.
 - `event` - The name of the event. This property is only present when the state machine is handling an event.
 - `eventPayload` - The payload of the event. This property is only present when the state machine is handling an event that has a payload.
+- `result` - The async operation result.
+- `error` - The async operation error.
 
 ## License
 
