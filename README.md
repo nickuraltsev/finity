@@ -131,12 +131,12 @@ StateMachine
       // resolve with the response if the request succeeds or reject if the
       // request fails
       .do(() => httpClient.get('https://api.github.com/users/nickuraltsev'))
-        .onSuccess().transitionTo('state2').withAction((from, to, context) => {
-          console.log('Response: ', context.result);
-        })
-        .onFailure().transitionTo('state3').withAction((from, to, context) => {
-          console.log('Error: ', context.error);
-        })
+        .onSuccess().transitionTo('state2').withAction((from, to, context) =>
+          console.log('Response: ', context.result)
+        )
+        .onFailure().transitionTo('state3').withAction((from, to, context) =>
+          console.log('Error: ', context.error)
+        )
 ```
 
 #### Entry and exit actions
