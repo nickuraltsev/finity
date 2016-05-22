@@ -37,10 +37,12 @@
       "eslint-plugin-jsx-a11y": "^1.2.0",
       "babel-eslint": "^6.0.4",
       "isparta": "^4.0.0",
-      "coveralls": "^2.11.9"
+      "coveralls": "^2.11.9",
+      "rimraf": "^2.5.2"
     },
     "scripts": {
-      "build": "babel src --out-dir lib",
+      "clean": "rimraf lib",
+      "build": "npm run clean && babel src --out-dir lib",
       "test": "babel-node spec/support/jasmineRunner",
       "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly spec/support/jasmineRunner.js",
       "lint": "eslint src spec examples"
