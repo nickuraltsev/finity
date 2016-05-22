@@ -29,38 +29,24 @@ npm install fluent-state-machine
 ```javascript
 import StateMachine from 'fluent-state-machine';
 
-const maxAttempts = 3;
-let attemptCount = 0;
+function executeTaskAsync(taskSpec) {
+  // Return a Promise that will resolve once the task is complete.
+}
 
-// Create a state machine which controls the execution of some asynchronous task.
-// If the task fails, it will be retried until it succeeds or the number of attempts reaches the limit.
-// If a cancellation request is received, the task will be stopped.
-const stateMachine = StateMachine
+const worker = StateMachine
   .configure()
     .initialState('ready')
-      .on('run').transitionTo('running')
-      .on('cancel').transitionTo('cancelled')
+      .on('task').transitionTo('running')
     .state('running')
-      .onEnter(() => {
-        attemptCount++;
-        // ... start the task
-      })
-      .on('success').transitionTo('succeeded')
-      .on('cancel').transitionTo('cancelled').withAction(() => {
-        // ... stop the task
-      })
-      .on('error')
-        .selfTransition().withCondition(() => attemptCount < maxAttempts)
-        .transitionTo('failed')
-    .global()
-      .onStateEnter(state => console.log(`Entering state ${state}.`))
+      .do((state, context) => executeTaskAsync(context.eventPayload))
+        .onSuccess().transitionTo('succeeded')
+        .onFailure().transitionTo('failed')
+      .onTimeout(1000)
+        .transitionTo('timed_out')
   .start();
 
-// Send the 'run' event to the state machine to start execution
-stateMachine.handle('run');
-
-// Send the 'cancel' event to the state machine to cancel execution
-stateMachine.handle('cancel');
+const taskSpec = { /* ... */ };
+worker.handle('task', taskSpec);
 ```
 
 ## Usage
