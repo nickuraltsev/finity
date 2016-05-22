@@ -4,35 +4,10 @@
 
 - [x] Event payloads
 - [x] Time triggers
-- [ ] Promise triggers
+- [x] Promise triggers
 - [ ] Hierarchical state machines
 - [ ] Ignoring events
 - [ ] Persistence support
-
-### Promise triggers
-
-```javascript
-.state('state1')
-  .do(() => { ... })
-    .onSuccess().transitionTo('state2')
-    .onFailure().transitionTo('state3')
-
-.state('state1')
-  .do(() => { ... })
-    .onComplete().transitionTo('state2')
-
-.state('state1')
-  .do(() => { ... })
-    .onComplete()
-      .transitionTo('state2')
-        .withAction((fromState, toState, context) => {
-          if (context.error) {
-            console.log('Error:', context.error);
-          } else {
-            console.log('Result:', context.result);
-          }
-        })
-```
 
 ### Hierarchical state machines
 
