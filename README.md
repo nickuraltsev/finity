@@ -429,6 +429,11 @@ A context object is passed to all entry, exit, and transition actions, guard con
 - `result` - The async operation result.
 - `error` - The async operation error.
 
+
+## Contributing
+
+Bug reports and pull requests are welcome!
+
 ## License
 
 [MIT](https://github.com/nickuraltsev/finity/blob/master/LICENSE)
