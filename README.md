@@ -1,8 +1,8 @@
-# fluent-state-machine
+# finity
 
-[![npm version](https://badge.fury.io/js/fluent-state-machine.svg)](https://badge.fury.io/js/fluent-state-machine)
-[![Build Status](https://api.travis-ci.org/nickuraltsev/fluent-state-machine.svg?branch=master)](https://travis-ci.org/nickuraltsev/fluent-state-machine)
-[![Coverage Status](https://coveralls.io/repos/nickuraltsev/fluent-state-machine/badge.svg?branch=master&service=github)](https://coveralls.io/github/nickuraltsev/fluent-state-machine?branch=master)
+[![npm version](https://badge.fury.io/js/finity.svg)](https://badge.fury.io/js/finity)
+[![Build Status](https://api.travis-ci.org/nickuraltsev/finity.svg?branch=master)](https://travis-ci.org/nickuraltsev/finity)
+[![Coverage Status](https://coveralls.io/repos/nickuraltsev/finity/badge.svg?branch=master&service=github)](https://coveralls.io/github/nickuraltsev/finity?branch=master)
 
 A finite state machine library for Node.js and the browser with a friendly configuration DSL.
 
@@ -21,13 +21,13 @@ A finite state machine library for Node.js and the browser with a friendly confi
 Install using [npm](https://www.npmjs.org/):
 
 ```
-npm install fluent-state-machine
+npm install finity
 ```
 
 ## Example
 
 ```javascript
-import StateMachine from 'fluent-state-machine';
+import StateMachine from 'finity';
 
 function executeTaskAsync(taskSpec) {
   // Return a Promise that will resolve once the task is complete.
@@ -431,4 +431,4 @@ A context object is passed to all entry, exit, and transition actions, guard con
 
 ## License
 
-[MIT](https://github.com/nickuraltsev/fluent-state-machine/blob/master/LICENSE)
+[MIT](https://github.com/nickuraltsev/finity/blob/master/LICENSE)
