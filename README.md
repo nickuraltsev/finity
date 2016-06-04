@@ -18,10 +18,16 @@ A finite state machine library for Node.js and the browser with a friendly confi
 
 ## Installation
 
-Install using [npm](https://www.npmjs.org/):
+Using [npm](https://www.npmjs.org/):
 
 ```
 npm install finity
+```
+
+The UMD build is available on [npmcdn](https://npmcdn.com/):
+
+```html
+<script src="https://npmcdn.com/finity/umd/Finity.min.js"></script>
 ```
 
 ## Example
