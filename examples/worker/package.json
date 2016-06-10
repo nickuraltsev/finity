@@ -1,0 +1,26 @@
+{
+  "name": "finity-worker-typescript-example",
+  "version": "0.0.0",
+  "description": "Finity worker example",
+  "author": {
+    "name": "Nick Uraltsev",
+    "email": "nick.uraltsev@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nickuraltsev/finity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nickuraltsev/finity/issues"
+  },
+  "dependencies": {
+    "finity": "^0.4.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.9.0"
+  },
+  "scripts": {
+    "start": "babel-node index.js"
+  }
+}
