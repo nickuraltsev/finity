@@ -9,5 +9,6 @@ script:
   - npm run lint
   - npm run build
   - npm run coverage
+  - npm run test:typings
 after_success:
   - cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js
