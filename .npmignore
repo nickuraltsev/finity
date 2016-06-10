@@ -1,9 +1,12 @@
 src/
-spec/
+test/
 examples/
 coverage/
 node_modules/
+typings/
 npm-debug.log
 ROADMAP.md
 **/.*
 webpack.config.babel.js
+tsconfig.json
+typings.json

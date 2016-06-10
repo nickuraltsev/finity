@@ -1,6 +1,7 @@
 lib/
 umd/
 node_modules/
+typings/
 coverage/
 npm-debug.log
 .DS_Store

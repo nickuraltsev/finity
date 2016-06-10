@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "noEmit": true
+  },
+  "files": [
+    "index.d.ts",
+    "typings/index.d.ts",
+    "test/typescript/configuration.ts",
+    "test/typescript/stateMachine.ts"
+  ]
+}
