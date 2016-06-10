@@ -33,13 +33,13 @@ The UMD build is available on [npmcdn](https://npmcdn.com/):
 ## Example
 
 ```javascript
-import StateMachine from 'finity';
+import Finity from 'finity';
 
 function executeTaskAsync(taskSpec) {
   // Return a Promise that will resolve once the task is complete.
 }
 
-const worker = StateMachine
+const worker = Finity
   .configure()
     .initialState('ready')
       .on('task').transitionTo('running')
@@ -66,7 +66,7 @@ Before you can create and start a state machine, you need to create a state mach
 To define the initial state, use the `initialState` method. To add other states, use the `state` method. Both methods take the state name as a parameter.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
     .state('state2')
@@ -83,7 +83,7 @@ A transition from one state to another can be triggered by an event-based, time-
 To add a transition that is triggered by an event, first call the `on` method, passing in the name of the event. Then call the `transitionTo` method, passing in the name of the target state.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2')
@@ -100,14 +100,14 @@ use the `onTimeout` method which accepts the amount of time in milliseconds as a
 ```javascript
 // Perform a transition from state1 to state2 when 100 milliseconds have passed
 // since entering state1
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .onTimeout(100).transitionTo('state2')
 
 // If eventA occurs before 100 milliseconds have passed, perform a transition to
 // state2; otherwise, perform a transition to state3
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2')
@@ -119,7 +119,7 @@ StateMachine
 A transition can be triggered by the completion of an async operation.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .do(asyncOperation) // asyncOperation is a function that returns a Promise
@@ -130,7 +130,7 @@ StateMachine
 The result or error can be accessed through the [context](#context) object.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       // httpClient.get makes an HTTP request and returns a Promise that will
@@ -157,7 +157,7 @@ Entry and exit actions receive two parameters:
 Use the `onEnter` method to add an entry action to a state, and the `onExit` method to add an exit action.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .onEnter(state => console.log(`Entering state ${state}`))
@@ -180,7 +180,7 @@ A transition action receives three parameters:
 To add an action to a transition, use the `withAction` method.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .on('eventA')
@@ -199,7 +199,7 @@ A guard condition function receives the current [context](#context) as a paramet
 To set a guard condition for a transition, use the `withCondition` method.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .on('eventA')
@@ -218,7 +218,7 @@ When a self-transition is executed, the state is exited and re-entered, and thus
 To add a self-transition to a state, use the `selfTransition` method. To add an internal transition, call the `internalTransition` method.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
       .on('eventA').selfTransition()
@@ -243,7 +243,7 @@ Called when the state machine is about to enter a state.
 - `context` - The current [context](#context).
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .global()
       .onStateEnter(state => console.log(`Entering state ${state}`))
@@ -259,7 +259,7 @@ Called when the state machine is about to exit a state.
 - `context` - The current [context](#context).
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .global()
       .onStateExit(state => console.log(`Exiting state ${state}`))
@@ -276,7 +276,7 @@ Called when the state machine is executing a transition.
 - `context` - The current [context](#context).
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .global()
       .onTransition((fromState, toState) =>
@@ -297,7 +297,7 @@ In contrast to `onTransition` hooks, `onStateChange` hooks are not called when e
 - `context` - The current [context](#context).
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .global()
       .onStateChange((oldState, newState) =>
@@ -308,7 +308,7 @@ StateMachine
 You can register multiple global hooks of the same type. They will be called in the same order as they have been registered.
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
     .global()
@@ -327,7 +327,7 @@ An `onUnhandledEvent` hook receives three parameters:
 - `context` - The current [context](#context).
 
 ```javascript
-StateMachine
+Finity
   .configure()
     .initialState('state1')
     .global()
@@ -343,7 +343,7 @@ You can register multiple `onUnhandledEvent` hooks. They will be executed in the
 Once you have created a configuration, you can create and start a state machine. There are two ways to do this. The easiest way is to call the `start` method of the configuration API.
 
 ```javascript
-const stateMachine = StateMachine
+const stateMachine = Finity
   .configure()
     .initialState('state1')
   .start();
@@ -352,13 +352,13 @@ const stateMachine = StateMachine
 If you don't want to start a state machine right away or you need to create multiple instances of a state machine with the same configuration, you can call the `getConfig` method to get the configuration first. Then you can create and start new state machine instances by passing the configuration to the `StateMachine.start` method.
 
 ```javascript
-const config = StateMachine
+const config = Finity
   .configure()
     .initialState('state1')
   .getConfig();
 
-const firstInstance = StateMachine.start(config);
-const secondInstance = StateMachine.start(config);
+const firstInstance = Finity.start(config);
+const secondInstance = Finity.start(config);
 ```
 
 When a state machine is started, it enters the initial state and all the `onStateEnter` hooks and the initial state's entry actions are executed. However, the `onTransition` and `onStateChange` hooks are not executed.
@@ -368,7 +368,7 @@ When a state machine is started, it enters the initial state and all the `onStat
 To send an event to a state machine, pass the event name as the first parameter to the `handle` method of the state machine object.
 
 ```javascript
-const stateMachine = StateMachine
+const stateMachine = Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2')
@@ -381,7 +381,7 @@ stateMachine.handle('eventA');
 You can send an event with a payload by passing the payload as the optional second parameter. The event payload can be accessed in entry, exit, and transition actions, guard conditions, async operations, and global hooks through the [context](#context) object.
 
 ```javascript
-const stateMachine = StateMachine
+const stateMachine = Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2').withAction((fromState, toState, context) => {
@@ -400,7 +400,7 @@ If a state machine cannot handle the specified event, it will throw an error or 
 You can check if a state machine, in its current state, can handle a given event via the `canHandle` method. Like the `handle` method, it takes an event name and an optional payload. If the specified event can be handled, the `canHandle` method returns `true`; otherwise, it returns `false`.
 
 ```javascript
-const stateMachine = StateMachine
+const stateMachine = Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2')
@@ -415,7 +415,7 @@ console.log(stateMachine.canHandle('eventB')); // false
 To get the current state of a state machine, call the `getCurrentState` method on the state machine object.
 
 ```javascript
-const stateMachine = StateMachine
+const stateMachine = Finity
   .configure()
     .initialState('state1')
   .start();

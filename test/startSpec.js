@@ -1,9 +1,9 @@
-import StateMachine from '../src';
+import Finity from '../src';
 import HandlerMocks from './support/HandlerMocks';
 
 describe('start', () => {
   it('sets the state to the initial state', () => {
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
       .start();
@@ -14,7 +14,7 @@ describe('start', () => {
   it('executes onStateEnter hooks and state entry actions with the correct parameters', () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .global().onStateEnter(mocks.stateEnterHook)
       .initialState('state1').onEnter(mocks.stateEntryAction)
@@ -31,7 +31,7 @@ describe('start', () => {
   it('does not execute onTransition and onStateChange hooks', () => {
     const mocks = new HandlerMocks();
 
-    StateMachine
+    Finity
       .configure()
       .global()
         .onTransition(mocks.transitionHook)
@@ -46,7 +46,7 @@ describe('start', () => {
   it('completes the execution of initial state\'s entry actions before processing events', () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
         .onEnter((state, context) => {
@@ -76,22 +76,22 @@ describe('start', () => {
   });
 
   it('throws if configuration is not specified', () => {
-    expect(() => StateMachine.start())
+    expect(() => Finity.start())
       .toThrowError('Configuration must be specified.');
   });
 
   it('throws if configuration is null', () => {
-    expect(() => StateMachine.start(null))
+    expect(() => Finity.start(null))
       .toThrowError('Configuration must be specified.');
   });
 
   it('throws if configuration is not an object', () => {
-    expect(() => StateMachine.start(100))
+    expect(() => Finity.start(100))
       .toThrowError('Configuration must be an object.');
   });
 
   it('throws if initial state is not defined', () => {
-    expect(() => StateMachine.configure().start())
+    expect(() => Finity.configure().start())
       .toThrowError('Initial state must be specified.');
   });
 });

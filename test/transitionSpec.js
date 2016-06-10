@@ -1,11 +1,11 @@
-import StateMachine from '../src';
+import Finity from '../src';
 import HandlerMocks from './support/HandlerMocks';
 
 describe('transition', () => {
   it('executes actions and global hooks in the correct order with the correct parameters', () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .global()
         .onStateEnter(mocks.stateEnterHook)

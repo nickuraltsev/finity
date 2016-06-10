@@ -1,9 +1,9 @@
-import StateMachine from '../src';
+import Finity from '../src';
 
 describe('promise trigger', () => {
   describe('when defined for initial state', () => {
     it('executes transition on success', (done) => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(() => Promise.resolve())
@@ -18,7 +18,7 @@ describe('promise trigger', () => {
     });
 
     it('executes transition on failure', (done) => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(() => Promise.reject(new Error()))
@@ -33,7 +33,7 @@ describe('promise trigger', () => {
     });
 
     it('does not execute transition when state has been exited', (done) => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(() => Promise.resolve()).onSuccess().transitionTo('state2')
@@ -49,7 +49,7 @@ describe('promise trigger', () => {
 
     it('puts result into context', (done) => {
       const action = jasmine.createSpy('action');
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(
@@ -68,7 +68,7 @@ describe('promise trigger', () => {
     it('puts error into context', (done) => {
       const action = jasmine.createSpy('action');
       const error = new Error('Boom!');
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(
@@ -86,7 +86,7 @@ describe('promise trigger', () => {
 
     it('receives correct parameters', () => {
       const asyncOperation = jasmine.createSpy('asyncOperation').and.returnValue(Promise.resolve());
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .do(asyncOperation).onSuccess().transitionTo('state2')
@@ -98,7 +98,7 @@ describe('promise trigger', () => {
 
   describe('when defined for non-initial state', () => {
     it('executes transition on success', (done) => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .on('event1').transitionTo('state2')
@@ -116,7 +116,7 @@ describe('promise trigger', () => {
     });
 
     it('executes transition on failure', (done) => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .on('event1').transitionTo('state2')
@@ -135,7 +135,7 @@ describe('promise trigger', () => {
 
     it('receives correct parameters', () => {
       const asyncOperation = jasmine.createSpy('asyncOperation').and.returnValue(Promise.resolve());
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .on('event1').transitionTo('state2')

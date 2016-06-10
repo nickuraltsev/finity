@@ -1,11 +1,11 @@
-import StateMachine from '../../src';
+import Finity from '../../src';
 
 function executeTaskAsync(taskSpec) {
   // Simulate an async operation
   return new Promise(resolve => setTimeout(resolve, taskSpec.delay));
 }
 
-const worker = StateMachine
+const worker = Finity
   .configure()
     .initialState('ready')
       .on('task').transitionTo('running')

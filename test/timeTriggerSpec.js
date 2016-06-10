@@ -1,4 +1,4 @@
-import StateMachine from '../src';
+import Finity from '../src';
 
 describe('time trigger', () => {
   beforeEach(() => jasmine.clock().install());
@@ -6,7 +6,7 @@ describe('time trigger', () => {
   afterEach(() => jasmine.clock().uninstall());
 
   it('executes transition from initial state', () => {
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1').onTimeout(100).transitionTo('state2')
       .start();
@@ -19,7 +19,7 @@ describe('time trigger', () => {
   });
 
   it('executes transition from a non-initial state', () => {
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1').on('event1').transitionTo('state2')
       .state('state2').onTimeout(100).transitionTo('state3')
@@ -34,7 +34,7 @@ describe('time trigger', () => {
   });
 
   it('does not execute transition after state is exited', () => {
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
         .on('event1').transitionTo('state2')

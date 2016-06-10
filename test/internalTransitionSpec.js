@@ -1,4 +1,4 @@
-import StateMachine from '../src';
+import Finity from '../src';
 import HandlerMocks from './support/HandlerMocks';
 
 describe('internal transition', () => {
@@ -7,7 +7,7 @@ describe('internal transition', () => {
     () => {
       const mocks = new HandlerMocks();
 
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .global().onTransition(mocks.transitionHook)
         .initialState('state1')
@@ -32,7 +32,7 @@ describe('internal transition', () => {
     () => {
       const mocks = new HandlerMocks();
 
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .global()
           .onStateEnter(mocks.stateEnterHook)

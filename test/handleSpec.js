@@ -1,11 +1,11 @@
-import StateMachine from '../src';
+import Finity from '../src';
 import HandlerMocks from './support/HandlerMocks';
 
 describe('handle', () => {
   describe('if there is no transition for the current state and event', () => {
     it('throws', () => {
       expect(() =>
-        StateMachine
+        Finity
           .configure()
           .initialState('state1')
           .start()
@@ -16,7 +16,7 @@ describe('handle', () => {
 
   describe('if there is a single transition for the current state and event', () => {
     it('executes the transition if it has no guard condition', () => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1').on('event1').transitionTo('state2')
         .start()
@@ -26,7 +26,7 @@ describe('handle', () => {
     });
 
     it('executes the transition if its guard condition is true', () => {
-      const stateMachine = StateMachine
+      const stateMachine = Finity
         .configure()
         .initialState('state1')
           .on('event1').transitionTo('state2').withCondition(() => true)
@@ -38,7 +38,7 @@ describe('handle', () => {
 
     it('throws if the guard condition of the transition is false', () => {
       expect(() =>
-        StateMachine
+        Finity
           .configure()
           .initialState('state1')
             .on('event1').transitionTo('state2').withCondition(() => false)
@@ -53,7 +53,7 @@ describe('handle', () => {
       'executes a transition if it has no guard condition ' +
       'and the guard condition of each preceding transition is false',
       () => {
-        const stateMachine = StateMachine
+        const stateMachine = Finity
           .configure()
           .initialState('state1')
             .on('event1')
@@ -70,7 +70,7 @@ describe('handle', () => {
       'executes a transition if its guard condition is true ' +
       'and the guard condition of each preceding transition is false',
       () => {
-        const stateMachine = StateMachine
+        const stateMachine = Finity
           .configure()
           .initialState('state1')
             .on('event1')
@@ -87,7 +87,7 @@ describe('handle', () => {
   it('passes a context object to guard conditions', () => {
     const condition = jasmine.createSpy('condition').and.returnValue(true);
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
         .on('event1').transitionTo('state2').withCondition(condition)
@@ -100,7 +100,7 @@ describe('handle', () => {
   it('supports event payloads', () => {
     const condition = jasmine.createSpy('condition').and.returnValue(true);
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
         .on('event1').transitionTo('state2').withCondition(condition)
@@ -117,7 +117,7 @@ describe('handle', () => {
   it('calls onUnhandledEvent hooks', () => {
     const unhandledEventHook = jasmine.createSpy('unhandledEventHook');
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .global().onUnhandledEvent(unhandledEventHook)
       .initialState('state1')
@@ -131,7 +131,7 @@ describe('handle', () => {
   it('completes the processing of the current event before processing the next event', () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = StateMachine
+    const stateMachine = Finity
       .configure()
       .initialState('state1')
         .on('event1')
