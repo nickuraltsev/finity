@@ -24,6 +24,6 @@
   },
   "scripts": {
     "postinstall": "typings install",
-    "build": "tsc"
+    "start": "tsc && node index.js"
   }
 }
