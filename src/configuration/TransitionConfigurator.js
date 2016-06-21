@@ -22,7 +22,7 @@ export default class TransitionConfigurator extends BaseConfigurator {
     return this;
   }
 
-  getConfig() {
+  internalGetConfig() {
     return deepCopy(this.config);
   }
 }

@@ -46,7 +46,7 @@ export default class StateConfigurator extends BaseConfigurator {
     return asyncActionConfigurator;
   }
 
-  getConfig() {
+  internalGetConfig() {
     const config = deepCopy(this.config);
     config.events = mapToConfig(this.eventConfigurators);
     config.timers = mapToConfig(this.timerConfigurators);

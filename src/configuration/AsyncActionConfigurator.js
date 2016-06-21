@@ -20,10 +20,10 @@ export default class AsyncActionConfigurator extends BaseConfigurator {
     return this.failureConfigurator;
   }
 
-  getConfig() {
+  internalGetConfig() {
     const config = deepCopy(this.config);
-    config.onSuccess = this.successConfigurator.getConfig();
-    config.onFailure = this.failureConfigurator.getConfig();
+    config.onSuccess = this.successConfigurator.internalGetConfig();
+    config.onFailure = this.failureConfigurator.internalGetConfig();
     return config;
   }
 }
