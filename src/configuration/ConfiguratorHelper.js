@@ -15,10 +15,10 @@ export function delegateToAncestor(type, ancestorType) {
     });
 }
 
-const getConfig = configurator => configurator.getConfig();
+const internalGetConfig = configurator => configurator.internalGetConfig();
 
 export function mapToConfig(configurators) {
   return Array.isArray(configurators) ?
-    configurators.map(getConfig) :
-    mapValues(configurators, getConfig);
+    configurators.map(internalGetConfig) :
+    mapValues(configurators, internalGetConfig);
 }

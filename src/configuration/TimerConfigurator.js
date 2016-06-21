@@ -9,7 +9,7 @@ export default class TrimerConfigurator extends TriggerConfigurator {
     };
   }
 
-  getConfig() {
-    return merge(super.getConfig(), this.config);
+  internalGetConfig() {
+    return merge(super.internalGetConfig(), this.config);
   }
 }

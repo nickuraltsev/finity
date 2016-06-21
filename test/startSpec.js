@@ -1,7 +1,7 @@
 import Finity from '../src';
 import HandlerMocks from './support/HandlerMocks';
 
-describe('start', () => {
+describe('configurator#start', () => {
   it('sets the state to the initial state', () => {
     const stateMachine = Finity
       .configure()
@@ -75,6 +75,23 @@ describe('start', () => {
     ]);
   });
 
+  it('throws if initial state is not defined', () => {
+    expect(() => Finity.configure().start())
+      .toThrowError('Initial state must be specified.');
+  });
+});
+
+describe('Finity.start', () => {
+  it('sets the state to the initial state', () => {
+    const config = Finity
+      .configure()
+        .initialState('state1')
+      .getConfig();
+
+    const stateMachine = Finity.start(config);
+    expect(stateMachine.getCurrentState()).toBe('state1');
+  });
+
   it('throws if configuration is not specified', () => {
     expect(() => Finity.start())
       .toThrowError('Configuration must be specified.');
@@ -88,10 +105,5 @@ describe('start', () => {
   it('throws if configuration is not an object', () => {
     expect(() => Finity.start(100))
       .toThrowError('Configuration must be an object.');
-  });
-
-  it('throws if initial state is not defined', () => {
-    expect(() => Finity.configure().start())
-      .toThrowError('Initial state must be specified.');
   });
 });

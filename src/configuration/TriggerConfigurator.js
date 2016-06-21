@@ -26,7 +26,7 @@ export default class TriggerConfigurator extends BaseConfigurator {
     return transitionConfigurator;
   }
 
-  getConfig() {
+  internalGetConfig() {
     return {
       transitions: mapToConfig(this.transitionConfigurators),
     };
