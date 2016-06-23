@@ -1,6 +1,6 @@
 {
   "name": "finity",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "A finite state machine library for Node.js and the browser with a friendly configuration DSL",
   "keywords": [
     "state",
