@@ -1,6 +1,6 @@
-import Jasmine from 'jasmine';
-import SpecReporter from 'jasmine-spec-reporter';
-import path from 'path';
+const Jasmine = require('jasmine');
+const SpecReporter = require('jasmine-spec-reporter');
+const path = require('path');
 
 const jasmine = new Jasmine();
 jasmine.loadConfigFile(path.join(__dirname, 'jasmine.json'));

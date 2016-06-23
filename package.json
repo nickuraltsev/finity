@@ -59,7 +59,7 @@
     "build:umd:min": "cross-env NODE_ENV=production webpack -p src/index.js umd/Finity.min.js",
     "build": "npm run clean && npm run build:commonjs && npm run build:umd && npm run build:umd:min",
     "test:typings": "typings install && tsc",
-    "test": "babel-node test/support/jasmineRunner && npm run test:typings",
+    "test": "node test/support/jasmineRunner.js && npm run test:typings",
     "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly test/support/jasmineRunner.js",
     "lint": "eslint src test examples"
   }

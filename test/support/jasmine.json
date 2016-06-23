@@ -4,5 +4,6 @@
     "**/*Spec.js"
   ],
   "helpers": [
+    "../node_modules/babel-register/lib/node.js"
   ]
 }
