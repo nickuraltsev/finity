@@ -249,6 +249,11 @@ export default class StateMachine {
   }
 
   selectTransition(transitions, context) {
-    return transitions.find(t => !t.condition || t.condition(context));
+    for (let i = 0; i < transitions.length; i++) {
+      if (!transitions[i].condition || transitions[i].condition(context)) {
+        return transitions[i];
+      }
+    }
+    return null;
   }
 }
