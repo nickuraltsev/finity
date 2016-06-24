@@ -1,3 +1,4 @@
+import Dispatcher from './Dispatcher';
 import AsyncActionSubscription from './AsyncActionSubscription';
 import executeHandlers from '../utils/executeHandlers';
 
@@ -14,8 +15,7 @@ export default class StateMachine {
     }
     this.config = config;
     this.currentState = null;
-    this.isBusy = false;
-    this.eventQueue = [];
+    this.dispatcher = new Dispatcher(::this.processEvent);
     this.timerIDs = null;
     this.asyncActionSubscriptions = null;
     this.handleTimeout = ::this.handleTimeout;
@@ -27,7 +27,9 @@ export default class StateMachine {
 
   start() {
     if (!this.isStarted()) {
-      this.execute(() => this.enterState(this.config.initialState, this.createContext()));
+      this.dispatcher.execute(
+        () => this.enterState(this.config.initialState, this.createContext())
+      );
     }
     return this;
   }
@@ -44,39 +46,14 @@ export default class StateMachine {
     if (!this.isStarted()) {
       return false;
     }
+
     const context = this.createContext(event, eventPayload);
     return !!this.getTransitionForEvent(context);
   }
 
   handle(event, eventPayload) {
-    if (!this.isBusy) {
-      this.execute(() => this.processEvent(event, eventPayload));
-    } else {
-      this.eventQueue.push({ event, eventPayload });
-    }
+    this.dispatcher.dispatch(event, eventPayload);
     return this;
-  }
-
-  execute(operation) {
-    if (this.isBusy) {
-      throw new Error('Operation cannot be executed because another operation is in progress.');
-    }
-    this.isBusy = true;
-    try {
-      operation();
-
-      // Process all events
-      while (this.eventQueue.length > 0) {
-        const { event, eventPayload } = this.eventQueue.shift();
-        this.processEvent(event, eventPayload);
-      }
-    } finally {
-      // Clean up
-      if (this.eventQueue.length > 0) {
-        this.eventQueue = [];
-      }
-      this.isBusy = false;
-    }
   }
 
   processEvent(event, eventPayload) {
@@ -240,7 +217,7 @@ export default class StateMachine {
   }
 
   executeTrigger(triggerConfig, context) {
-    this.execute(() => {
+    this.dispatcher.execute(() => {
       const transitionConfig = this.selectTransition(triggerConfig.transitions, context);
       if (transitionConfig) {
         this.executeTransition(transitionConfig, context);
