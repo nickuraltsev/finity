@@ -52,7 +52,7 @@ export default class StateConfigurator extends BaseConfigurator {
     return this;
   }
 
-  getConfig() {
+  internalGetConfig() {
     const config = deepCopy(this.config);
     config.events = mapToConfig(this.eventConfigurators);
     config.timers = mapToConfig(this.timerConfigurators);

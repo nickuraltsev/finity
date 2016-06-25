@@ -1,4 +1,4 @@
-import Finity from '../../src';
+import Finity from 'finity';
 
 function executeTaskAsync(taskSpec) {
   // Simulate an async operation

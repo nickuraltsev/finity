@@ -35,7 +35,7 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   getConfig() {
     const config = deepCopy(this.config);
     config.states = mapToConfig(this.stateConfigurators);
-    return merge(config, this.globalConfigurator.getConfig());
+    return merge(config, this.globalConfigurator.internalGetConfig());
   }
 
   start() {
