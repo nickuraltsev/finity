@@ -2,17 +2,16 @@ export default class Dispatcher {
   isBusy = false;
   eventQueue = [];
 
-  constructor(processor) {
-    this.processor = processor;
+  constructor(handler) {
+    this.handler = handler;
   }
 
   dispatch(event, eventPayload) {
     if (!this.isBusy) {
-      this.execute(() => this.processor(event, eventPayload));
+      this.execute(() => this.handler(event, eventPayload));
     } else {
       this.eventQueue.push({ event, eventPayload });
     }
-    return this;
   }
 
   execute(operation) {
@@ -26,7 +25,7 @@ export default class Dispatcher {
       // Process all events
       while (this.eventQueue.length > 0) {
         const { event, eventPayload } = this.eventQueue.shift();
-        this.processor(event, eventPayload);
+        this.handler(event, eventPayload);
       }
     } finally {
       // Clean up

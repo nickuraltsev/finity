@@ -3,7 +3,7 @@ import AsyncActionSubscription from './AsyncActionSubscription';
 import executeHandlers from '../utils/executeHandlers';
 
 export default class StateMachine {
-  constructor(config) {
+  constructor(config, parent) {
     if (config === undefined || config === null) {
       throw new Error('Configuration must be specified.');
     }
@@ -14,28 +14,19 @@ export default class StateMachine {
       throw new Error('Initial state must be specified.');
     }
     this.config = config;
+    this.parent = parent;
     this.currentState = null;
-    this.dispatcher = new Dispatcher(::this.processEvent);
+    this.dispatcher = parent ? parent.dispatcher : new Dispatcher(::this.internalHandle);
+    this.submachines = Object.create(null);
     this.timerIDs = null;
     this.asyncActionSubscriptions = null;
     this.handleTimeout = ::this.handleTimeout;
   }
 
   static start(config) {
-    return new StateMachine(config).start();
-  }
-
-  start() {
-    if (!this.isStarted()) {
-      this.dispatcher.execute(
-        () => this.enterState(this.config.initialState, this.createContext())
-      );
-    }
-    return this;
-  }
-
-  isStarted() {
-    return this.currentState !== null;
+    const stateMachine = new StateMachine(config);
+    stateMachine.dispatcher.execute(() => stateMachine.start());
+    return stateMachine;
   }
 
   getCurrentState() {
@@ -47,6 +38,11 @@ export default class StateMachine {
       return false;
     }
 
+    const submachine = this.submachines[this.currentState];
+    if (submachine && submachine.canHandle(event, eventPayload)) {
+      return true;
+    }
+
     const context = this.createContext(event, eventPayload);
     return !!this.getTransitionForEvent(context);
   }
@@ -56,14 +52,41 @@ export default class StateMachine {
     return this;
   }
 
-  processEvent(event, eventPayload) {
+  isStarted() {
+    return this.currentState !== null;
+  }
+
+  start() {
+    if (!this.isStarted()) {
+      this.enterState(this.config.initialState, this.createContext());
+    }
+  }
+
+  stop() {
+    if (this.isStarted()) {
+      this.exitState(this.createContext());
+      this.currentState = null;
+    }
+  }
+
+  internalHandle(event, eventPayload) {
+    const submachine = this.submachines[this.currentState];
+    if (submachine && submachine.internalHandle(event, eventPayload)) {
+      return true;
+    }
+
     const context = this.createContext(event, eventPayload);
     const transitionConfig = this.getTransitionForEvent(context);
     if (transitionConfig) {
       this.executeTransition(transitionConfig, context);
-    } else {
+      return true;
+    }
+
+    if (!this.parent) {
       this.handleUnhandledEvent(context);
     }
+
+    return false;
   }
 
   createContext(event, eventPayload) {
@@ -104,19 +127,6 @@ export default class StateMachine {
     }
   }
 
-  handleUnhandledEvent(context) {
-    if (this.config.unhandledEventHooks.length > 0) {
-      executeHandlers(
-        this.config.unhandledEventHooks,
-        context.event,
-        this.currentState,
-        context
-      );
-    } else {
-      throw new Error(`Unhandled event '${context.event}' in state '${this.currentState}'.`);
-    }
-  }
-
   enterState(state, context) {
     executeHandlers(this.config.stateEnterHooks, state, context);
 
@@ -132,13 +142,13 @@ export default class StateMachine {
     this.currentState = state;
 
     this.startAsyncActions(context);
-
     this.startTimers();
+    this.startSubmachines();
   }
 
   exitState(context) {
+    this.stopSubmachines();
     this.stopTimers();
-
     this.cancelAsyncActionSubscriptions();
 
     executeHandlers(this.config.stateExitHooks, this.currentState, context);
@@ -216,6 +226,23 @@ export default class StateMachine {
     this.executeTrigger(timerConfig, this.createContext());
   }
 
+  startSubmachines() {
+    const stateConfig = this.config.states[this.currentState];
+    if (stateConfig && stateConfig.submachine) {
+      if (!this.submachines[this.currentState]) {
+        this.submachines[this.currentState] = new StateMachine(stateConfig.submachine, this);
+      }
+      this.submachines[this.currentState].start();
+    }
+  }
+
+  stopSubmachines() {
+    const submachine = this.submachines[this.currentState];
+    if (submachine) {
+      submachine.stop();
+    }
+  }
+
   executeTrigger(triggerConfig, context) {
     this.dispatcher.execute(() => {
       const transitionConfig = this.selectTransition(triggerConfig.transitions, context);
@@ -227,5 +254,18 @@ export default class StateMachine {
 
   selectTransition(transitions, context) {
     return transitions.find(t => !t.condition || t.condition(context));
+  }
+
+  handleUnhandledEvent(context) {
+    if (this.config.unhandledEventHooks.length > 0) {
+      executeHandlers(
+        this.config.unhandledEventHooks,
+        context.event,
+        this.currentState,
+        context
+      );
+    } else {
+      throw new Error(`Unhandled event '${context.event}' in state '${this.currentState}'.`);
+    }
   }
 }

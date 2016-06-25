@@ -11,6 +11,7 @@ export default class StateConfigurator extends BaseConfigurator {
     this.config = {
       entryActions: [],
       exitActions: [],
+      submachine: null,
     };
     this.eventConfigurators = Object.create(null);
     this.timerConfigurators = [];
@@ -44,6 +45,11 @@ export default class StateConfigurator extends BaseConfigurator {
     const asyncActionConfigurator = new AsyncActionConfigurator(this, asyncAction);
     this.asyncActionConfigurators.push(asyncActionConfigurator);
     return asyncActionConfigurator;
+  }
+
+  submachine(submachineConfig) {
+    this.config.submachine = submachineConfig;
+    return this;
   }
 
   getConfig() {
