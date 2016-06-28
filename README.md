@@ -442,6 +442,8 @@ A context object is passed to all entry, exit, and transition actions, guard con
 
 Bug reports and pull requests are welcome!
 
+By participating in this project you agree to abide by the [code of conduct](https://github.com/nickuraltsev/finity/blob/master/CODE_OF_CONDUCT.md).
+
 ## License
 
 [MIT](https://github.com/nickuraltsev/finity/blob/master/LICENSE)
