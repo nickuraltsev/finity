@@ -351,7 +351,7 @@ const stateMachine = Finity
   .start();
 ```
 
-If you don't want to start a state machine right away or you need to create multiple instances of a state machine with the same configuration, you can call the `getConfig` method to get the configuration first. Then you can create and start new state machine instances by passing the configuration to the `StateMachine.start` method.
+If you don't want to start a state machine right away or you need to create multiple instances of a state machine with the same configuration, you can call the `getConfig` method to get the configuration first. Then you can create and start new state machine instances by passing the configuration to the `Finity.start` method.
 
 ```javascript
 const config = Finity
@@ -441,6 +441,8 @@ A context object is passed to all entry, exit, and transition actions, guard con
 ## Contributing
 
 Bug reports and pull requests are welcome!
+
+By participating in this project you agree to abide by the [code of conduct](https://github.com/nickuraltsev/finity/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
