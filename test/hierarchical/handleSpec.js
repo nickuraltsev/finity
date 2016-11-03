@@ -1,27 +1,36 @@
 import Finity from '../../src';
 
 describe('handle', () => {
+  let stateMachine;
+
+  beforeEach(() => {
+    const grandchildConfig = Finity
+      .configure()
+        .initialState('state111')
+        .on('event3').transitionTo('state112')
+      .getConfig();
+
+    const childConfig = Finity
+      .configure()
+        .initialState('state11')
+          .submachine(grandchildConfig)
+          .on('event2').transitionTo('state12')
+      .getConfig();
+
+    stateMachine = Finity
+      .configure()
+        .initialState('state1')
+          .submachine(childConfig)
+          .on('event1').transitionTo('state2')
+      .start();
+  });
+
   describe(
     'when the child state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the child state machine', () => {
-        const submachineConfig = Finity
-          .configure()
-            .initialState('state21')
-              .on('event2').transitionTo('state22')
-          .getConfig();
-
-        const stateMachine = Finity
-          .configure()
-            .initialState('state1')
-              .on('event1').transitionTo('state2')
-            .state('state2')
-              .submachine(submachineConfig)
-          .start()
-          .handle('event1')
-          .handle('event2');
-
-        expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state22']);
+        stateMachine.handle('event2');
+        expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state12']);
       });
     }
   );
@@ -30,34 +39,8 @@ describe('handle', () => {
     'when the grandchild state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the grandchild state machine', () => {
-        const submachineConfig1 = Finity
-          .configure()
-            .initialState('state221')
-              .on('event3').transitionTo('state222')
-          .getConfig();
-
-        const submachineConfig2 = Finity
-          .configure()
-            .initialState('state21')
-              .on('event2').transitionTo('state22')
-            .state('state22')
-              .submachine(submachineConfig1)
-          .getConfig();
-
-        const stateMachine = Finity
-          .configure()
-            .initialState('state1')
-              .on('event1').transitionTo('state2')
-            .state('state2')
-              .submachine(submachineConfig2)
-              .on('event3').transitionTo('state3')
-          .start();
-
-        for (let i = 1; i <= 3; i++) {
-          stateMachine.handle(`event${i}`);
-        }
-
-        expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state22', 'state222']);
+        stateMachine.handle('event3');
+        expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state11', 'state112']);
       });
     }
   );
@@ -66,26 +49,8 @@ describe('handle', () => {
     'when the current state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the current state machine', () => {
-        const submachineConfig = Finity
-          .configure()
-            .initialState('state21')
-              .on('event2').transitionTo('state22')
-          .getConfig();
-
-        const stateMachine = Finity
-          .configure()
-            .initialState('state1')
-              .on('event1').transitionTo('state2')
-            .state('state2')
-              .submachine(submachineConfig)
-              .on('event3').transitionTo('state3')
-          .start();
-
-        for (let i = 1; i <= 3; i++) {
-          stateMachine.handle(`event${i}`);
-        }
-
-        expect(stateMachine.getStateHierarchy()).toEqual(['state3']);
+        stateMachine.handle('event1');
+        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
       });
     }
   );
@@ -94,63 +59,60 @@ describe('handle', () => {
     'when the parent state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the parent state machine', () => {
-        const submachineConfig = Finity
-          .configure()
-            .initialState('state21')
-              .on('event2').transitionTo('state22')
-            .state('state22')
-              .onEnter((state, context) => context.stateMachine.handle('event3'))
-          .getConfig();
+        stateMachine
+          .getSubmachine('state1')
+          .handle('event1');
+        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
+      });
+    }
+  );
 
-        const stateMachine = Finity
-          .configure()
-            .initialState('state1')
-              .on('event1').transitionTo('state2')
-            .state('state2')
-              .submachine(submachineConfig)
-              .on('event3').transitionTo('state3')
-          .start()
-          .handle('event1')
-          .handle('event2');
-
-        expect(stateMachine.getStateHierarchy()).toEqual(['state3']);
+  describe(
+    'when the grandparent state machine is the innermost state machine that can handle the event',
+    () => {
+      it('passes the event to the grandparent state machine', () => {
+        stateMachine
+          .getSubmachine('state1')
+          .getSubmachine('state11')
+          .handle('event1');
+        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
       });
     }
   );
 
   describe('when multiple state machines in the hierarchy can handle the event', () => {
     it('passes the event to the innermost one', () => {
-      const submachineConfig1 = Finity
+      const grandchildConfig = Finity
         .configure()
-          .initialState('state221')
-            .on('event3').transitionTo('state222')
-          .state('state222')
-            .on('event4').transitionTo('state223')
+          .initialState('state111')
+            .on('event1').transitionTo('state112')
         .getConfig();
 
-      const submachineConfig2 = Finity
+      const childConfig = Finity
         .configure()
-          .initialState('state21')
-            .on('event2').transitionTo('state22')
-          .state('state22')
-            .submachine(submachineConfig1)
-            .on('event4').transitionTo('state23')
+          .initialState('state11')
+            .submachine(grandchildConfig)
+            .on('event1').transitionTo('state12')
         .getConfig();
 
       const stateMachine = Finity
         .configure()
           .initialState('state1')
+            .submachine(childConfig)
             .on('event1').transitionTo('state2')
-          .state('state2')
-            .submachine(submachineConfig2)
-            .on('event4').transitionTo('state3')
         .start();
 
-      for (let i = 1; i <= 4; i++) {
-        stateMachine.handle(`event${i}`);
-      }
+      stateMachine.handle('event1');
 
-      expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state22', 'state223']);
+      expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state11', 'state112']);
+    });
+  });
+
+  describe('when no state machine in the hierarchy can handle the event', () => {
+    it('throws', () => {
+      const child = stateMachine.getSubmachine('state1');
+      expect(() => child.handle('non-handleable'))
+        .toThrowError('Unhandled event \'non-handleable\' in state \'state1\'.');
     });
   });
 });
