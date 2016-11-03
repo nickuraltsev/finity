@@ -33,6 +33,16 @@ export default class StateMachine {
     return this.currentState;
   }
 
+  getStateHierarchy() {
+    const result = [];
+    let stateMachine = this;
+    while (stateMachine && stateMachine.isStarted()) {
+      result.push(stateMachine.currentState);
+      stateMachine = stateMachine.submachines[stateMachine.currentState];
+    }
+    return result;
+  }
+
   canHandle(event, eventPayload) {
     if (!this.isStarted()) {
       return false;
@@ -67,6 +77,10 @@ export default class StateMachine {
       this.exitState(this.createContext());
       this.currentState = null;
     }
+  }
+
+  getSubmachine(state) {
+    return this.submachines[state];
   }
 
   internalHandle(event, eventPayload) {
@@ -272,5 +286,9 @@ export default class StateMachine {
     } else {
       throw new Error(`Unhandled event '${context.event}' in state '${this.currentState}'.`);
     }
+  }
+
+  toString() {
+    return `StateMachine({ currentState: ${this.currentState} })`;
   }
 }
