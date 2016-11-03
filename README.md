@@ -24,10 +24,10 @@ Using [npm](https://www.npmjs.org/):
 npm install --save finity
 ```
 
-The UMD build is available on [npmcdn](https://npmcdn.com/):
+The UMD build is available on [unpkg](https://unpkg.com/):
 
 ```html
-<script src="https://npmcdn.com/finity/umd/Finity.min.js"></script>
+<script src="https://unpkg.com/finity/umd/Finity.min.js"></script>
 ```
 
 Finity includes TypeScript typings.
