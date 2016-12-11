@@ -25,11 +25,11 @@ describe('canHandle', () => {
       .start();
   });
 
-  it('returns true if the event can be handled by a descendant state machine', () => {
+  it('returns true when the event can be handled by a descendant state machine', () => {
     expect(stateMachine.canHandle('event3')).toBe(true);
   });
 
-  it('returns true if the event can be handled by an ancestor state machine', () => {
+  it('returns true when the event can be handled by an ancestor state machine', () => {
     expect(stateMachine
       .getSubmachine('state1')
       .getSubmachine('state11')
@@ -37,7 +37,7 @@ describe('canHandle', () => {
     ).toBe(true);
   });
 
-  it('returns false if the event cannot be handled by any state machine in the hierarchy', () => {
+  it('returns false when the event cannot be handled by any state machine in the hierarchy', () => {
     expect(stateMachine
       .getSubmachine('state1')
       .canHandle('non-handleable')
