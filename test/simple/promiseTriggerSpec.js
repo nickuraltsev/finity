@@ -1,4 +1,4 @@
-import Finity from '../src';
+import Finity from '../../src';
 
 describe('promise trigger', () => {
   describe('when defined for the initial state', () => {

@@ -1,5 +1,5 @@
-import Finity from '../src';
-import HandlerMocks from './support/HandlerMocks';
+import Finity from '../../src';
+import HandlerMocks from '../support/HandlerMocks';
 
 describe('internal transition', () => {
   it(

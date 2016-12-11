@@ -1,4 +1,4 @@
-import Finity from '../src';
+import Finity from '../../src';
 
 describe('canHandle', () => {
   describe('when there is no transition for the current state and event', () => {

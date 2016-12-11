@@ -1,4 +1,4 @@
-import Finity from '../src';
+import Finity from '../../src';
 
 describe('time trigger', () => {
   beforeEach(() => jasmine.clock().install());

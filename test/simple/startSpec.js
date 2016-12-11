@@ -1,5 +1,5 @@
-import Finity from '../src';
-import HandlerMocks from './support/HandlerMocks';
+import Finity from '../../src';
+import HandlerMocks from '../support/HandlerMocks';
 
 describe('Configurator#start', () => {
   it('sets the state to the initial state', () => {

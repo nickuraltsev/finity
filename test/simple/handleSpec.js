@@ -1,5 +1,5 @@
-import Finity from '../src';
-import HandlerMocks from './support/HandlerMocks';
+import Finity from '../../src';
+import HandlerMocks from '../support/HandlerMocks';
 
 describe('handle', () => {
   describe('when there is no transition for the current state and event', () => {

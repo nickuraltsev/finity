@@ -1,5 +1,5 @@
-import Finity from '../src';
-import HandlerMocks from './support/HandlerMocks';
+import Finity from '../../src';
+import HandlerMocks from '../support/HandlerMocks';
 
 describe('transition', () => {
   it('executes actions and global hooks in the correct order with the correct parameters', () => {
