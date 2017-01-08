@@ -8,6 +8,7 @@ export function delegateToAncestor(type, ancestorType) {
       ancestorType.prototype[name] !== ancestorType.prototype.constructor
     )
     .forEach(name => {
+      // eslint-disable-next-line func-names
       type.prototype[name] = function (...args) {
         const method = ancestorType.prototype[name];
         return method.apply(this.getAncestor(ancestorType), args);

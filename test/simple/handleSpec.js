@@ -56,7 +56,7 @@ describe('handle', () => {
 
   describe('when there are multiple transitions for the current state and event', () => {
     describe('when the first allowed transition has no guard condition', () => {
-      it("executes the transition", () => {
+      it('executes the transition', () => {
         const stateMachine = Finity
           .configure()
           .initialState('state1')

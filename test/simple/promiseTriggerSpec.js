@@ -2,7 +2,7 @@ import Finity from '../../src';
 
 describe('promise trigger', () => {
   describe('when defined for the initial state', () => {
-    it('executes the correct transition on success', (done) => {
+    it('executes the correct transition on success', done => {
       const stateMachine = Finity
         .configure()
         .initialState('state1')
@@ -17,7 +17,7 @@ describe('promise trigger', () => {
       }, 0);
     });
 
-    it('executes the correct transition on failure', (done) => {
+    it('executes the correct transition on failure', done => {
       const stateMachine = Finity
         .configure()
         .initialState('state1')
@@ -32,7 +32,7 @@ describe('promise trigger', () => {
       }, 0);
     });
 
-    it('executes no transition when the state has been exited', (done) => {
+    it('executes no transition when the state has been exited', done => {
       const stateMachine = Finity
         .configure()
         .initialState('state1')
@@ -47,7 +47,7 @@ describe('promise trigger', () => {
       }, 0);
     });
 
-    it('adds the result to the context object on success', (done) => {
+    it('adds the result to the context object on success', done => {
       const action = jasmine.createSpy('action');
       const stateMachine = Finity
         .configure()
@@ -65,7 +65,7 @@ describe('promise trigger', () => {
       }, 0);
     });
 
-    it('adds the error to the context object on failure', (done) => {
+    it('adds the error to the context object on failure', done => {
       const action = jasmine.createSpy('action');
       const error = new Error('Boom!');
       const stateMachine = Finity
@@ -97,7 +97,7 @@ describe('promise trigger', () => {
   });
 
   describe('when defined for a non-initial state', () => {
-    it('executes the correct transition on success', (done) => {
+    it('executes the correct transition on success', done => {
       const stateMachine = Finity
         .configure()
         .initialState('state1')
@@ -115,7 +115,7 @@ describe('promise trigger', () => {
       }, 0);
     });
 
-    it('executes the correct transition on failure', (done) => {
+    it('executes the correct transition on failure', done => {
       const stateMachine = Finity
         .configure()
         .initialState('state1')

@@ -54,15 +54,15 @@ export default class StateMachine {
 
   handleUnhandledEvent(event, eventPayload) {
     if (this.config.unhandledEventHooks.length > 0) {
-       invokeEach(
-         this.config.unhandledEventHooks,
-         event,
-         this.currentState,
-         this.createContextWithEvent(event, eventPayload)
-       );
-     } else {
-       throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
-     }
+      invokeEach(
+        this.config.unhandledEventHooks,
+        event,
+        this.currentState,
+        this.createContextWithEvent(event, eventPayload)
+      );
+    } else {
+      throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
+    }
   }
 
   isStarted() {
@@ -181,7 +181,7 @@ export default class StateMachine {
       this.timerIDs = stateConfig.timers.map(timerConfig => setTimeout(
         this.handleTimeout,
         timerConfig.timeout,
-        timerConfig,
+        timerConfig
       ));
     }
   }
@@ -229,7 +229,7 @@ export default class StateMachine {
     return context;
   }
 
-  getFirstAllowedTransition(transitions, context) {
+  static getFirstAllowedTransition(transitions, context) {
     for (let i = 0; i < transitions.length; i++) {
       if (!transitions[i].condition || transitions[i].condition(context)) {
         return transitions[i];
@@ -245,12 +245,16 @@ export default class StateMachine {
     }
 
     const eventConfig = stateConfig.events[context.event];
-    return eventConfig ? this.getFirstAllowedTransition(eventConfig.transitions, context) : null;
+    return eventConfig ?
+      StateMachine.getFirstAllowedTransition(eventConfig.transitions, context) :
+      null;
   }
 
   executeTrigger(triggerConfig, context) {
     this.taskScheduler.execute(() => {
-      const transitionConfig = this.getFirstAllowedTransition(triggerConfig.transitions, context);
+      const transitionConfig = StateMachine.getFirstAllowedTransition(
+        triggerConfig.transitions, context
+      );
       if (transitionConfig) {
         this.executeTransition(transitionConfig, context);
       }

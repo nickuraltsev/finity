@@ -95,16 +95,16 @@ describe('handle', () => {
             .on('event1').transitionTo('state12')
         .getConfig();
 
-      const stateMachine = Finity
-        .configure()
-          .initialState('state1')
-            .submachine(childConfig)
-            .on('event1').transitionTo('state2')
-        .start();
-
-      stateMachine.handle('event1');
-
-      expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state11', 'state112']);
+      expect(
+        Finity
+          .configure()
+            .initialState('state1')
+              .submachine(childConfig)
+              .on('event1').transitionTo('state2')
+          .start()
+          .handle('event1')
+          .getStateHierarchy()
+      ).toEqual(['state1', 'state11', 'state112']);
     });
   });
 

@@ -1,7 +1,7 @@
 import Finity from '../../src';
 
-const handleStateEnter = (state) => console.log(`Entering state '${state}'`);
-const handleStateExit = (state) => console.log(`Exiting state '${state}'`);
+const handleStateEnter = state => console.log(`Entering state '${state}'`);
+const handleStateExit = state => console.log(`Exiting state '${state}'`);
 
 const submachineConfig = Finity
   .configure()
