@@ -31,15 +31,15 @@ describe('canHandle', () => {
 
   it('returns true when the event can be handled by an ancestor state machine', () => {
     expect(stateMachine
-      .getSubmachine('state1')
-      .getSubmachine('state11')
+      .getSubmachine()
+      .getSubmachine()
       .canHandle('event1')
     ).toBe(true);
   });
 
   it('returns false when the event cannot be handled by any state machine in the hierarchy', () => {
     expect(stateMachine
-      .getSubmachine('state1')
+      .getSubmachine()
       .canHandle('non-handleable')
     ).toBe(false);
   });

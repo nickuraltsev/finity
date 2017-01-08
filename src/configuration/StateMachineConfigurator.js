@@ -1,7 +1,7 @@
 import BaseConfigurator from './BaseConfigurator';
 import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
-import StateMachine from '../core/StateMachine';
+import HierarchicalStateMachine from '../core/HierarchicalStateMachine';
 import { mapToConfig } from './ConfiguratorHelper';
 import deepCopy from '../utils/deepCopy';
 import merge from '../utils/merge';
@@ -40,6 +40,6 @@ export default class StateMachineConfigurator extends BaseConfigurator {
 
   start() {
     const config = this.getConfig();
-    return StateMachine.start(config);
+    return HierarchicalStateMachine.start(config);
   }
 }

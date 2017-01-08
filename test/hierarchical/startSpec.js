@@ -1,5 +1,6 @@
 import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
+import stateMachineMatcher from '../support/stateMachineMatcher';
 
 describe('start', () => {
   describe('when the initial state is a submachine state', () => {
@@ -51,7 +52,7 @@ describe('start', () => {
 
       expect(mocks.calledHandlers).toEqual([
         ['stateEntryAction', 'state1', { stateMachine }],
-        ['stateEntryAction', 'state11', { stateMachine: stateMachine.getSubmachine('state1') }],
+        ['stateEntryAction', 'state11', { stateMachine: stateMachineMatcher() }],
         ['transitionHook', 'state1', 'state2', { stateMachine, event: 'event1' }],
         ['transitionHook', 'state2', 'state3', { stateMachine, event: 'event2' }],
       ]);

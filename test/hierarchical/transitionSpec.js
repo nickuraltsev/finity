@@ -1,5 +1,6 @@
 import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
+import stateMachineMatcher from '../support/stateMachineMatcher';
 
 describe('transition', () => {
   describe('when the target state is a submachine state', () => {
@@ -67,7 +68,7 @@ describe('transition', () => {
       expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state21']);
 
       const context1 = {
-        stateMachine: stateMachine.getSubmachine('state1'),
+        stateMachine: stateMachineMatcher(),
       };
 
       const context2 = {
@@ -76,7 +77,7 @@ describe('transition', () => {
       };
 
       const context3 = {
-        stateMachine: stateMachine.getSubmachine('state2'),
+        stateMachine: stateMachineMatcher(),
       };
 
       expect(mocks.calledHandlers).toEqual([

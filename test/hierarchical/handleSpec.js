@@ -60,7 +60,7 @@ describe('handle', () => {
     () => {
       it('passes the event to the parent state machine', () => {
         stateMachine
-          .getSubmachine('state1')
+          .getSubmachine()
           .handle('event1');
         expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
       });
@@ -72,8 +72,8 @@ describe('handle', () => {
     () => {
       it('passes the event to the grandparent state machine', () => {
         stateMachine
-          .getSubmachine('state1')
-          .getSubmachine('state11')
+          .getSubmachine()
+          .getSubmachine()
           .handle('event1');
         expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
       });
@@ -110,9 +110,9 @@ describe('handle', () => {
 
   describe('when no state machine in the hierarchy can handle the event', () => {
     it('throws', () => {
-      const child = stateMachine.getSubmachine('state1');
+      const child = stateMachine.getSubmachine();
       expect(() => child.handle('non-handleable'))
-        .toThrowError('Unhandled event \'non-handleable\' in state \'state1\'.');
+        .toThrowError('Unhandled event \'non-handleable\' in state \'state11\'.');
     });
   });
 });
