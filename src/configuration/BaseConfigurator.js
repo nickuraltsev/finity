@@ -16,6 +16,9 @@ export default class BaseConfigurator {
 
   buildConfig() {
     const mapper = value => {
+      if (!value) {
+        return value;
+      }
       if (value instanceof BaseConfigurator) {
         return value.buildConfig();
       }
