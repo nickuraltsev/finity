@@ -1,5 +1,4 @@
 import BaseConfigurator from './BaseConfigurator';
-import deepCopy from '../utils/deepCopy';
 
 export default class GlobalConfigurator extends BaseConfigurator {
   constructor(parent) {
@@ -36,9 +35,5 @@ export default class GlobalConfigurator extends BaseConfigurator {
   onUnhandledEvent(hook) {
     this.config.unhandledEventHooks.push(hook);
     return this;
-  }
-
-  internalGetConfig() {
-    return deepCopy(this.config);
   }
 }

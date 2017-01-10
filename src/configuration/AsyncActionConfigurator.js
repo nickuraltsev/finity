@@ -1,29 +1,21 @@
 import BaseConfigurator from './BaseConfigurator';
 import TriggerConfigurator from './TriggerConfigurator';
-import deepCopy from '../utils/deepCopy';
 
 export default class AsyncActionConfigurator extends BaseConfigurator {
   constructor(parent, action) {
     super(parent);
     this.config = {
       action,
+      successTrigger: new TriggerConfigurator(this),
+      failureTrigger: new TriggerConfigurator(this),
     };
-    this.successConfigurator = new TriggerConfigurator(this);
-    this.failureConfigurator = new TriggerConfigurator(this);
   }
 
   onSuccess() {
-    return this.successConfigurator;
+    return this.config.successTrigger;
   }
 
   onFailure() {
-    return this.failureConfigurator;
-  }
-
-  internalGetConfig() {
-    const config = deepCopy(this.config);
-    config.successTrigger = this.successConfigurator.internalGetConfig();
-    config.failureTrigger = this.failureConfigurator.internalGetConfig();
-    return config;
+    return this.config.failureTrigger;
   }
 }

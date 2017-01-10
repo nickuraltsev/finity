@@ -2,22 +2,19 @@ import BaseConfigurator from './BaseConfigurator';
 import GlobalConfigurator from './GlobalConfigurator';
 import StateConfigurator from './StateConfigurator';
 import HierarchicalStateMachine from '../core/HierarchicalStateMachine';
-import { mapToConfig } from './ConfiguratorHelper';
-import deepCopy from '../utils/deepCopy';
-import merge from '../utils/merge';
 
 export default class StateMachineConfigurator extends BaseConfigurator {
   constructor() {
     super();
     this.config = {
+      global: new GlobalConfigurator(this),
       initialState: null,
+      states: Object.create(null),
     };
-    this.globalConfigurator = new GlobalConfigurator(this);
-    this.stateConfigurators = Object.create(null);
   }
 
   global() {
-    return this.globalConfigurator;
+    return this.config.global;
   }
 
   initialState(state) {
@@ -26,16 +23,14 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   }
 
   state(state) {
-    if (!this.stateConfigurators[state]) {
-      this.stateConfigurators[state] = new StateConfigurator(this);
+    if (!this.config.states[state]) {
+      this.config.states[state] = new StateConfigurator(this);
     }
-    return this.stateConfigurators[state];
+    return this.config.states[state];
   }
 
   getConfig() {
-    const config = deepCopy(this.config);
-    config.states = mapToConfig(this.stateConfigurators);
-    return merge(config, this.globalConfigurator.internalGetConfig());
+    return this.buildConfig();
   }
 
   start() {

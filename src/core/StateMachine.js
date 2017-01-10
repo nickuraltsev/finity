@@ -53,9 +53,9 @@ export default class StateMachine {
   }
 
   handleUnhandledEvent(event, eventPayload) {
-    if (this.config.unhandledEventHooks.length > 0) {
+    if (this.config.global.unhandledEventHooks.length > 0) {
       invokeEach(
-        this.config.unhandledEventHooks,
+        this.config.global.unhandledEventHooks,
         event,
         this.currentState,
         this.createContextWithEvent(event, eventPayload)
@@ -95,7 +95,7 @@ export default class StateMachine {
       transitionConfig.targetState :
       this.currentState;
 
-    invokeEach(this.config.transitionHooks, this.currentState, nextState, context);
+    invokeEach(this.config.global.transitionHooks, this.currentState, nextState, context);
     invokeEach(transitionConfig.actions, this.currentState, nextState, context);
 
     if (!transitionConfig.isInternal) {
@@ -104,7 +104,7 @@ export default class StateMachine {
   }
 
   enterState(state, context) {
-    invokeEach(this.config.stateEnterHooks, state, context);
+    invokeEach(this.config.global.stateEnterHooks, state, context);
 
     const stateConfig = this.config.states[state];
     if (stateConfig) {
@@ -112,7 +112,7 @@ export default class StateMachine {
     }
 
     if (this.currentState !== null && this.currentState !== state) {
-      invokeEach(this.config.stateChangeHooks, this.currentState, state, context);
+      invokeEach(this.config.global.stateChangeHooks, this.currentState, state, context);
     }
 
     try {
@@ -133,7 +133,7 @@ export default class StateMachine {
     this.stopTimers();
     this.cancelAsyncActions();
 
-    invokeEach(this.config.stateExitHooks, this.currentState, context);
+    invokeEach(this.config.global.stateExitHooks, this.currentState, context);
 
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {

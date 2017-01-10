@@ -1,11 +1,12 @@
 import BaseConfigurator from './BaseConfigurator';
 import TransitionConfigurator from './TransitionConfigurator';
-import { mapToConfig } from './ConfiguratorHelper';
 
 export default class TriggerConfigurator extends BaseConfigurator {
   constructor(parent) {
     super(parent);
-    this.transitionConfigurators = [];
+    this.config = {
+      transitions: [],
+    };
   }
 
   transitionTo(targetState) {
@@ -22,13 +23,7 @@ export default class TriggerConfigurator extends BaseConfigurator {
 
   transition(targetState, isInternal) {
     const transitionConfigurator = new TransitionConfigurator(this, targetState, isInternal);
-    this.transitionConfigurators.push(transitionConfigurator);
+    this.config.transitions.push(transitionConfigurator);
     return transitionConfigurator;
-  }
-
-  internalGetConfig() {
-    return {
-      transitions: mapToConfig(this.transitionConfigurators),
-    };
   }
 }
