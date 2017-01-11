@@ -45,6 +45,7 @@ export interface StateConfigurator<S, E> extends BaseConfigurator<S, E>, StateMa
   on(event: E): TriggerConfigurator<S, E>;
   onTimeout(timeout: number): TimerConfigurator<S, E>;
   do(asyncOperation: AsyncOperation<S, E>): AsyncConfigurator<S, E>;
+  submachine<S2>(submachineConfig: Configuration<S2, E>): StateConfigurator<S, E>;
 }
 
 export interface TriggerConfigurator<S, E> extends BaseConfigurator<S, E> {
