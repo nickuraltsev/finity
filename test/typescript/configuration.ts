@@ -1,5 +1,4 @@
 import Finity, { Configuration, Context, StateMachine } from '../../';
-import { Promise } from 'es6-promise';
 
 enum State { S1, S2, S3, S4, S5, S6 }
 enum Substate { S5A, S5B }

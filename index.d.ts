@@ -31,13 +31,7 @@ export interface GlobalConfigurator<S, E> extends BaseConfigurator<S, E>, StateM
 
 export type StateAction<S, E> = (state: S, context: Context<S, E>) => void;
 
-export interface Thenable<V> {
-  then<R>(onFulfilled?: (value: V) => R | Thenable<R>, onRejected?: (reason: any) => R | Thenable<R>): Thenable<R>;
-  then<R>(onFulfilled?: (value: V) => R | Thenable<R>, onRejected?: (reason: any) => void): Thenable<R>;
-  catch<R>(onRejected?: (reason: any) => R | Thenable<R>): Thenable<R>;
-}
-
-export type AsyncOperation<S, E> = (state: S, context: Context<S, E>) => Thenable<any>;
+export type AsyncOperation<S, E> = (state: S, context: Context<S, E>) => Promise<any>;
 
 export interface StateConfigurator<S, E> extends BaseConfigurator<S, E>, StateMachineConfigurator<S, E> {
   onEnter(action: StateAction<S, E>): StateConfigurator<S, E>;

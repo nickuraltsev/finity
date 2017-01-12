@@ -15,15 +15,12 @@
     "url": "https://github.com/nickuraltsev/finity/issues"
   },
   "dependencies": {
-    "finity": "^0.4.3",
-    "es6-promise": "^3.2.1"
+    "finity": "^0.4.5"
   },
   "devDependencies": {
-    "typings": "^1.0.4",
-    "typescript": "^1.8.10"
+    "typescript": "^2.1.4"
   },
   "scripts": {
-    "postinstall": "typings install",
     "start": "tsc && node index.js"
   }
 }

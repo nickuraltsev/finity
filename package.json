@@ -28,7 +28,7 @@
     "index.d.ts"
   ],
   "main": "lib/index.js",
-  "typings": "index.d.ts",
+  "types": "index.d.ts",
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-core": "^6.21.0",
@@ -49,7 +49,6 @@
     "rimraf": "^2.5.4",
     "webpack": "^1.14.0",
     "cross-env": "^3.1.4",
-    "typings": "^2.1.0",
     "typescript": "^2.1.4"
   },
   "scripts": {
@@ -58,7 +57,7 @@
     "build:umd": "cross-env NODE_ENV=development webpack src/index.js umd/Finity.js",
     "build:umd:min": "cross-env NODE_ENV=production webpack -p src/index.js umd/Finity.min.js",
     "build": "npm run clean && npm run build:commonjs && npm run build:umd && npm run build:umd:min",
-    "test:typings": "typings install && tsc",
+    "test:typings": "tsc",
     "test": "node test/support/jasmineRunner.js && npm run test:typings",
     "coverage": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly test/support/jasmineRunner.js",
     "lint": "eslint src test examples"

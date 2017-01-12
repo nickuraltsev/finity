@@ -1,5 +1,4 @@
 import Finity from 'finity';
-import { Promise } from 'es6-promise';
 
 enum State {
   Ready,

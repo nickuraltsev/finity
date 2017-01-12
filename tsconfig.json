@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2015",
     "noImplicitAny": true,
-    "module": "commonjs",
+    "module": "ES2015",
+    "moduleResolution": "node",
     "noEmit": true
   },
   "files": [
     "index.d.ts",
-    "typings/index.d.ts",
     "test/typescript/configuration.ts",
     "test/typescript/stateMachine.ts"
   ]
