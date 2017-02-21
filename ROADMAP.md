@@ -9,25 +9,6 @@
 - [ ] Ignoring events
 - [ ] Persistence support
 
-### Hierarchical state machines
-
-```javascript
-const submachineConfig = Finity
-  .configure()
-    .initialState('substate2A')
-      .on('event2').transitionTo('substate2B')
-  .getConfig();
-
-const stateMachine = Finity
-  .configure()
-    .initialState('state1')
-      .on('event1').transitionTo('state2')
-    .state('state2')
-      .on('event3').transitionTo('state3')
-      .submachine(submachineConfig)
-  .start();
-```
-
 ### Ignoring events
 
 ```javascript
