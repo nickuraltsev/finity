@@ -49,13 +49,14 @@
     "rimraf": "^2.5.4",
     "webpack": "^1.14.0",
     "cross-env": "^3.1.4",
-    "typescript": "^2.1.4"
+    "typescript": "^2.1.4",
+    "shx": "^0.2.2"
   },
   "scripts": {
     "clean": "rimraf lib && rimraf umd",
-    "build:commonjs": "babel src --out-dir lib",
-    "build:umd": "cross-env NODE_ENV=development webpack src/index.js umd/Finity.js",
-    "build:umd:min": "cross-env NODE_ENV=production webpack -p src/index.js umd/Finity.min.js",
+    "build:commonjs": "babel src --out-dir lib && shx cp src/index.commonjs.js lib/index.js",
+    "build:umd": "cross-env NODE_ENV=development webpack src/index.commonjs.js umd/Finity.js",
+    "build:umd:min": "cross-env NODE_ENV=production webpack -p src/index.commonjs.js umd/Finity.min.js",
     "build": "npm run clean && npm run build:commonjs && npm run build:umd && npm run build:umd:min",
     "test:typings": "tsc",
     "test": "node test/support/jasmineRunner.js && npm run test:typings",
