@@ -15,7 +15,7 @@
     "url": "https://github.com/nickuraltsev/finity/issues"
   },
   "dependencies": {
-    "finity": "^0.4.5"
+    "finity": "^0.5.0"
   },
   "scripts": {
     "start": "node index.js"
