@@ -9,20 +9,21 @@ enum State {
 }
 
 enum Event {
-  TaskCreated
+  TaskSumbitted
 }
 
-function executeTaskAsync(taskSpec: any) {
+function processTaskAsync(taskParams: any) {
+  console.log('Processing task:', taskParams);
   // Simulate an async operation
-  return new Promise(resolve => setTimeout(resolve, taskSpec.delay));
+  return new Promise(resolve => setTimeout(resolve, 100));
 }
 
 const worker = Finity
   .configure<State, Event>()
     .initialState(State.Ready)
-      .on(Event.TaskCreated).transitionTo(State.Running)
+      .on(Event.TaskSumbitted).transitionTo(State.Running)
     .state(State.Running)
-      .do((state, context) => executeTaskAsync(context.eventPayload))
+      .do((state, context) => processTaskAsync(context.eventPayload))
         .onSuccess().transitionTo(State.Succeeded)
         .onFailure().transitionTo(State.Failed)
       .onTimeout(1000)
@@ -31,7 +32,7 @@ const worker = Finity
       .onStateEnter(state => console.log(`Entering state '${State[state]}'`))
   .start();
 
-const taskSpec = {
-  delay: 500,
+const taskParams = {
+  foo: 'bar',
 };
-worker.handle(Event.TaskCreated, taskSpec);
+worker.handle(Event.TaskSumbitted, taskParams);

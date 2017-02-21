@@ -15,12 +15,9 @@
     "url": "https://github.com/nickuraltsev/finity/issues"
   },
   "dependencies": {
-    "finity": "^0.4.3"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.9.0"
+    "finity": "^0.4.5"
   },
   "scripts": {
-    "start": "babel-node index.js"
+    "start": "node index.js"
   }
 }

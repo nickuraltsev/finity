@@ -1,29 +1,28 @@
-import Finity from '../../src';
-
-const handleStateEnter = state => console.log(`Entering state '${state}'`);
-const handleStateExit = state => console.log(`Exiting state '${state}'`);
+const Finity = require('finity');
 
 const submachineConfig = Finity
   .configure()
-    .initialState('substate2A')
-      .on('event2').transitionTo('substate2B')
+    .initialState('s21')
+      .on('eventB').transitionTo('s22')
     .global()
-      .onStateEnter(handleStateEnter)
-      .onStateExit(handleStateExit)
+      .onStateEnter(substate => console.log(`  - Entering substate '${substate}'`))
+      .onStateExit(substate => console.log(`  - Exiting substate '${substate}'`))
   .getConfig();
 
 const stateMachine = Finity
   .configure()
-    .initialState('state1')
-      .on('event1').transitionTo('state2')
-    .state('state2')
-      .on('event3').transitionTo('state3')
-      .submachine(submachineConfig)
+    .initialState('s1')
+      .on('eventA').transitionTo('s2')
+    .state('s2')
+      .submachine(submachineConfig) // s2 is a submachine state
+      .on('eventC').transitionTo('s3')
     .global()
-      .onStateEnter(handleStateEnter)
-      .onStateExit(handleStateExit)
+      .onStateEnter(state => console.log(`- Entering state '${state}'`))
+      .onStateExit(state => console.log(`- Exiting state '${state}'`))
   .start();
 
-for (let i = 1; i <= 3; i++) {
-  stateMachine.handle(`event${i}`);
-}
+stateMachine.handle('eventA');
+
+stateMachine.handle('eventB');
+
+stateMachine.handle('eventC');
