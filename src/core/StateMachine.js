@@ -1,8 +1,10 @@
-import AsyncActionSubscription from './AsyncActionSubscription';
-import executeHandlers from '../utils/executeHandlers';
+import invokeEach from '../utils/invokeEach';
+import merge from '../utils/merge';
+
+const noop = () => {};
 
 export default class StateMachine {
-  constructor(config) {
+  constructor(config, taskScheduler, contextFactory) {
     if (config === undefined || config === null) {
       throw new Error('Configuration must be specified.');
     }
@@ -13,27 +15,14 @@ export default class StateMachine {
       throw new Error('Initial state must be specified.');
     }
     this.config = config;
+    this.taskScheduler = taskScheduler;
+    this.contextFactory = contextFactory;
     this.currentState = null;
-    this.isBusy = false;
-    this.eventQueue = [];
+    this.submachines = Object.create(null);
     this.timerIDs = null;
-    this.asyncActionSubscriptions = null;
+    this.asyncActionCancelers = null;
+    this.handleAsyncActionComplete = ::this.handleAsyncActionComplete;
     this.handleTimeout = ::this.handleTimeout;
-  }
-
-  static start(config) {
-    return new StateMachine(config).start();
-  }
-
-  start() {
-    if (!this.isStarted()) {
-      this.execute(() => this.enterState(this.config.initialState, this.createContext()));
-    }
-    return this;
-  }
-
-  isStarted() {
-    return this.currentState !== null;
   }
 
   getCurrentState() {
@@ -44,70 +33,57 @@ export default class StateMachine {
     if (!this.isStarted()) {
       return false;
     }
-    const context = this.createContext(event, eventPayload);
-    return !!this.getTransitionForEvent(context);
+
+    const context = this.createContextWithEvent(event, eventPayload);
+    return !!this.getFirstAllowedTransitionForEvent(context);
   }
 
-  handle(event, eventPayload) {
-    if (!this.isBusy) {
-      this.execute(() => this.processEvent(event, eventPayload));
-    } else {
-      this.eventQueue.push({ event, eventPayload });
+  tryHandle(event, eventPayload) {
+    if (!this.isStarted()) {
+      return false;
     }
-    return this;
-  }
 
-  execute(operation) {
-    if (this.isBusy) {
-      throw new Error('Operation cannot be executed because another operation is in progress.');
-    }
-    this.isBusy = true;
-    try {
-      operation();
-
-      // Process all events
-      while (this.eventQueue.length > 0) {
-        const { event, eventPayload } = this.eventQueue.shift();
-        this.processEvent(event, eventPayload);
-      }
-    } finally {
-      // Clean up
-      if (this.eventQueue.length > 0) {
-        this.eventQueue = [];
-      }
-      this.isBusy = false;
-    }
-  }
-
-  processEvent(event, eventPayload) {
-    const context = this.createContext(event, eventPayload);
-    const transitionConfig = this.getTransitionForEvent(context);
+    const context = this.createContextWithEvent(event, eventPayload);
+    const transitionConfig = this.getFirstAllowedTransitionForEvent(context);
     if (transitionConfig) {
       this.executeTransition(transitionConfig, context);
+      return true;
+    }
+    return false;
+  }
+
+  handleUnhandledEvent(event, eventPayload) {
+    if (this.config.global.unhandledEventHooks.length > 0) {
+      invokeEach(
+        this.config.global.unhandledEventHooks,
+        event,
+        this.currentState,
+        this.createContextWithEvent(event, eventPayload)
+      );
     } else {
-      this.handleUnhandledEvent(context);
+      throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
     }
   }
 
-  createContext(event, eventPayload) {
-    const context = { stateMachine: this };
-    if (event !== undefined) {
-      context.event = event;
-    }
-    if (eventPayload !== undefined) {
-      context.eventPayload = eventPayload;
-    }
-    return context;
+  isStarted() {
+    return this.currentState !== null;
   }
 
-  getTransitionForEvent(context) {
-    const stateConfig = this.config.states[this.currentState];
-    if (!stateConfig) {
-      return null;
+  start() {
+    if (!this.isStarted()) {
+      this.enterState(this.config.initialState, this.createContext());
     }
+  }
 
-    const eventConfig = stateConfig.events[context.event];
-    return eventConfig ? this.selectTransition(eventConfig.transitions, context) : null;
+  stop() {
+    if (this.isStarted()) {
+      this.exitState(this.createContext());
+      this.currentState = null;
+    }
+  }
+
+  getSubmachine() {
+    return this.isStarted() ? this.submachines[this.currentState] : null;
   }
 
   executeTransition(transitionConfig, context) {
@@ -119,111 +95,93 @@ export default class StateMachine {
       transitionConfig.targetState :
       this.currentState;
 
-    executeHandlers(this.config.transitionHooks, this.currentState, nextState, context);
-    executeHandlers(transitionConfig.actions, this.currentState, nextState, context);
+    invokeEach(this.config.global.transitionHooks, this.currentState, nextState, context);
+    invokeEach(transitionConfig.actions, this.currentState, nextState, context);
 
     if (!transitionConfig.isInternal) {
       this.enterState(nextState, context);
     }
   }
 
-  handleUnhandledEvent(context) {
-    if (this.config.unhandledEventHooks.length > 0) {
-      executeHandlers(
-        this.config.unhandledEventHooks,
-        context.event,
-        this.currentState,
-        context
-      );
-    } else {
-      throw new Error(`Unhandled event '${context.event}' in state '${this.currentState}'.`);
-    }
-  }
-
   enterState(state, context) {
-    executeHandlers(this.config.stateEnterHooks, state, context);
+    invokeEach(this.config.global.stateEnterHooks, state, context);
 
     const stateConfig = this.config.states[state];
     if (stateConfig) {
-      executeHandlers(stateConfig.entryActions, state, context);
+      invokeEach(stateConfig.entryActions, state, context);
     }
 
     if (this.currentState !== null && this.currentState !== state) {
-      executeHandlers(this.config.stateChangeHooks, this.currentState, state, context);
+      invokeEach(this.config.global.stateChangeHooks, this.currentState, state, context);
+    }
+
+    try {
+      this.startAsyncActions(state, context);
+      this.startTimers(state);
+      this.startSubmachines(state);
+    } catch (error) {
+      this.stopTimers();
+      this.cancelAsyncActions();
+      throw error;
     }
 
     this.currentState = state;
-
-    this.startAsyncActions(context);
-
-    this.startTimers();
   }
 
   exitState(context) {
+    this.stopSubmachines();
     this.stopTimers();
+    this.cancelAsyncActions();
 
-    this.cancelAsyncActionSubscriptions();
-
-    executeHandlers(this.config.stateExitHooks, this.currentState, context);
+    invokeEach(this.config.global.stateExitHooks, this.currentState, context);
 
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
-      executeHandlers(stateConfig.exitActions, this.currentState, context);
+      invokeEach(stateConfig.exitActions, this.currentState, context);
     }
   }
 
-  startAsyncActions(context) {
-    const stateConfig = this.config.states[this.currentState];
+  startAsyncActions(state, context) {
+    const stateConfig = this.config.states[state];
     if (stateConfig) {
       stateConfig.asyncActions.forEach(
-        asyncActionConfig => this.startAsyncAction(asyncActionConfig, context)
+        asyncActionConfig => this.startAsyncAction(asyncActionConfig, state, context)
       );
     }
   }
 
-  startAsyncAction(asyncActionConfig, context) {
-    const action = asyncActionConfig.action;
-
-    const subscription = new AsyncActionSubscription(
-      result => this.handleAsyncActionSuccess(asyncActionConfig.onSuccess, result),
-      error => this.handleAsyncActionFailure(asyncActionConfig.onFailure, error)
+  startAsyncAction(asyncActionConfig, state, context) {
+    const { action, successTrigger, failureTrigger } = asyncActionConfig;
+    let handleComplete = this.handleAsyncActionComplete;
+    action(state, context).then(
+      result => handleComplete(successTrigger, { result }),
+      error => handleComplete(failureTrigger, { error })
     );
-
-    action(this.currentState, context).then(
-      subscription.onSuccess,
-      subscription.onFailure
-    );
-
-    this.asyncActionSubscriptions = this.asyncActionSubscriptions || [];
-    this.asyncActionSubscriptions.push(subscription);
+    this.asyncActionCancelers = this.asyncActionCancelers || [];
+    this.asyncActionCancelers.push(() => {
+      handleComplete = noop;
+    });
   }
 
-  cancelAsyncActionSubscriptions() {
-    if (this.asyncActionSubscriptions) {
-      this.asyncActionSubscriptions.forEach(subscription => subscription.cancel());
-      this.asyncActionSubscriptions = null;
+  cancelAsyncActions() {
+    if (this.asyncActionCancelers) {
+      invokeEach(this.asyncActionCancelers);
+      this.asyncActionCancelers = null;
     }
   }
 
-  handleAsyncActionSuccess(triggerConfig, result) {
-    const context = this.createContext();
-    context.result = result;
+  handleAsyncActionComplete(triggerConfig, additionalContext) {
+    const context = merge(this.createContext(), additionalContext);
     this.executeTrigger(triggerConfig, context);
   }
 
-  handleAsyncActionFailure(triggerConfig, error) {
-    const context = this.createContext();
-    context.error = error;
-    this.executeTrigger(triggerConfig, context);
-  }
-
-  startTimers() {
-    const stateConfig = this.config.states[this.currentState];
+  startTimers(state) {
+    const stateConfig = this.config.states[state];
     if (stateConfig && stateConfig.timers.length > 0) {
       this.timerIDs = stateConfig.timers.map(timerConfig => setTimeout(
         this.handleTimeout,
         timerConfig.timeout,
-        timerConfig,
+        timerConfig
       ));
     }
   }
@@ -239,21 +197,67 @@ export default class StateMachine {
     this.executeTrigger(timerConfig, this.createContext());
   }
 
-  executeTrigger(triggerConfig, context) {
-    this.execute(() => {
-      const transitionConfig = this.selectTransition(triggerConfig.transitions, context);
-      if (transitionConfig) {
-        this.executeTransition(transitionConfig, context);
+  startSubmachines(state) {
+    const stateConfig = this.config.states[state];
+    if (stateConfig && stateConfig.submachine) {
+      if (!this.submachines[state]) {
+        this.submachines[state] = new StateMachine(
+          stateConfig.submachine, this.taskScheduler, this.contextFactory
+        );
       }
-    });
+      this.submachines[state].start();
+    }
   }
 
-  selectTransition(transitions, context) {
+  stopSubmachines() {
+    const submachine = this.submachines[this.currentState];
+    if (submachine) {
+      submachine.stop();
+    }
+  }
+
+  createContext() {
+    return this.contextFactory(this);
+  }
+
+  createContextWithEvent(event, eventPayload) {
+    const context = this.createContext();
+    context.event = event;
+    if (eventPayload !== undefined) {
+      context.eventPayload = eventPayload;
+    }
+    return context;
+  }
+
+  static getFirstAllowedTransition(transitions, context) {
     for (let i = 0; i < transitions.length; i++) {
       if (!transitions[i].condition || transitions[i].condition(context)) {
         return transitions[i];
       }
     }
     return null;
+  }
+
+  getFirstAllowedTransitionForEvent(context) {
+    const stateConfig = this.config.states[this.currentState];
+    if (!stateConfig) {
+      return null;
+    }
+
+    const eventConfig = stateConfig.events[context.event];
+    return eventConfig ?
+      StateMachine.getFirstAllowedTransition(eventConfig.transitions, context) :
+      null;
+  }
+
+  executeTrigger(triggerConfig, context) {
+    this.taskScheduler.execute(() => {
+      const transitionConfig = StateMachine.getFirstAllowedTransition(
+        triggerConfig.transitions, context
+      );
+      if (transitionConfig) {
+        this.executeTransition(transitionConfig, context);
+      }
+    });
   }
 }

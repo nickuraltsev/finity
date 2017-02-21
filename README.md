@@ -12,9 +12,11 @@ A finite state machine library for Node.js and the browser with a friendly confi
 - Entry, exit, and transition actions
 - Guard conditions
 - Self-transitions and internal transitions
+- Hierarchical state machines
 - State machine event hooks
 - Fluent configuration API
 - No external dependencies
+- TypeScript typings
 
 ## Installation
 
@@ -30,38 +32,35 @@ The UMD build is available on [unpkg](https://unpkg.com/):
 <script src="https://unpkg.com/finity/umd/Finity.min.js"></script>
 ```
 
-Finity includes TypeScript typings.
-
 ## Example
 
 ```javascript
 import Finity from 'finity';
 
-function executeTaskAsync(taskSpec) {
-  // Return a Promise that will resolve once the task is complete.
-}
-
 const worker = Finity
   .configure()
     .initialState('ready')
-      .on('task').transitionTo('running')
+      .on('task_submitted').transitionTo('running')
     .state('running')
-      .do((state, context) => executeTaskAsync(context.eventPayload))
+      .do((state, context) => processTaskAsync(context.eventPayload))
         .onSuccess().transitionTo('succeeded')
         .onFailure().transitionTo('failed')
       .onTimeout(1000)
         .transitionTo('timed_out')
+    .global()
+      .onStateEnter(state => console.log(`Entering state '${state}'`))
   .start();
 
-const taskSpec = { /* ... */ };
-worker.handle('task', taskSpec);
+worker.handle('task_submitted', task);
 ```
+
+[More examples](https://github.com/nickuraltsev/finity/tree/master/examples)
 
 ## Usage
 
 ### Configuration
 
-Before you can create and start a state machine, you need to create a state machine configuration.
+Before you can create and start a state machine, you need to create a state machine configuration using Finity configuration DSL. The entry point to the DSL is the `Finity.configure` method.
 
 #### States
 
@@ -161,10 +160,11 @@ Use the `onEnter` method to add an entry action to a state, and the `onExit` met
 ```javascript
 Finity
   .configure()
-    .initialState('state1')
-      .onEnter(state => console.log(`Entering state ${state}`))
-      .onExit(state => console.log(`Exiting state ${state}`))
-      .on('eventA').transitionTo('state2')
+    .initialState('ready')
+      .on('task_submitted').transitionTo('running')
+    .state('running')
+      .onEnter(() => console.log('Processing task...'))
+      .onExit(() => console.log('All done!'))
 ```
 
 You can add multiple entry actions to a state. They will be executed in the same order as they have been added. The same is true for exit actions.
@@ -187,7 +187,7 @@ Finity
     .initialState('state1')
       .on('eventA')
         .transitionTo('state2')
-          .withAction((fromState, toState) => console.log(`Transitioning from ${fromState} to ${toState}`))
+          .withAction(() => console.log('Transitioning to next state'))
 ```
 
 You can add multiple actions to a transition. They will be executed in the same order as they have been added.
@@ -205,7 +205,9 @@ Finity
   .configure()
     .initialState('state1')
       .on('eventA')
-        .transitionTo('state2').withCondition(() => new Date().getHours() < 12)
+        // Perform a transition to state2 if `fn` returns a truthy value
+        .transitionTo('state2').withCondition(fn)
+        // Otherwise, perform a transition to state3
         .transitionTo('state3')
 ```
 
@@ -248,7 +250,7 @@ Called when the state machine is about to enter a state.
 Finity
   .configure()
     .global()
-      .onStateEnter(state => console.log(`Entering state ${state}`))
+      .onStateEnter(state => console.log(`Entering state '${state}'`))
 ```
 
 ##### `onStateExit`
@@ -264,7 +266,7 @@ Called when the state machine is about to exit a state.
 Finity
   .configure()
     .global()
-      .onStateExit(state => console.log(`Exiting state ${state}`))
+      .onStateExit(state => console.log(`Exiting state '${state}'`))
 ```
 
 ##### `onTransition`
@@ -282,7 +284,7 @@ Finity
   .configure()
     .global()
       .onTransition((fromState, toState) =>
-        console.log(`Transitioning from ${fromState} to ${toState}`)
+        console.log(`Transitioning from '${fromState}' to '${toState}'`)
       )
 ```
 
@@ -303,7 +305,7 @@ Finity
   .configure()
     .global()
       .onStateChange((oldState, newState) =>
-        console.log(`Changing state from ${oldState} to ${newState}`)
+        console.log(`Changing state from '${oldState}' to '${newState}'`)
       )
 ```
 
@@ -314,7 +316,7 @@ Finity
   .configure()
     .initialState('state1')
     .global()
-      .onStateEnter(state => console.log(`Entering state ${state}`))
+      .onStateEnter(state => console.log(`Entering state '${state}'`))
       .onStateEnter(state => console.log('We are almost there!'))
 ```
 
@@ -334,7 +336,7 @@ Finity
     .initialState('state1')
     .global()
       .onUnhandledEvent((event, state) =>
-        console.log(`Unhandled event ${event} in state ${state}.`)
+        console.log(`Unhandled event '${event}' in state '${state}'.`)
       )
 ```
 
@@ -387,12 +389,11 @@ const stateMachine = Finity
   .configure()
     .initialState('state1')
       .on('eventA').transitionTo('state2').withAction((fromState, toState, context) => {
-        // Do something with the payload
         console.log('Payload:', context.eventPayload);
       })
   .start();
 
-stateMachine.handle('eventA', { foo: 'bar' }); // Payloads can be of any type, including objects.
+stateMachine.handle('eventA', { foo: 'bar' }); // Note: A payload can be of any type.
 ```
 
 If a state machine cannot handle the specified event, it will throw an error or execute the `onUnhandledEvent` hooks if any are registered (see [Unhandled events](#unhandled-events)).
@@ -437,6 +438,54 @@ A context object is passed to all entry, exit, and transition actions, guard con
 - `result` - The async operation result.
 - `error` - The async operation error.
 
+### Hierarchical state machines
+
+```javascript
+const submachineConfig = Finity
+  .configure()
+    .initialState('s21')
+      .on('eventB').transitionTo('s22')
+    .global()
+      .onStateEnter(substate => console.log(`  - Entering substate '${substate}'`))
+      .onStateExit(substate => console.log(`  - Exiting substate '${substate}'`))
+  .getConfig();
+
+const stateMachine = Finity
+  .configure()
+    .initialState('s1')
+      .on('eventA').transitionTo('s2')
+    .state('s2')
+      .submachine(submachineConfig) // s2 is a submachine state
+      .on('eventC').transitionTo('s3')
+    .global()
+      .onStateEnter(state => console.log(`- Entering state '${state}'`))
+      .onStateExit(state => console.log(`- Exiting state '${state}'`))
+  .start();
+
+stateMachine.handle('eventA');
+
+stateMachine.handle('eventB');
+
+stateMachine.handle('eventC');
+```
+
+The above code will generate the following output:
+
+```
+- Entering state 's1'
+- Exiting state 's1'
+- Entering state 's2'
+  - Entering substate 's21'
+  - Exiting substate 's21'
+  - Entering substate 's22'
+  - Exiting substate 's22'
+- Exiting state 's2'
+- Entering state 's3'
+```
+
+## TypeScript Support
+
+Finity includes [TypeScript typings](https://github.com/nickuraltsev/finity/blob/master/index.d.ts).
 
 ## Contributing
 

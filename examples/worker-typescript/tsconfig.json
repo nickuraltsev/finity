@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES5",
     "noImplicitAny": true,
-    "module": "commonjs"
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": [
+      "es5",
+      "es2015.promise",
+      "dom"
+    ]
   },
   "exclude": [
     "node_modules"

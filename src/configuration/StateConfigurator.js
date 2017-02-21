@@ -2,8 +2,6 @@ import BaseConfigurator from './BaseConfigurator';
 import TriggerConfigurator from './TriggerConfigurator';
 import TimerConfigurator from './TimerConfigurator';
 import AsyncActionConfigurator from './AsyncActionConfigurator';
-import { mapToConfig } from './ConfiguratorHelper';
-import deepCopy from '../utils/deepCopy';
 
 export default class StateConfigurator extends BaseConfigurator {
   constructor(parent) {
@@ -11,10 +9,11 @@ export default class StateConfigurator extends BaseConfigurator {
     this.config = {
       entryActions: [],
       exitActions: [],
+      events: Object.create(null),
+      timers: [],
+      asyncActions: [],
+      submachine: null,
     };
-    this.eventConfigurators = Object.create(null);
-    this.timerConfigurators = [];
-    this.asyncActionConfigurators = [];
   }
 
   onEnter(action) {
@@ -28,29 +27,26 @@ export default class StateConfigurator extends BaseConfigurator {
   }
 
   on(event) {
-    if (!this.eventConfigurators[event]) {
-      this.eventConfigurators[event] = new TriggerConfigurator(this);
+    if (!this.config.events[event]) {
+      this.config.events[event] = new TriggerConfigurator(this);
     }
-    return this.eventConfigurators[event];
+    return this.config.events[event];
   }
 
   onTimeout(timeout) {
     const timerConfigurator = new TimerConfigurator(this, timeout);
-    this.timerConfigurators.push(timerConfigurator);
+    this.config.timers.push(timerConfigurator);
     return timerConfigurator;
   }
 
   do(asyncAction) {
     const asyncActionConfigurator = new AsyncActionConfigurator(this, asyncAction);
-    this.asyncActionConfigurators.push(asyncActionConfigurator);
+    this.config.asyncActions.push(asyncActionConfigurator);
     return asyncActionConfigurator;
   }
 
-  internalGetConfig() {
-    const config = deepCopy(this.config);
-    config.events = mapToConfig(this.eventConfigurators);
-    config.timers = mapToConfig(this.timerConfigurators);
-    config.asyncActions = mapToConfig(this.asyncActionConfigurators);
-    return config;
+  submachine(submachineConfig) {
+    this.config.submachine = submachineConfig;
+    return this;
   }
 }

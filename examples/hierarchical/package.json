@@ -1,7 +1,7 @@
 {
-  "name": "finity-worker-typescript-example",
+  "name": "finity-hierarchical-example",
   "version": "0.0.0",
-  "description": "Finity worker example",
+  "description": "Finity hierarchical state machine example",
   "author": {
     "name": "Nick Uraltsev",
     "email": "nick.uraltsev@gmail.com"

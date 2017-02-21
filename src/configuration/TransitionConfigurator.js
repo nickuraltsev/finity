@@ -1,5 +1,4 @@
 import BaseConfigurator from './BaseConfigurator';
-import deepCopy from '../utils/deepCopy';
 
 export default class TransitionConfigurator extends BaseConfigurator {
   constructor(parent, targetState, isInternal) {
@@ -20,9 +19,5 @@ export default class TransitionConfigurator extends BaseConfigurator {
   withCondition(condition) {
     this.config.condition = condition;
     return this;
-  }
-
-  internalGetConfig() {
-    return deepCopy(this.config);
   }
 }

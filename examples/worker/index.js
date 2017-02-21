@@ -1,16 +1,17 @@
-import Finity from 'finity';
+const Finity = require('finity');
 
-function executeTaskAsync(taskSpec) {
+function processTaskAsync(taskParams) {
+  console.log('Processing task:', taskParams);
   // Simulate an async operation
-  return new Promise(resolve => setTimeout(resolve, taskSpec.delay));
+  return new Promise(resolve => setTimeout(resolve, 100));
 }
 
 const worker = Finity
   .configure()
     .initialState('ready')
-      .on('task').transitionTo('running')
+      .on('task_submitted').transitionTo('running')
     .state('running')
-      .do((state, context) => executeTaskAsync(context.eventPayload))
+      .do((state, context) => processTaskAsync(context.eventPayload))
         .onSuccess().transitionTo('succeeded')
         .onFailure().transitionTo('failed')
       .onTimeout(1000)
@@ -19,7 +20,7 @@ const worker = Finity
       .onStateEnter(state => console.log(`Entering state '${state}'`))
   .start();
 
-const taskSpec = {
-  delay: 500,
+const taskParams = {
+  foo: 'bar',
 };
-worker.handle('task', taskSpec);
+worker.handle('task_submitted', taskParams);

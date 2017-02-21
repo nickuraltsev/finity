@@ -1,8 +1,8 @@
 import Finity, { Configuration, Context, StateMachine } from '../../';
-import { Promise } from 'es6-promise';
 
 enum State { S1, S2, S3, S4, S5, S6 }
-enum Event { E1, E2, E3, E4 }
+enum Substate { S5A, S5B }
+enum Event { E1, E2, E3, E4, E5, E6 }
 
 const config: Configuration<State, Event> =
   Finity
@@ -25,6 +25,17 @@ const config: Configuration<State, Event> =
           .onFailure().transitionTo(State.S5)
       .state(State.S4)
         .onTimeout(1000).transitionTo(State.S6)
+      .state(State.S5)
+        .submachine(
+          Finity
+            .configure<Substate, Event>()
+              .initialState(Substate.S5A)
+                .on(Event.E5).transitionTo(Substate.S5B)
+              .state(Substate.S5B)
+                .on(Event.E6).transitionTo(Substate.S5A)
+            .getConfig()
+        )
+        .on(Event.E1).transitionTo(State.S2)
       .global()
         .onStateEnter((state: State, context: Context<State, Event>) => {})
         .onStateExit((state: State, context: Context<State, Event>) => {})

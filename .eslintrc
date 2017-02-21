@@ -6,7 +6,16 @@
     "jasmine": true
   },
   "rules": {
-    "no-param-reassign": [2, { "props": false }],
-    "newline-per-chained-call": 0
+    "no-param-reassign": ["error", { "props": false }],
+    "newline-per-chained-call": "off",
+    "no-plusplus": "off",
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "never"
+    }],
+    "arrow-parens": ["error", "as-needed"],
   }
 }
