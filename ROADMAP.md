@@ -5,7 +5,7 @@
 - [x] Event payloads
 - [x] Time triggers
 - [x] Promise triggers
-- [ ] Hierarchical state machines *(in progress)*
+- [x] Hierarchical state machines
 - [ ] Ignoring events
 - [ ] Persistence support
 
@@ -17,7 +17,7 @@ const submachineConfig = Finity
     .initialState('substate2A')
       .on('event2').transitionTo('substate2B')
   .getConfig();
-  
+
 const stateMachine = Finity
   .configure()
     .initialState('state1')
