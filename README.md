@@ -16,6 +16,7 @@ A finite state machine library for Node.js and the browser with a friendly confi
 - State machine event hooks
 - Fluent configuration API
 - No external dependencies
+- < 4 kB minified and gzipped
 - TypeScript typings
 
 ## Installation
