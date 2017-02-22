@@ -21,10 +21,20 @@ A finite state machine library for Node.js and the browser with a friendly confi
 
 ## Installation
 
-Using [npm](https://www.npmjs.org/):
+Install `finity` using [npm](https://www.npmjs.org/):
 
 ```
 npm install --save finity
+```
+
+Then you can import it using ES2015 or CommonJS modules:
+
+```js
+// ES2015
+import Finity from 'finity';
+
+// CommonJS
+const Finity = require('finity');
 ```
 
 The UMD build is available on [unpkg](https://unpkg.com/):
@@ -36,8 +46,6 @@ The UMD build is available on [unpkg](https://unpkg.com/):
 ## Example
 
 ```javascript
-import Finity from 'finity';
-
 const worker = Finity
   .configure()
     .initialState('ready')
