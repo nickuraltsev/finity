@@ -1,11 +1,10 @@
 # finity
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/nickuraltsev/finity.svg)](https://greenkeeper.io/)
-
 [![npm version](https://badge.fury.io/js/finity.svg)](https://badge.fury.io/js/finity)
 [![Build Status](https://api.travis-ci.org/nickuraltsev/finity.svg?branch=master)](https://travis-ci.org/nickuraltsev/finity)
 [![Coverage Status](https://coveralls.io/repos/nickuraltsev/finity/badge.svg?branch=master&service=github)](https://coveralls.io/github/nickuraltsev/finity?branch=master)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nickuraltsev/finity/master/LICENSE)
+[![Greenkeeper badge](https://badges.greenkeeper.io/nickuraltsev/finity.svg)](https://greenkeeper.io/)
 
 A finite state machine library for Node.js and the browser with a friendly configuration DSL.
 
