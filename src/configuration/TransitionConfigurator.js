@@ -1,11 +1,11 @@
 import BaseConfigurator from './BaseConfigurator';
 
 export default class TransitionConfigurator extends BaseConfigurator {
-  constructor(parent, targetState, isInternal) {
+  constructor(parent, targetState, options = {}) {
     super(parent);
     this.config = {
       targetState,
-      isInternal: targetState === null && isInternal,
+      ...options,
       actions: [],
       condition: null,
     };
