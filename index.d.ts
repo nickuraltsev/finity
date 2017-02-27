@@ -46,6 +46,7 @@ export interface TriggerConfigurator<S, E> extends BaseConfigurator<S, E> {
   transitionTo(targetState: S): TransitionConfigurator<S, E>;
   selfTransition(): TransitionConfigurator<S, E>;
   internalTransition(): TransitionConfigurator<S, E>;
+  ignore(): TransitionConfigurator<S, E>;
 }
 
 export interface TimerConfigurator<S, E> extends TriggerConfigurator<S, E> {
