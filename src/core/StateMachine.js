@@ -87,6 +87,10 @@ export default class StateMachine {
   }
 
   executeTransition(transitionConfig, context) {
+    if (transitionConfig.ignore) {
+      return;
+    }
+
     if (!transitionConfig.isInternal) {
       this.exitState(context);
     }

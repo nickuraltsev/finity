@@ -18,7 +18,7 @@ A finite state machine library for Node.js and the browser with a friendly confi
 - State machine event hooks
 - Fluent configuration API
 - No external dependencies
-- 3.6 kB minified and gzipped
+- 3.7 kB minified and gzipped
 - TypeScript typings
 
 ## Installation
@@ -241,6 +241,32 @@ Finity
 ```
 
 Self-transitions and internal transitions can have actions and guard conditions attached.
+
+#### Ignoring events
+
+To ignore an event, use the `ignore` method.
+
+```javascript
+Finity
+  .configure()
+    .initialState('state1')
+      .on('eventA').ignore()
+```
+
+Events can be conditionally ignored using the `withCondition` method.
+
+```javascript
+Finity
+  .configure()
+    .initialState('state1')
+      .on('eventA')
+        // If `fn1` returns a truthy value, perform a transition to state2
+        .transitionTo('state2').withCondition(fn1)
+        // Else if `fn2` returns a truthy value, ignore the event
+        .ignore().withCondition(fn2)
+        // Otherwise, perform a transition to state3
+        .transitionTo('state3')
+```
 
 #### Global hooks
 

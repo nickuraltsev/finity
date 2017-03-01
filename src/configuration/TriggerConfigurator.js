@@ -18,11 +18,15 @@ export default class TriggerConfigurator extends BaseConfigurator {
   }
 
   internalTransition() {
-    return this.transition(null, true);
+    return this.transition(null, { isInternal: true });
   }
 
-  transition(targetState, isInternal) {
-    const transitionConfigurator = new TransitionConfigurator(this, targetState, isInternal);
+  ignore() {
+    return this.transition(null, { ignore: true });
+  }
+
+  transition(targetState, options) {
+    const transitionConfigurator = new TransitionConfigurator(this, targetState, options);
     this.config.transitions.push(transitionConfigurator);
     return transitionConfigurator;
   }

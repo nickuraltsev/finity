@@ -12,6 +12,7 @@ const config: Configuration<State, Event> =
         .onEnter((state: State, context: Context<State, Event>) => {})
         .onExit((state: State, context: Context<State, Event>) => {})
       .state(State.S2)
+        .on(Event.E1).ignore()
         .on(Event.E2).internalTransition()
         .on(Event.E3).selfTransition()
         .on(Event.E4)
