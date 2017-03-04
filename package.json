@@ -48,7 +48,7 @@
     "coveralls": "^2.11.16",
     "rimraf": "^2.6.0",
     "webpack": "^2.2.1",
-    "cross-env": "^3.1.4",
+    "cross-env": "^3.2.3",
     "typescript": "^2.2.1",
     "shx": "^0.2.2",
     "gzip-size-cli": "^2.0.0"
