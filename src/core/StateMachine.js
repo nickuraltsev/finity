@@ -248,10 +248,20 @@ export default class StateMachine {
       return null;
     }
 
+    let transitionConfig = null;
+
     const eventConfig = stateConfig.events[context.event];
-    return eventConfig ?
-      StateMachine.getFirstAllowedTransition(eventConfig.transitions, context) :
-      null;
+    if (eventConfig) {
+      transitionConfig = StateMachine.getFirstAllowedTransition(eventConfig.transitions, context);
+    }
+
+    if (!transitionConfig && stateConfig.anyEventTrigger) {
+      transitionConfig = StateMachine.getFirstAllowedTransition(
+        stateConfig.anyEventTrigger.transitions, context
+      );
+    }
+
+    return transitionConfig;
   }
 
   executeTrigger(triggerConfig, context) {

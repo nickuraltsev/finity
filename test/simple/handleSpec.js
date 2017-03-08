@@ -2,7 +2,7 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
 describe('handle', () => {
-  describe('when there is no transition for the current state and event', () => {
+  describe('when there are no transitions for the current state and event', () => {
     it('throws', () => {
       expect(() =>
         Finity
@@ -117,6 +117,95 @@ describe('handle', () => {
       });
     });
   });
+
+  describe('when there is a single catch-all transition and no event-specific transitions', () => {
+    describe('when the catch-all transition is allowed', () => {
+      it('executes the transition', () => {
+        const stateMachine = Finity
+          .configure()
+          .initialState('state1')
+            .onAny().transitionTo('state2')
+          .start()
+          .handle('event1');
+
+        expect(stateMachine.getCurrentState()).toBe('state2');
+      });
+    });
+
+    describe('when the catch-all transition is not allowed', () => {
+      it('throws', () => {
+        expect(() =>
+          Finity
+            .configure()
+            .initialState('state1')
+              .onAny().transitionTo('state2').withCondition(() => false)
+            .start()
+            .handle('event1')
+        ).toThrowError('Unhandled event \'event1\' in state \'state1\'.');
+      });
+    });
+  });
+
+  describe(
+    'when there is a single catch-all transition and a single event-specific transition',
+    () => {
+      describe('when both transitions are allowed', () => {
+        it('executes the event-specific transition', () => {
+          const stateMachine = Finity
+            .configure()
+            .initialState('state1')
+              .onAny().transitionTo('state2')
+              .on('event1').transitionTo('state3')
+            .start()
+            .handle('event1');
+
+          expect(stateMachine.getCurrentState()).toBe('state3');
+        });
+      });
+
+      describe('when only the catch-all transition is allowed', () => {
+        it('executes the catch-all transition', () => {
+          const stateMachine = Finity
+            .configure()
+            .initialState('state1')
+              .on('event1').transitionTo('state2').withCondition(() => false)
+              .onAny().transitionTo('state3')
+            .start()
+            .handle('event1');
+
+          expect(stateMachine.getCurrentState()).toBe('state3');
+        });
+      });
+
+      describe('when only the event-specific transition is allowed', () => {
+        it('executes the event-specific transition', () => {
+          const stateMachine = Finity
+            .configure()
+            .initialState('state1')
+              .onAny().transitionTo('state2').withCondition(() => false)
+              .on('event1').transitionTo('state3')
+            .start()
+            .handle('event1');
+
+          expect(stateMachine.getCurrentState()).toBe('state3');
+        });
+      });
+
+      describe('when none of the transitions are allowed', () => {
+        it('throws', () => {
+          expect(() =>
+            Finity
+              .configure()
+              .initialState('state1')
+                .on('event1').transitionTo('state2').withCondition(() => false)
+                .onAny().transitionTo('state3').withCondition(() => false)
+              .start()
+              .handle('event1')
+          ).toThrowError('Unhandled event \'event1\' in state \'state1\'.');
+        });
+      });
+    }
+  );
 
   it('passes a context object to guard conditions', () => {
     const condition = jasmine.createSpy('condition').and.returnValue(true);

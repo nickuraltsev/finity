@@ -92,7 +92,7 @@ A transition from one state to another can be triggered by an event-based, time-
 
 ##### Event-based triggers
 
-To add a transition that is triggered by an event, first call the `on` method, passing in the name of the event. Then call the `transitionTo` method, passing in the name of the target state.
+To add a transition that is triggered by a specific event, first call the `on` method, passing in the name of the event. Then call the `transitionTo` method, passing in the name of the target state.
 
 ```javascript
 Finity
@@ -102,6 +102,18 @@ Finity
       .on('eventB').transitionTo('state3')
     .state('state2')
       .on('eventC').transitionTo('state1')
+```
+
+To add a catch-all transition that is triggered by any event, use the `onAny` method. (Event-specific transitions take precedence over catch-all transitions.)
+
+```javascript
+Finity
+  .configure()
+    .initialState('state1')
+        // Perform a transition to state2 when eventA occurs
+      .on('eventA').transitionTo('state2')
+      // Perform a transition to state3 when any other event occurs
+      .onAny().transitionTo('state3')  
 ```
 
 ##### Time-based triggers

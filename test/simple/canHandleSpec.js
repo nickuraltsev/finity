@@ -1,7 +1,7 @@
 import Finity from '../../src';
 
 describe('canHandle', () => {
-  describe('when there is no transition for the current state and event', () => {
+  describe('when there are no transitions for the current state and event', () => {
     it('returns false', () => {
       const stateMachine = Finity
         .configure()
@@ -87,6 +87,32 @@ describe('canHandle', () => {
             .on('event1')
               .transitionTo('state2').withCondition(() => false)
               .transitionTo('state3').withCondition(() => false)
+          .start();
+
+        expect(stateMachine.canHandle('event1')).toBe(false);
+      });
+    });
+  });
+
+  describe('when there is a single catch-all transition and no event-specific transitions', () => {
+    describe('when the catch-all transition is allowed', () => {
+      it('returns true', () => {
+        const stateMachine = Finity
+          .configure()
+          .initialState('state1')
+            .onAny().transitionTo('state2')
+          .start();
+
+        expect(stateMachine.canHandle('event1')).toBe(true);
+      });
+    });
+
+    describe('when the catch-all transition is not allowed', () => {
+      it('returns false', () => {
+        const stateMachine = Finity
+          .configure()
+          .initialState('state1')
+            .onAny().transitionTo('state2').withCondition(() => false)
           .start();
 
         expect(stateMachine.canHandle('event1')).toBe(false);
