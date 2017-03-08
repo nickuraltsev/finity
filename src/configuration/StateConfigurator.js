@@ -10,6 +10,7 @@ export default class StateConfigurator extends BaseConfigurator {
       entryActions: [],
       exitActions: [],
       events: Object.create(null),
+      anyEventTrigger: null,
       timers: [],
       asyncActions: [],
       submachine: null,
@@ -31,6 +32,13 @@ export default class StateConfigurator extends BaseConfigurator {
       this.config.events[event] = new TriggerConfigurator(this);
     }
     return this.config.events[event];
+  }
+
+  onAny() {
+    if (!this.config.anyEventTrigger) {
+      this.config.anyEventTrigger = new TriggerConfigurator(this);
+    }
+    return this.config.anyEventTrigger;
   }
 
   onTimeout(timeout) {
