@@ -37,6 +37,7 @@ export interface StateConfigurator<S, E> extends BaseConfigurator<S, E>, StateMa
   onEnter(action: StateAction<S, E>): StateConfigurator<S, E>;
   onExit(action: StateAction<S, E>): StateConfigurator<S, E>;
   on(event: E): TriggerConfigurator<S, E>;
+  onAny(): TriggerConfigurator<S, E>;
   onTimeout(timeout: number): TimerConfigurator<S, E>;
   do(asyncOperation: AsyncOperation<S, E>): AsyncConfigurator<S, E>;
   submachine<S2>(submachineConfig: Configuration<S2, E>): StateConfigurator<S, E>;

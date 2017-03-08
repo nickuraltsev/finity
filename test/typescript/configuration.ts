@@ -20,6 +20,7 @@ const config: Configuration<State, Event> =
             .withCondition((context: Context<State, Event>) => false)
             .withAction((fromState: State, toState: State, context: Context<State, Event>) => {})
           .transitionTo(State.S3)
+        .onAny().transitionTo(State.S5)
       .state(State.S3)
         .do((state: State, context: Context<State, Event>) => Promise.resolve({ foo: 'bar' }))
           .onSuccess().transitionTo(State.S4)
