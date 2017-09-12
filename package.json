@@ -43,7 +43,7 @@
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-react": "^7.3.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^8.0.0",
     "isparta": "^4.0.0",
     "coveralls": "^2.13.1",
     "rimraf": "^2.6.2",
