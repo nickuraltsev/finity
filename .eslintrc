@@ -30,5 +30,7 @@
       "functions": "never"
     }],
     "arrow-parens": ["error", "as-needed"],
+    "function-paren-newline": "off",
+    "prefer-destructuring": "off",
   }
 }
