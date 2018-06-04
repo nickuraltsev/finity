@@ -1,9 +1,14 @@
 {
   "presets": [
-    ["es2015", {
+    ["env", {
+      "targets": {
+        "node": "8.0",
+        "browsers": "Chrome >= 62, Firefox >= 59, Edge >= 16, iOS >= 10.3, Safari >= 10.1"
+      },
       "loose": true,
-    }],
-    "stage-0"
+      "useBuiltIns": true,
+      "debug": true
+    }]
   ],
   "ignore": [
     "src/index.commonjs.js"
