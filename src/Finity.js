@@ -6,8 +6,8 @@ const Finity = {
     return new StateMachineConfigurator();
   },
 
-  start(config) {
-    return HierarchicalStateMachine.start(config);
+  async start(config) {
+    return await HierarchicalStateMachine.start(config);
   },
 };
 

@@ -1,32 +1,44 @@
 export default class TaskScheduler {
-  queue = [];
-  isBusy = false;
-
-  enqueue(task) {
-    if (this.isBusy) {
-      this.queue.push(task);
-    } else {
-      this.execute(task);
-    }
+  constructor() {
+    this.queue = [];
+    this.runningPromise = null;
   }
 
-  execute(task) {
-    if (this.isBusy) {
-      throw new Error('Cannot execute task because another task is already running.');
+  async enqueue(task) {
+    const retvalPromise = new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          resolve(await task());
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+    if (!this.runningPromise) await this.runAll();
+    return await retvalPromise;
+  }
+
+  async runAll() {
+    if (this.runningPromise) {
+      await this.runningPromise;
+      return;
     }
-    this.isBusy = true;
+
+    let finished;
+    this.runningPromise = new Promise(resolve => { finished = resolve; });
     try {
-      task();
       while (this.queue.length > 0) {
         const nextTask = this.queue.shift();
-        nextTask();
+        // eslint-disable-next-line no-await-in-loop
+        await nextTask();
       }
     } finally {
       // Clean up
       if (this.queue.length > 0) {
         this.queue = [];
       }
-      this.isBusy = false;
+      finished();
+      this.runningPromise = null;
     }
   }
 }
