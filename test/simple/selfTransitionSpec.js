@@ -2,10 +2,10 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
 describe('self-transition', () => {
-  it('executes actions and global hooks in the correct order with the correct parameters', () => {
+  it('executes actions and global hooks in the correct order with the correct parameters', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await Finity
       .configure()
       .global()
         .onStateEnter(mocks.stateEnterHook)
@@ -19,7 +19,7 @@ describe('self-transition', () => {
 
     mocks.reset();
 
-    stateMachine.handle('event1');
+    await stateMachine.handle('event1');
 
     const context = { stateMachine, event: 'event1' };
 
@@ -33,16 +33,17 @@ describe('self-transition', () => {
     ]);
   });
 
-  it('does not execute onStateChange hooks', () => {
+  it('does not execute onStateChange hooks', async () => {
     const stateChangeHook = jasmine.createSpy('stateChangeHook');
 
-    Finity
+    const stateMachine = await Finity
       .configure()
       .global().onStateChange(stateChangeHook)
       .initialState('state1')
         .on('event1').selfTransition()
-      .start()
-      .handle('event1');
+      .start();
+
+    await stateMachine.handle('event1');
 
     expect(stateChangeHook).not.toHaveBeenCalled();
   });

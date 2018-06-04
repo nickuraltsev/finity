@@ -3,7 +3,7 @@ import Finity from '../../src';
 describe('canHandle', () => {
   let stateMachine;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const grandchildConfig = Finity
       .configure()
         .initialState('state111')
@@ -17,7 +17,7 @@ describe('canHandle', () => {
           .on('event2').transitionTo('state12')
       .getConfig();
 
-    stateMachine = Finity
+    stateMachine = await Finity
       .configure()
         .initialState('state1')
           .submachine(childConfig)
@@ -25,20 +25,20 @@ describe('canHandle', () => {
       .start();
   });
 
-  it('returns true when the event can be handled by a descendant state machine', () => {
-    expect(stateMachine.canHandle('event3')).toBe(true);
+  it('returns true when the event can be handled by a descendant state machine', async () => {
+    expect(await stateMachine.canHandle('event3')).toBe(true);
   });
 
-  it('returns true when the event can be handled by an ancestor state machine', () => {
-    expect(stateMachine
+  it('returns true when the event can be handled by an ancestor state machine', async () => {
+    expect(await stateMachine
       .getSubmachine()
       .getSubmachine()
       .canHandle('event1')
     ).toBe(true);
   });
 
-  it('returns false when the event cannot be handled by any state machine in the hierarchy', () => {
-    expect(stateMachine
+  it('returns false when the event cannot be handled by any state machine in the hierarchy', async () => {
+    expect(await stateMachine
       .getSubmachine()
       .canHandle('non-handleable')
     ).toBe(false);

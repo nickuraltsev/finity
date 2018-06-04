@@ -4,13 +4,13 @@ import stateMachineMatcher from '../support/stateMachineMatcher';
 
 describe('start', () => {
   describe('when the initial state is a submachine state', () => {
-    it('sets the state of the submachine to the submachine\'s initial state', () => {
+    it('sets the state of the submachine to the submachine\'s initial state', async () => {
       const submachineConfig = Finity
         .configure()
           .initialState('state11')
         .getConfig();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
           .initialState('state1')
             .submachine(submachineConfig)
@@ -19,7 +19,7 @@ describe('start', () => {
       expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state11']);
     });
 
-    it('completes the execution of state entry actions before processing events', () => {
+    it('completes the execution of state entry actions before processing events', async () => {
       const mocks = new HandlerMocks();
 
       const submachineConfig = Finity
@@ -32,7 +32,7 @@ describe('start', () => {
             })
         .getConfig();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
           .initialState('state1')
             .onEnter((state, context) => {
