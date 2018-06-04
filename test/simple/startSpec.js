@@ -2,8 +2,8 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
 describe('Configurator#start', () => {
-  it('sets the state to the initial state', () => {
-    const stateMachine = Finity
+  it('sets the state to the initial state', async () => {
+    const stateMachine = await Finity
       .configure()
       .initialState('state1')
       .start();
@@ -11,10 +11,10 @@ describe('Configurator#start', () => {
     expect(stateMachine.getCurrentState()).toBe('state1');
   });
 
-  it('executes onStateEnter hooks and state entry actions with the correct parameters', () => {
+  it('executes onStateEnter hooks and state entry actions with the correct parameters', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await Finity
       .configure()
       .global().onStateEnter(mocks.stateEnterHook)
       .initialState('state1').onEnter(mocks.stateEntryAction)
@@ -28,10 +28,10 @@ describe('Configurator#start', () => {
     ]);
   });
 
-  it('does not execute onTransition and onStateChange hooks', () => {
+  it('does not execute onTransition and onStateChange hooks', async () => {
     const mocks = new HandlerMocks();
 
-    Finity
+    await Finity
       .configure()
       .global()
         .onTransition(mocks.transitionHook)
@@ -43,10 +43,10 @@ describe('Configurator#start', () => {
     expect(mocks.stateChangeHook).not.toHaveBeenCalled();
   });
 
-  it('completes the execution of initial state\'s entry actions before processing events', () => {
+  it('completes the execution of initial state\'s entry actions before processing events', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await (Finity
       .configure()
       .initialState('state1')
         .onEnter((state, context) => {
@@ -59,7 +59,7 @@ describe('Configurator#start', () => {
         .onExit(mocks.stateExitAction)
       .state('state2')
         .onEnter(mocks.stateEntryAction)
-      .start();
+      .start());
 
     expect(stateMachine.getCurrentState()).toBe('state2');
 
@@ -75,35 +75,63 @@ describe('Configurator#start', () => {
     ]);
   });
 
-  it('throws when the initial state is not defined', () => {
-    expect(() => Finity.configure().start())
-      .toThrowError('Initial state must be specified.');
+  it('throws when the initial state is not defined', async () => {
+    let error;
+    try {
+      await Finity.configure().start();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect(error.message).toBe('Initial state must be specified.');
   });
 });
 
 describe('Finity.start', () => {
-  it('sets the state to the initial state', () => {
+  it('sets the state to the initial state', async () => {
     const config = Finity
       .configure()
         .initialState('state1')
       .getConfig();
 
-    const stateMachine = Finity.start(config);
+    const stateMachine = await Finity.start(config);
     expect(stateMachine.getCurrentState()).toBe('state1');
   });
 
-  it('throws when `configuration` is not specified', () => {
-    expect(() => Finity.start())
-      .toThrowError('Configuration must be specified.');
+  it('throws when `configuration` is not specified', async () => {
+    let error;
+    try {
+      await Finity.start();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect(error.message).toBe('Configuration must be specified.');
   });
 
-  it('throws when `configuration` is null', () => {
-    expect(() => Finity.start(null))
-      .toThrowError('Configuration must be specified.');
+  it('throws when `configuration` is null', async () => {
+    let error;
+    try {
+      await Finity.start(null);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect(error.message).toBe('Configuration must be specified.');
   });
 
-  it('throws when `configuration` is not an object', () => {
-    expect(() => Finity.start(100))
-      .toThrowError('Configuration must be an object.');
+  it('throws when `configuration` is not an object', async () => {
+    let error;
+    try {
+      await Finity.start(100);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect(error.message).toBe('Configuration must be an object.');
   });
 });

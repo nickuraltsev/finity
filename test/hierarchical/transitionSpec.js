@@ -4,27 +4,28 @@ import stateMachineMatcher from '../support/stateMachineMatcher';
 
 describe('transition', () => {
   describe('when the target state is a submachine state', () => {
-    it('sets the state of the submachine to the submachine\'s initial state', () => {
+    it('sets the state of the submachine to the submachine\'s initial state', async () => {
       const submachineConfig = Finity
         .configure()
           .initialState('state21')
         .getConfig();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
           .initialState('state1')
             .on('event1').transitionTo('state2')
           .state('state2')
             .submachine(submachineConfig)
-        .start()
-        .handle('event1');
+        .start();
+
+      await stateMachine.handle('event1');
 
       expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state21']);
     });
   });
 
   describe('when the source and target states are submachine states', () => {
-    it('executes actions and global hooks in the correct order with the correct parameters', () => {
+    it('executes actions and global hooks in the correct order with the correct parameters', async () => {
       const mocks = new HandlerMocks();
 
       const withGlobalHooks = configurator =>
@@ -49,7 +50,7 @@ describe('transition', () => {
             .onEnter(mocks.stateEntryAction)
       ).getConfig();
 
-      const stateMachine = withGlobalHooks(
+      const stateMachine = await (withGlobalHooks(
         Finity
           .configure()
             .initialState('state1')
@@ -59,11 +60,11 @@ describe('transition', () => {
             .state('state2')
               .submachine(submachine2Config)
               .onEnter(mocks.stateEntryAction)
-      ).start();
+      ).start());
 
       mocks.reset();
 
-      stateMachine.handle('event1');
+      await stateMachine.handle('event1');
 
       expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state21']);
 

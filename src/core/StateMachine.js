@@ -1,5 +1,4 @@
 import invokeEach from '../utils/invokeEach';
-import merge from '../utils/merge';
 
 const noop = () => {};
 
@@ -21,63 +20,60 @@ export default class StateMachine {
     this.submachines = Object.create(null);
     this.timerIDs = null;
     this.asyncActionCancelers = null;
-    this.handleAsyncActionComplete = ::this.handleAsyncActionComplete;
-    this.handleTimeout = ::this.handleTimeout;
+    this.handleAsyncActionComplete = this.handleAsyncActionComplete.bind(this);
+    this.handleTimeout = this.handleTimeout.bind(this);
   }
 
   getCurrentState() {
     return this.currentState;
   }
 
-  canHandle(event, eventPayload) {
+  async canHandle(event, eventPayload) {
     if (!this.isStarted()) {
       return false;
     }
 
     const context = this.createContextWithEvent(event, eventPayload);
-    return !!this.getFirstAllowedTransitionForEvent(context);
+    return !!(await this.getFirstAllowedTransitionForEvent(context));
   }
 
-  tryHandle(event, eventPayload) {
+  async handle(event, eventPayload) {
     if (!this.isStarted()) {
-      return false;
+      throw new Error('Cannot handle events before starting the state machine!');
     }
-
     const context = this.createContextWithEvent(event, eventPayload);
-    const transitionConfig = this.getFirstAllowedTransitionForEvent(context);
+    const transitionConfig = await this.getFirstAllowedTransitionForEvent(context);
     if (transitionConfig) {
-      this.executeTransition(transitionConfig, context);
-      return true;
+      return await this.executeTransition(transitionConfig, context);
     }
-    return false;
+    return await this.handleUnhandledEvent(event, eventPayload);
   }
 
-  handleUnhandledEvent(event, eventPayload) {
+  async handleUnhandledEvent(event, eventPayload) {
     if (this.config.global.unhandledEventHooks.length > 0) {
-      invokeEach(
+      return (await invokeEach(
         this.config.global.unhandledEventHooks,
         event,
         this.currentState,
         this.createContextWithEvent(event, eventPayload)
-      );
-    } else {
-      throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
+      ))[0];
     }
+    throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
   }
 
   isStarted() {
     return this.currentState !== null;
   }
 
-  start() {
+  async start() {
     if (!this.isStarted()) {
-      this.enterState(this.config.initialState, this.createContext());
+      await this.enterState(this.config.initialState, this.createContext());
     }
   }
 
-  stop() {
+  async stop() {
     if (this.isStarted()) {
-      this.exitState(this.createContext());
+      await this.exitState(this.createContext());
       this.currentState = null;
     }
   }
@@ -86,43 +82,50 @@ export default class StateMachine {
     return this.isStarted() ? this.submachines[this.currentState] : null;
   }
 
-  executeTransition(transitionConfig, context) {
+  async executeTransition(transitionConfig, context) {
     if (transitionConfig.ignore) {
-      return;
+      return undefined;
     }
 
     if (!transitionConfig.isInternal) {
-      this.exitState(context);
+      await this.exitState(context);
     }
 
     const nextState = transitionConfig.targetState !== null ?
       transitionConfig.targetState :
       this.currentState;
 
-    invokeEach(this.config.global.transitionHooks, this.currentState, nextState, context);
-    invokeEach(transitionConfig.actions, this.currentState, nextState, context);
+    await invokeEach(this.config.global.transitionHooks, this.currentState, nextState, context);
+    const actionRetvals = await invokeEach(
+      transitionConfig.actions,
+      this.currentState,
+      nextState,
+      context
+    );
 
     if (!transitionConfig.isInternal) {
-      this.enterState(nextState, context);
+      await this.enterState(nextState, context);
     }
+
+    return (actionRetvals.length > 1 ? actionRetvals : actionRetvals[0]);
   }
 
-  enterState(state, context) {
-    invokeEach(this.config.global.stateEnterHooks, state, context);
+  async enterState(state, context) {
+    await invokeEach(this.config.global.stateEnterHooks, state, context);
 
     const stateConfig = this.config.states[state];
     if (stateConfig) {
-      invokeEach(stateConfig.entryActions, state, context);
+      await invokeEach(stateConfig.entryActions, state, context);
     }
 
     if (this.currentState !== null && this.currentState !== state) {
-      invokeEach(this.config.global.stateChangeHooks, this.currentState, state, context);
+      await invokeEach(this.config.global.stateChangeHooks, this.currentState, state, context);
     }
 
     try {
       this.startAsyncActions(state, context);
       this.startTimers(state);
-      this.startSubmachines(state);
+      await this.startSubmachines(state);
     } catch (error) {
       this.stopTimers();
       this.cancelAsyncActions();
@@ -132,16 +135,16 @@ export default class StateMachine {
     this.currentState = state;
   }
 
-  exitState(context) {
-    this.stopSubmachines();
+  async exitState(context) {
+    await this.stopSubmachines();
     this.stopTimers();
     this.cancelAsyncActions();
 
-    invokeEach(this.config.global.stateExitHooks, this.currentState, context);
+    await invokeEach(this.config.global.stateExitHooks, this.currentState, context);
 
     const stateConfig = this.config.states[this.currentState];
     if (stateConfig) {
-      invokeEach(stateConfig.exitActions, this.currentState, context);
+      await invokeEach(stateConfig.exitActions, this.currentState, context);
     }
   }
 
@@ -155,28 +158,32 @@ export default class StateMachine {
   }
 
   startAsyncAction(asyncActionConfig, state, context) {
-    const { action, successTrigger, failureTrigger } = asyncActionConfig;
-    let handleComplete = this.handleAsyncActionComplete;
-    action(state, context).then(
-      result => handleComplete(successTrigger, { result }),
-      error => handleComplete(failureTrigger, { error })
-    );
-    this.asyncActionCancelers = this.asyncActionCancelers || [];
-    this.asyncActionCancelers.push(() => {
-      handleComplete = noop;
-    });
+    this.taskScheduler.enqueue(() => {
+      const { action, successTrigger, failureTrigger } = asyncActionConfig;
+      let handleComplete = this.handleAsyncActionComplete;
+      this.taskScheduler.enqueue(async () => {
+        action(state, context).then(
+          result => handleComplete(successTrigger, { result }),
+          error => handleComplete(failureTrigger, { error })
+        );
+      }).then(null, x => { throw x; });
+      this.asyncActionCancelers = this.asyncActionCancelers || [];
+      this.asyncActionCancelers.push(() => {
+        handleComplete = noop;
+      });
+    }).then(null, x => { throw x; });
   }
 
   cancelAsyncActions() {
     if (this.asyncActionCancelers) {
-      invokeEach(this.asyncActionCancelers);
+      this.asyncActionCancelers.forEach(x => x());
       this.asyncActionCancelers = null;
     }
   }
 
-  handleAsyncActionComplete(triggerConfig, additionalContext) {
-    const context = merge(this.createContext(), additionalContext);
-    this.executeTrigger(triggerConfig, context);
+  async handleAsyncActionComplete(triggerConfig, additionalContext) {
+    const context = Object.assign(this.createContext(), additionalContext);
+    await this.executeTrigger(triggerConfig, context);
   }
 
   startTimers(state) {
@@ -198,10 +205,10 @@ export default class StateMachine {
   }
 
   handleTimeout(timerConfig) {
-    this.executeTrigger(timerConfig, this.createContext());
+    this.executeTrigger(timerConfig, this.createContext()).then(null, x => { throw x; });
   }
 
-  startSubmachines(state) {
+  async startSubmachines(state) {
     const stateConfig = this.config.states[state];
     if (stateConfig && stateConfig.submachine) {
       if (!this.submachines[state]) {
@@ -209,14 +216,14 @@ export default class StateMachine {
           stateConfig.submachine, this.taskScheduler, this.contextFactory
         );
       }
-      this.submachines[state].start();
+      await this.submachines[state].start();
     }
   }
 
-  stopSubmachines() {
+  async stopSubmachines() {
     const submachine = this.submachines[this.currentState];
     if (submachine) {
-      submachine.stop();
+      await submachine.stop();
     }
   }
 
@@ -233,16 +240,17 @@ export default class StateMachine {
     return context;
   }
 
-  static getFirstAllowedTransition(transitions, context) {
+  static async getFirstAllowedTransition(transitions, context) {
     for (let i = 0; i < transitions.length; i++) {
-      if (!transitions[i].condition || transitions[i].condition(context)) {
+      // eslint-disable-next-line no-await-in-loop
+      if (!transitions[i].condition || await transitions[i].condition(context)) {
         return transitions[i];
       }
     }
     return null;
   }
 
-  getFirstAllowedTransitionForEvent(context) {
+  async getFirstAllowedTransitionForEvent(context) {
     const stateConfig = this.config.states[this.currentState];
     if (!stateConfig) {
       return null;
@@ -252,11 +260,14 @@ export default class StateMachine {
 
     const eventConfig = stateConfig.events[context.event];
     if (eventConfig) {
-      transitionConfig = StateMachine.getFirstAllowedTransition(eventConfig.transitions, context);
+      transitionConfig = await StateMachine.getFirstAllowedTransition(
+        eventConfig.transitions,
+        context
+      );
     }
 
     if (!transitionConfig && stateConfig.anyEventTrigger) {
-      transitionConfig = StateMachine.getFirstAllowedTransition(
+      transitionConfig = await StateMachine.getFirstAllowedTransition(
         stateConfig.anyEventTrigger.transitions, context
       );
     }
@@ -264,14 +275,15 @@ export default class StateMachine {
     return transitionConfig;
   }
 
-  executeTrigger(triggerConfig, context) {
-    this.taskScheduler.execute(() => {
-      const transitionConfig = StateMachine.getFirstAllowedTransition(
+  async executeTrigger(triggerConfig, context) {
+    return await this.taskScheduler.enqueue(async () => {
+      const transitionConfig = await StateMachine.getFirstAllowedTransition(
         triggerConfig.transitions, context
       );
       if (transitionConfig) {
-        this.executeTransition(transitionConfig, context);
+        return await this.executeTransition(transitionConfig, context);
       }
+      return undefined;
     });
   }
 }

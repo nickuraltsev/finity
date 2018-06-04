@@ -1,6 +1,5 @@
 {
   "extends": "airbnb/base",
-  "parser": "babel-eslint",
   "env": {
     "node": true,
     "jasmine": true
@@ -32,5 +31,7 @@
     "arrow-parens": ["error", "as-needed"],
     "function-paren-newline": "off",
     "prefer-destructuring": "off",
+    "no-return-await": "off",
+    "no-return-assign": ["error", "except-parens"]
   }
 }

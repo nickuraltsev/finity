@@ -2,10 +2,10 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
 describe('ignore transition', () => {
-  it('executes no global hooks or actions', () => {
+  it('executes no global hooks or actions', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await Finity
       .configure()
       .global()
         .onStateEnter(mocks.stateEnterHook)
@@ -20,7 +20,7 @@ describe('ignore transition', () => {
 
     mocks.reset();
 
-    stateMachine.handle('event1');
+    await stateMachine.handle('event1');
 
     expect(mocks.stateEnterHook).not.toHaveBeenCalled();
     expect(mocks.stateExitHook).not.toHaveBeenCalled();

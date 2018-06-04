@@ -2,10 +2,10 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
 describe('transition', () => {
-  it('executes actions and global hooks in the correct order with the correct parameters', () => {
+  it('executes actions and global hooks in the correct order with the correct parameters', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await (Finity
       .configure()
       .global()
         .onStateEnter(mocks.stateEnterHook)
@@ -17,11 +17,11 @@ describe('transition', () => {
         .onExit(mocks.stateExitAction)
       .state('state2')
         .onEnter(mocks.stateEntryAction)
-      .start();
+      .start());
 
     mocks.reset();
 
-    stateMachine.handle('event1', 'payload1');
+    await stateMachine.handle('event1', 'payload1');
 
     const context = { stateMachine, event: 'event1', eventPayload: 'payload1' };
 

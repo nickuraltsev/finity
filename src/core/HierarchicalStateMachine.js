@@ -8,14 +8,15 @@ export default class HierarchicalStateMachine {
     this.taskScheduler = taskScheduler;
   }
 
-  static start(config) {
+  static async start(config) {
     const taskScheduler = new TaskScheduler();
     let rootStateMachine;
     const createContext = stateMachine => ({
       stateMachine: new HierarchicalStateMachine(rootStateMachine, stateMachine, taskScheduler),
     });
     rootStateMachine = new StateMachine(config, taskScheduler, createContext);
-    taskScheduler.execute(() => rootStateMachine.start());
+    await taskScheduler.enqueue(() => rootStateMachine.start());
+    await taskScheduler.runAll();
     return new HierarchicalStateMachine(rootStateMachine, rootStateMachine, taskScheduler);
   }
 
@@ -36,27 +37,31 @@ export default class HierarchicalStateMachine {
       .map(stateMachine => stateMachine.getCurrentState());
   }
 
-  canHandle(event, eventPayload) {
+  async canHandle(event, eventPayload) {
     const stateMachines = this.getStateMachines();
     for (let i = stateMachines.length - 1; i >= 0; i--) {
-      if (stateMachines[i].canHandle(event, eventPayload)) {
+      // eslint-disable-next-line no-await-in-loop
+      if (await stateMachines[i].canHandle(event, eventPayload)) {
         return true;
       }
     }
     return false;
   }
 
-  handle(event, eventPayload) {
-    this.taskScheduler.enqueue(() => {
-      const stateMachines = this.getStateMachines();
-      for (let i = stateMachines.length - 1; i >= 0; i--) {
-        if (stateMachines[i].tryHandle(event, eventPayload)) {
-          return;
+  async handle(event, eventPayload) {
+    return await new Promise((resolve, reject) => {
+      this.taskScheduler.enqueue(async () => {
+        const stateMachines = this.getStateMachines();
+        for (let i = stateMachines.length - 1; i >= 0; i--) {
+          // eslint-disable-next-line no-await-in-loop
+          if (await stateMachines[i].canHandle(event, eventPayload)) {
+            // eslint-disable-next-line no-await-in-loop
+            return await (stateMachines[i].handle(event, eventPayload));
+          }
         }
-      }
-      this.currentStateMachine.handleUnhandledEvent(event, eventPayload);
+        return await this.currentStateMachine.handleUnhandledEvent(event, eventPayload);
+      }).then(resolve, reject);
     });
-    return this;
   }
 
   getStateMachines() {

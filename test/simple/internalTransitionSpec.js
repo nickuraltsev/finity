@@ -4,10 +4,10 @@ import HandlerMocks from '../support/HandlerMocks';
 describe('internal transition', () => {
   it(
     'executes onTransition global hooks and transition actions with the correct parameters',
-    () => {
+    async () => {
       const mocks = new HandlerMocks();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
         .global().onTransition(mocks.transitionHook)
         .initialState('state1')
@@ -16,7 +16,7 @@ describe('internal transition', () => {
 
       mocks.reset();
 
-      stateMachine.handle('event1');
+      await stateMachine.handle('event1');
 
       const context = { stateMachine, event: 'event1' };
 
@@ -29,10 +29,10 @@ describe('internal transition', () => {
 
   it(
     'executes no global hooks or actions other than onTransition hooks and transition actions',
-    () => {
+    async () => {
       const mocks = new HandlerMocks();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
         .global()
           .onStateEnter(mocks.stateEnterHook)
@@ -46,7 +46,7 @@ describe('internal transition', () => {
 
       mocks.reset();
 
-      stateMachine.handle('event1');
+      await stateMachine.handle('event1');
 
       expect(mocks.stateEnterHook).not.toHaveBeenCalled();
       expect(mocks.stateExitHook).not.toHaveBeenCalled();
