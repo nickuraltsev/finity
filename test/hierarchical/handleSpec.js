@@ -1,30 +1,34 @@
 import Finity from '../../src';
+import { UnhandledEventError } from '../../src/core/Errors';
 
-describe('handle', () => {
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
+describeForAllTagTypes('heirarchial handle', () => {
   let stateMachine;
 
   beforeEach(async () => {
     const grandchildConfig = Finity
       .configure()
-        .initialState('state111')
-        .on('event3')
-          .transitionTo('state112').withAction(() => 'action3')
+        .initialState(tagFor('state111'))
+        .on(tagFor('event3'))
+          .transitionTo(tagFor('state112')).withAction(() => tagFor('action3'))
       .getConfig();
 
     const childConfig = Finity
       .configure()
-        .initialState('state11')
+        .initialState(tagFor('state11'))
           .submachine(grandchildConfig)
-          .on('event2')
-            .transitionTo('state12').withAction(() => 'action2')
+          .on(tagFor('event2'))
+            .transitionTo(tagFor('state12')).withAction(() => tagFor('action2'))
       .getConfig();
 
     stateMachine = await Finity
       .configure()
-        .initialState('state1')
+        .initialState(tagFor('state1'))
           .submachine(childConfig)
-          .on('event1')
-            .transitionTo('state2').withAction(() => 'action1')
+          .on(tagFor('event1'))
+            .transitionTo(tagFor('state2')).withAction(() => tagFor('action1'))
       .start();
   });
 
@@ -32,11 +36,11 @@ describe('handle', () => {
     'when the child state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the child state machine', async () => {
-        await stateMachine.handle('event2');
-        expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state12']);
+        await stateMachine.handle(tagFor('event2'));
+        expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state1'), tagFor('state12')]);
       });
       it('returns the value from the child state machine', async () => {
-        expect(await stateMachine.handle('event2')).toBe('action2');
+        expect(await stateMachine.handle(tagFor('event2'))).toBe(tagFor('action2'));
       });
     }
   );
@@ -45,11 +49,15 @@ describe('handle', () => {
     'when the grandchild state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the grandchild state machine', async () => {
-        await stateMachine.handle('event3');
-        expect(stateMachine.getStateHierarchy()).toEqual(['state1', 'state11', 'state112']);
+        await stateMachine.handle(tagFor('event3'));
+        expect(stateMachine.getStateHierarchy()).toEqual([
+          tagFor('state1'),
+          tagFor('state11'),
+          tagFor('state112'),
+        ]);
       });
       it('returns the value from the grandchild state machine', async () => {
-        expect(await stateMachine.handle('event3')).toBe('action3');
+        expect(await stateMachine.handle(tagFor('event3'))).toBe(tagFor('action3'));
       });
     }
   );
@@ -58,11 +66,11 @@ describe('handle', () => {
     'when the current state machine is the innermost state machine that can handle the event',
     () => {
       it('passes the event to the current state machine', async () => {
-        await stateMachine.handle('event1');
-        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
+        await stateMachine.handle(tagFor('event1'));
+        expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state2')]);
       });
       it('returns the value from the current state machine', async () => {
-        expect(await stateMachine.handle('event1')).toBe('action1');
+        expect(await stateMachine.handle(tagFor('event1'))).toBe(tagFor('action1'));
       });
     }
   );
@@ -73,11 +81,11 @@ describe('handle', () => {
       it('passes the event to the parent state machine', async () => {
         await stateMachine
           .getSubmachine()
-          .handle('event1');
-        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
+          .handle(tagFor('event1'));
+        expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state2')]);
       });
       it('returns the value from the parent state machine', async () => {
-        expect(await stateMachine.getSubmachine().handle('event1')).toBe('action1');
+        expect(await stateMachine.getSubmachine().handle(tagFor('event1'))).toBe(tagFor('action1'));
       });
     }
   );
@@ -89,8 +97,8 @@ describe('handle', () => {
         await stateMachine
           .getSubmachine()
           .getSubmachine()
-          .handle('event1');
-        expect(stateMachine.getStateHierarchy()).toEqual(['state2']);
+          .handle(tagFor('event1'));
+        expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state2')]);
       });
     }
   );
@@ -99,30 +107,30 @@ describe('handle', () => {
     it('passes the event to the innermost one', async () => {
       const grandchildConfig = Finity
         .configure()
-          .initialState('state111')
-            .on('event1').transitionTo('state112')
+          .initialState(tagFor('state111'))
+            .on(tagFor('event1')).transitionTo(tagFor('state112'))
         .getConfig();
 
       const childConfig = Finity
         .configure()
-          .initialState('state11')
+          .initialState(tagFor('state11'))
             .submachine(grandchildConfig)
-            .on('event1').transitionTo('state12')
+            .on(tagFor('event1')).transitionTo(tagFor('state12'))
         .getConfig();
 
       // eslint-disable-next-line no-shadow
       const stateMachine = await Finity
         .configure()
-          .initialState('state1')
+          .initialState(tagFor('state1'))
             .submachine(childConfig)
-            .on('event1').transitionTo('state2')
+            .on(tagFor('event1')).transitionTo(tagFor('state2'))
         .start();
 
-      await stateMachine.handle('event1');
+      await stateMachine.handle(tagFor('event1'));
 
       expect(
         stateMachine.getStateHierarchy()
-      ).toEqual(['state1', 'state11', 'state112']);
+      ).toEqual([tagFor('state1'), tagFor('state11'), tagFor('state112')]);
     });
   });
 
@@ -132,13 +140,14 @@ describe('handle', () => {
 
       let error;
       try {
-        await child.handle('non-handleable');
+        await child.handle(tagFor('nonHandleable'));
       } catch (e) {
         error = e;
       }
 
-      expect(error instanceof Error).toBe(true);
-      expect(error.message).toBe('Unhandled event \'non-handleable\' in state \'state11\'.');
+      expect(error instanceof UnhandledEventError).toBe(true);
+      expect(error.event).toBe(tagFor('nonHandleable'));
+      expect(error.state).toBe(tagFor('state11'));
     });
   });
 });

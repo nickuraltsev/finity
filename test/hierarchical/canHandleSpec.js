@@ -1,39 +1,42 @@
 import Finity from '../../src';
 
-describe('canHandle', () => {
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
+describeForAllTagTypes('heirarchial canHandle', () => {
   let stateMachine;
 
   beforeEach(async () => {
     const grandchildConfig = Finity
       .configure()
-        .initialState('state111')
-        .on('event3').transitionTo('state112')
+        .initialState(tagFor('state111'))
+        .on(tagFor('event3')).transitionTo(tagFor('state112'))
       .getConfig();
 
     const childConfig = Finity
       .configure()
-        .initialState('state11')
+        .initialState(tagFor('state11'))
           .submachine(grandchildConfig)
-          .on('event2').transitionTo('state12')
+          .on(tagFor('event2')).transitionTo(tagFor('state12'))
       .getConfig();
 
     stateMachine = await Finity
       .configure()
-        .initialState('state1')
+        .initialState(tagFor('state1'))
           .submachine(childConfig)
-          .on('event1').transitionTo('state2')
+          .on(tagFor('event1')).transitionTo(tagFor('state2'))
       .start();
   });
 
   it('returns true when the event can be handled by a descendant state machine', async () => {
-    expect(await stateMachine.canHandle('event3')).toBe(true);
+    expect(await stateMachine.canHandle(tagFor('event3'))).toBe(true);
   });
 
   it('returns true when the event can be handled by an ancestor state machine', async () => {
     expect(await stateMachine
       .getSubmachine()
       .getSubmachine()
-      .canHandle('event1')
+      .canHandle(tagFor('event1'))
     ).toBe(true);
   });
 

@@ -1,8 +1,11 @@
 import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
 describe('internal transition', () => {
-  it(
+  forAllTagTypesIt(
     'executes onTransition global hooks and transition actions with the correct parameters',
     async () => {
       const mocks = new HandlerMocks();
@@ -10,24 +13,24 @@ describe('internal transition', () => {
       const stateMachine = await Finity
         .configure()
         .global().onTransition(mocks.transitionHook)
-        .initialState('state1')
-          .on('event1').internalTransition().withAction(mocks.transitionAction)
+        .initialState(tagFor('state1'))
+          .on(tagFor('event1')).internalTransition().withAction(mocks.transitionAction)
         .start();
 
       mocks.reset();
 
-      await stateMachine.handle('event1');
+      await stateMachine.handle(tagFor('event1'));
 
-      const context = { stateMachine, event: 'event1' };
+      const context = { stateMachine, event: tagFor('event1') };
 
       expect(mocks.calledHandlers).toEqual([
-        ['transitionHook', 'state1', 'state1', context],
-        ['transitionAction', 'state1', 'state1', context],
+        ['transitionHook', tagFor('state1'), tagFor('state1'), context],
+        ['transitionAction', tagFor('state1'), tagFor('state1'), context],
       ]);
     }
   );
 
-  it(
+  forAllTagTypesIt(
     'executes no global hooks or actions other than onTransition hooks and transition actions',
     async () => {
       const mocks = new HandlerMocks();
@@ -38,15 +41,15 @@ describe('internal transition', () => {
           .onStateEnter(mocks.stateEnterHook)
           .onStateExit(mocks.stateExitHook)
           .onStateChange(mocks.stateChangeHook)
-        .initialState('state1')
+        .initialState(tagFor('state1'))
           .onEnter(mocks.stateEntryAction)
           .onExit(mocks.stateExitAction)
-          .on('event1').internalTransition()
+          .on(tagFor('event1')).internalTransition()
         .start();
 
       mocks.reset();
 
-      await stateMachine.handle('event1');
+      await stateMachine.handle(tagFor('event1'));
 
       expect(mocks.stateEnterHook).not.toHaveBeenCalled();
       expect(mocks.stateExitHook).not.toHaveBeenCalled();
