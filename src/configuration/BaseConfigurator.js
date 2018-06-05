@@ -15,21 +15,22 @@ export default class BaseConfigurator {
   }
 
   buildConfig() {
-    const mapper = value => {
-      if (!value) {
-        return value;
-      }
+    const mapper = (value, deep = false) => {
       if (value instanceof BaseConfigurator) {
         return value.buildConfig();
       }
-      if (Array.isArray(value)) {
-        return value.map(mapper);
-      }
-      if (value && typeof value === 'object') {
+      if (deep && value instanceof Map) {
         return mapValues(value, mapper);
+      }
+      if (deep && Array.isArray(value)) {
+        return value.map(mapper);
       }
       return value;
     };
-    return mapValues(this.config, mapper);
+    return mapValues(this.config, value => mapper(value, true), [
+      'action',
+      'initialState',
+      'targetState',
+    ]);
   }
 }

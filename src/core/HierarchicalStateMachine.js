@@ -75,6 +75,6 @@ export default class HierarchicalStateMachine {
   }
 
   toString() {
-    return `StateMachine(currentState: ${this.getCurrentState()})`;
+    return `StateMachine(currentState: ${this.getCurrentState().toString()})`;
   }
 }

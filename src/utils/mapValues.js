@@ -1,8 +1,13 @@
-export default function mapValues(obj, callback) {
+export default function mapValues(obj, callback, excludeKeys = []) {
+  if (obj instanceof Map) {
+    return new Map(
+      Array.from(obj.entries())
+      .map(([k, v]) => ([k, (excludeKeys.includes(k) ? v : callback(v))]))
+    );
+  }
   const prototype = Object.getPrototypeOf(obj);
   const result = Object.create(prototype);
-  Object.keys(obj).forEach(key => {
-    result[key] = callback(obj[key]);
-  });
-  return result;
+  return Object.entries(obj)
+    .map(([k, v]) => ([k, (excludeKeys.includes(k) ? v : callback(v))]))
+    .reduce((acc, [k, v]) => Object.assign(acc, { [k]: v }), result);
 }

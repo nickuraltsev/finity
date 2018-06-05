@@ -17,7 +17,7 @@ export default class StateMachine {
     this.taskScheduler = taskScheduler;
     this.contextFactory = contextFactory;
     this.currentState = null;
-    this.submachines = Object.create(null);
+    this.submachines = new Map();
     this.timerIDs = null;
     this.asyncActionCancelers = null;
     this.handleAsyncActionComplete = this.handleAsyncActionComplete.bind(this);
@@ -79,7 +79,7 @@ export default class StateMachine {
   }
 
   getSubmachine() {
-    return this.isStarted() ? this.submachines[this.currentState] : null;
+    return this.isStarted() ? this.submachines.get(this.currentState) : null;
   }
 
   async executeTransition(transitionConfig, context) {
@@ -113,7 +113,7 @@ export default class StateMachine {
   async enterState(state, context) {
     await invokeEach(this.config.global.stateEnterHooks, state, context);
 
-    const stateConfig = this.config.states[state];
+    const stateConfig = this.config.states.get(state);
     if (stateConfig) {
       await invokeEach(stateConfig.entryActions, state, context);
     }
@@ -142,14 +142,14 @@ export default class StateMachine {
 
     await invokeEach(this.config.global.stateExitHooks, this.currentState, context);
 
-    const stateConfig = this.config.states[this.currentState];
+    const stateConfig = this.config.states.get(this.currentState);
     if (stateConfig) {
       await invokeEach(stateConfig.exitActions, this.currentState, context);
     }
   }
 
   startAsyncActions(state, context) {
-    const stateConfig = this.config.states[state];
+    const stateConfig = this.config.states.get(state);
     if (stateConfig) {
       stateConfig.asyncActions.forEach(
         asyncActionConfig => this.startAsyncAction(asyncActionConfig, state, context)
@@ -187,7 +187,7 @@ export default class StateMachine {
   }
 
   startTimers(state) {
-    const stateConfig = this.config.states[state];
+    const stateConfig = this.config.states.get(state);
     if (stateConfig && stateConfig.timers.length > 0) {
       this.timerIDs = stateConfig.timers.map(timerConfig => setTimeout(
         this.handleTimeout,
@@ -209,19 +209,19 @@ export default class StateMachine {
   }
 
   async startSubmachines(state) {
-    const stateConfig = this.config.states[state];
+    const stateConfig = this.config.states.get(state);
     if (stateConfig && stateConfig.submachine) {
-      if (!this.submachines[state]) {
-        this.submachines[state] = new StateMachine(
+      if (!this.submachines.get(state)) {
+        this.submachines.set(state, new StateMachine(
           stateConfig.submachine, this.taskScheduler, this.contextFactory
-        );
+        ));
       }
-      await this.submachines[state].start();
+      await this.submachines.get(state).start();
     }
   }
 
   async stopSubmachines() {
-    const submachine = this.submachines[this.currentState];
+    const submachine = this.submachines.get(this.currentState);
     if (submachine) {
       await submachine.stop();
     }
@@ -251,14 +251,14 @@ export default class StateMachine {
   }
 
   async getFirstAllowedTransitionForEvent(context) {
-    const stateConfig = this.config.states[this.currentState];
+    const stateConfig = this.config.states.get(this.currentState);
     if (!stateConfig) {
       return null;
     }
 
     let transitionConfig = null;
 
-    const eventConfig = stateConfig.events[context.event];
+    const eventConfig = stateConfig.events.get(context.event);
     if (eventConfig) {
       transitionConfig = await StateMachine.getFirstAllowedTransition(
         eventConfig.transitions,

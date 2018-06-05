@@ -9,7 +9,7 @@ export default class StateConfigurator extends BaseConfigurator {
     this.config = {
       entryActions: [],
       exitActions: [],
-      events: Object.create(null),
+      events: new Map(),
       anyEventTrigger: null,
       timers: [],
       asyncActions: [],
@@ -28,10 +28,10 @@ export default class StateConfigurator extends BaseConfigurator {
   }
 
   on(event) {
-    if (!this.config.events[event]) {
-      this.config.events[event] = new TriggerConfigurator(this);
+    if (!this.config.events.has(event)) {
+      this.config.events.set(event, new TriggerConfigurator(this));
     }
-    return this.config.events[event];
+    return this.config.events.get(event);
   }
 
   onAny() {

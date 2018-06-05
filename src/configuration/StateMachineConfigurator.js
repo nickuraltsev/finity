@@ -9,7 +9,7 @@ export default class StateMachineConfigurator extends BaseConfigurator {
     this.config = {
       global: new GlobalConfigurator(this),
       initialState: null,
-      states: Object.create(null),
+      states: new Map(),
     };
   }
 
@@ -23,10 +23,10 @@ export default class StateMachineConfigurator extends BaseConfigurator {
   }
 
   state(state) {
-    if (!this.config.states[state]) {
-      this.config.states[state] = new StateConfigurator(this);
+    if (!this.config.states.has(state)) {
+      this.config.states.set(state, new StateConfigurator(this));
     }
-    return this.config.states[state];
+    return this.config.states.get(state);
   }
 
   getConfig() {
