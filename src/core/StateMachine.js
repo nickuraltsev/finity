@@ -1,3 +1,4 @@
+import { UnhandledEventError, StateMachineNotStartedError, StateMachineConfigError } from './Errors';
 import invokeEach from '../utils/invokeEach';
 
 const noop = () => {};
@@ -5,13 +6,13 @@ const noop = () => {};
 export default class StateMachine {
   constructor(config, taskScheduler, contextFactory) {
     if (config === undefined || config === null) {
-      throw new Error('Configuration must be specified.');
+      throw new StateMachineConfigError('Configuration must be specified.');
     }
     if (typeof config !== 'object') {
-      throw new Error('Configuration must be an object.');
+      throw new StateMachineConfigError('Configuration must be an object.');
     }
     if (config.initialState === undefined || config.initialState === null) {
-      throw new Error('Initial state must be specified.');
+      throw new StateMachineConfigError('Initial state must be specified.');
     }
     this.config = config;
     this.taskScheduler = taskScheduler;
@@ -39,7 +40,7 @@ export default class StateMachine {
 
   async handle(event, eventPayload) {
     if (!this.isStarted()) {
-      throw new Error('Cannot handle events before starting the state machine!');
+      throw new StateMachineNotStartedError(this);
     }
     const context = this.createContextWithEvent(event, eventPayload);
     const transitionConfig = await this.getFirstAllowedTransitionForEvent(context);
@@ -58,7 +59,11 @@ export default class StateMachine {
         this.createContextWithEvent(event, eventPayload)
       ))[0];
     }
-    throw new Error(`Unhandled event '${event}' in state '${this.currentState}'.`);
+    throw new UnhandledEventError(
+      event,
+      this.currentState,
+      this.createContextWithEvent(event, eventPayload)
+    );
   }
 
   isStarted() {
