@@ -60,9 +60,10 @@
     "build:umd:min": "webpack src/index.commonjs.js -o umd/Finity.min.js --mode production",
     "build": "npm run clean && npm run build:commonjs && npm run build:umd && npm run build:umd:min && gzip-size umd/Finity.min.js",
     "prepare": "npm run build",
+    "test:lint": "eslint src test examples",
     "test:typings": "tsc",
     "test": "node -r source-map-support/register test/support/jasmineRunner.js && npm run test:typings",
-    "coverage": "nyc --cache false --produce-source-map --reporter lcovonly --reporter text node -r source-map-support/register test/support/jasmineRunner.js && rimraf .nyc_output",
-    "lint": "eslint src test examples"
+    "test:coverage": "nyc --cache false --produce-source-map --reporter lcovonly --reporter text npm run test && rimraf .nyc_output",
+    "test:full": "npm run test:lint && npm run build && npm run test:coverage && npm run test:typings"
   }
 }
