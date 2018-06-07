@@ -1,6 +1,8 @@
+import toString from '../utils/toString';
+
 export class UnhandledEventError extends Error {
   constructor(event, state, context) {
-    super(`Unhandled event '${event.toString()}' in state '${state.toString()}'.`);
+    super(`Unhandled event '${toString(event)}' in state '${toString(state)}'.`);
     this.event = event;
     this.state = state;
     this.context = context;

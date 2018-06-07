@@ -1,7 +1,9 @@
+import toString from '../../src/utils/toString';
+
 const tagFactories = {
-  string(key) { return key.toString(); },
-  Symbol(key) { return Symbol(key.toString()); },
-  Object(key) { return { toString() { return `Object(${key.toString()})`; } }; },
+  string(key) { return `${toString(key)}`; },
+  Symbol(key) { return Symbol(`${toString(key)}`); },
+  Object(key) { return { toString() { return `Object(${toString(key)})`; } }; },
   Number() { return this.tagMap.size + 1; },
   RandomNumber() {
     // eslint-disable-next-line no-constant-condition

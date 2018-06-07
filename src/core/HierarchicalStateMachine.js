@@ -1,5 +1,6 @@
 import StateMachine from './StateMachine';
 import TaskScheduler from './TaskScheduler';
+import toString from '../utils/toString';
 
 export default class HierarchicalStateMachine {
   constructor(rootStateMachine, currentStateMachine, taskScheduler) {
@@ -75,6 +76,6 @@ export default class HierarchicalStateMachine {
   }
 
   toString() {
-    return `StateMachine(currentState: ${this.getCurrentState().toString()})`;
+    return `StateMachine(currentState: ${toString(this.getCurrentState())})`;
   }
 }
