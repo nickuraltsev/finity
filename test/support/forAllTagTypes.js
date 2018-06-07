@@ -1,5 +1,6 @@
 import Tagger from './Tagger';
 import Finity from '../../src';
+import toString from '../../src/utils/toString';
 
 const finityTagTypes = {
   BaseConfigurator(key) {
@@ -68,29 +69,31 @@ export { shadowBeforeEach as beforeEach };
 const shadowAfterEach = makeShadow(afterEach);
 export { shadowAfterEach as afterEach };
 
-export default function forAllTagTypes(block) {
+export default function forAllTagTypes(fn, block) {
   Tagger.BuiltinTagTypes
     .map(tagType => [tagType, new Tagger(tagType)])
     .concat(Object.entries(finityTagTypes).map(([k, v]) => [k, new Tagger(v)]))
-    .forEach(([tagType, tagger]) => describe(
-      `when using ${tagType} tags`,
-      (...describeArgs) => {
+    .forEach(([tagType, tagger]) => fn(tagType,
+      (...blockArgs) => {
         taggerStack.push(tagger);
-        [describe, it, beforeEach, afterEach].forEach(fn => shadowFor(fn).pushCurrentTagger());
-        const retval = block(...describeArgs);
-        [describe, it, beforeEach, afterEach].forEach(fn => shadowFor(fn).pop());
-        taggerStack.pop();
+        [describe, it, beforeEach, afterEach].forEach(x => shadowFor(x).pushCurrentTagger());
+        const retval = block(...blockArgs);
+        const popShadows = val => {
+          [describe, it, beforeEach, afterEach].forEach(x => shadowFor(x).pop());
+          taggerStack.pop();
+          return val;
+        };
+        if (retval && retval.then) return retval.then(popShadows);
+        popShadows();
         return retval;
       }
     ));
 }
 
 export function describeForAllTagTypes(name, block) {
-  return describe(name, () => forAllTagTypes(block));
+  return describe(name, () => forAllTagTypes((tagType, shadowedBlock) => describe(`when using ${toString(tagType)} tags`, shadowedBlock), block));
 }
 
 export function forAllTagTypesIt(name, block) {
-  return forAllTagTypes(async () => {
-    await it(name, block);
-  });
+  return describe(name, () => forAllTagTypes((tagType, shadowedBlock) => it(`when using ${toString(tagType)} tags`, shadowedBlock), block));
 }
