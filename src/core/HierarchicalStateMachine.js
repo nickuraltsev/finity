@@ -48,8 +48,8 @@ export default class HierarchicalStateMachine {
     return false;
   }
 
-  async handle(event, eventPayload) {
-    return await new Promise((resolve, reject) => {
+  handle(event, eventPayload) {
+    return (new Promise((resolve, reject) => {
       this.taskScheduler.enqueue(async () => {
         const stateMachines = this.getStateMachines();
         for (let i = stateMachines.length - 1; i >= 0; i--) {
@@ -61,7 +61,7 @@ export default class HierarchicalStateMachine {
         }
         return await this.currentStateMachine.handleUnhandledEvent(event, eventPayload);
       }).then(resolve, reject);
-    });
+    })).catch(err => { throw err; });
   }
 
   getStateMachines() {

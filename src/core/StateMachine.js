@@ -38,16 +38,18 @@ export default class StateMachine {
     return !!(await this.getFirstAllowedTransitionForEvent(context));
   }
 
-  async handle(event, eventPayload) {
-    if (!this.isStarted()) {
-      throw new StateMachineNotStartedError(this);
-    }
-    const context = this.createContextWithEvent(event, eventPayload);
-    const transitionConfig = await this.getFirstAllowedTransitionForEvent(context);
-    if (transitionConfig) {
-      return await this.executeTransition(transitionConfig, context);
-    }
-    return await this.handleUnhandledEvent(event, eventPayload);
+  handle(event, eventPayload) {
+    return (async () => {
+      if (!this.isStarted()) {
+        throw new StateMachineNotStartedError(this);
+      }
+      const context = this.createContextWithEvent(event, eventPayload);
+      const transitionConfig = await this.getFirstAllowedTransitionForEvent(context);
+      if (transitionConfig) {
+        return await this.executeTransition(transitionConfig, context);
+      }
+      return await this.handleUnhandledEvent(event, eventPayload);
+    })().catch(err => { throw err; });
   }
 
   async handleUnhandledEvent(event, eventPayload) {
