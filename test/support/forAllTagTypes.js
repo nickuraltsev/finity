@@ -24,6 +24,8 @@ function shadowerForTagger(tagger) {
     const retval = Promise.resolve(shadowedBlock(...args));
     retval.then(() => {
       taggerStack.pop();
+    }, () => {
+      taggerStack.pop();
     });
     return retval;
   });
@@ -77,12 +79,19 @@ export default function forAllTagTypes(fn, block) {
       (...blockArgs) => {
         taggerStack.push(tagger);
         [describe, it, beforeEach, afterEach].forEach(x => shadowFor(x).pushCurrentTagger());
-        const retval = block(...blockArgs);
         const popShadows = val => {
           [describe, it, beforeEach, afterEach].forEach(x => shadowFor(x).pop());
           taggerStack.pop();
           return val;
         };
+        let retval;
+        let success = false;
+        try {
+          retval = block(...blockArgs);
+          success = true;
+        } finally {
+          if (!success) popShadows();
+        }
         if (retval && retval.then) return retval.then(popShadows);
         popShadows();
         return retval;
@@ -95,5 +104,5 @@ export function describeForAllTagTypes(name, block) {
 }
 
 export function forAllTagTypesIt(name, block) {
-  return describe(name, () => forAllTagTypes((tagType, shadowedBlock) => it(`when using ${toString(tagType)} tags`, shadowedBlock), block));
+  return describe(name, () => forAllTagTypes((tagType, shadowedBlock) => it(`when using ${toString(tagType)} tags`, async () => (await shadowedBlock())), block));
 }
