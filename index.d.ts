@@ -1,7 +1,7 @@
 declare const Finity: {
   configure(): StateMachineConfigurator<string, string>;
   configure<S, E>(): StateMachineConfigurator<S, E>;
-  start<S, E>(config: Configuration<S, E>): StateMachine<S, E>;
+  start<S, E>(config: Configuration<S, E>): Promise<StateMachine<S, E>>;
 };
 
 export default Finity;
@@ -14,12 +14,12 @@ export interface StateMachineConfigurator<S, E> extends BaseConfigurator<S, E> {
   global(): GlobalConfigurator<S, E>;
   initialState(state: S): StateConfigurator<S, E>;
   state(state: S): StateConfigurator<S, E>;
-  start(): StateMachine<S, E>;
+  start(): Promise<StateMachine<S, E>>;
 }
 
-export type StateHook<S, E> = (state: S, context: Context<S, E>) => void;
-export type TransitionHook<S, E> = (fromState: S, toState: S, context: Context<S, E>) => void;
-export type UnhandledEventHook<S, E> = (event: E, state: S, context: Context<S, E>) => void;
+export type StateHook<S, E> = (state: S, context: Context<S, E>) => void | Promise<void>;
+export type TransitionHook<S, E> = (fromState: S, toState: S, context: Context<S, E>) => void | Promise<void>;
+export type UnhandledEventHook<S, E> = (event: E, state: S, context: Context<S, E>) => void | Promise<void>;
 
 export interface GlobalConfigurator<S, E> extends BaseConfigurator<S, E>, StateMachineConfigurator<S, E> {
   onStateEnter(hook: StateHook<S, E>): GlobalConfigurator<S, E>;
@@ -29,7 +29,7 @@ export interface GlobalConfigurator<S, E> extends BaseConfigurator<S, E>, StateM
   onUnhandledEvent(hook: UnhandledEventHook<S, E>): GlobalConfigurator<S, E>;
 }
 
-export type StateAction<S, E> = (state: S, context: Context<S, E>) => void;
+export type StateAction<S, E> = (state: S, context: Context<S, E>) => void | Promise<void>;
 
 export type AsyncOperation<S, E> = (state: S, context: Context<S, E>) => Promise<any>;
 
@@ -58,8 +58,8 @@ export interface AsyncConfigurator<S, E> extends BaseConfigurator<S, E> {
   onFailure(): TriggerConfigurator<S, E>;
 }
 
-export type TransitionAction<S, E> = (fromState: S, toState: S, context: Context<S, E>) => void;
-export type Condition<S, E> = (context: Context<S, E>) => boolean;
+export type TransitionAction<S, E> = (fromState: S, toState: S, context: Context<S, E>) => void | Promise<void>;
+export type Condition<S, E> = (context: Context<S, E>) => boolean | Promise<boolean>;
 
 export interface TransitionConfigurator<S, E>
   extends BaseConfigurator<S, E>, StateConfigurator<S, E>, TriggerConfigurator<S, E>, AsyncConfigurator<S, E> {
@@ -73,8 +73,8 @@ export interface Configuration<S, E> {
 export interface StateMachine<S, E> {
   getCurrentState(): S;
   getStateHierarchy(): S[];
-  canHandle(event: E, eventPayload?: any): boolean;
-  handle(event: E, eventPayload?: any): StateMachine<S, E>;
+  canHandle(event: E, eventPayload?: any): Promise<boolean>;
+  handle(event: E, eventPayload?: any): Promise<any>;
 }
 
 export interface Context<S, E> {

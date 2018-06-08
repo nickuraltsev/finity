@@ -2,6 +2,7 @@ src/
 test/
 examples/
 coverage/
+.nyc_output/
 node_modules/
 typings/
 npm-debug.log

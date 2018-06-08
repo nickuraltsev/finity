@@ -1,48 +1,52 @@
 import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
 describe('self-transition', () => {
-  it('executes actions and global hooks in the correct order with the correct parameters', () => {
+  forAllTagTypesIt('executes actions and global hooks in the correct order with the correct parameters', async () => {
     const mocks = new HandlerMocks();
 
-    const stateMachine = Finity
+    const stateMachine = await Finity
       .configure()
       .global()
         .onStateEnter(mocks.stateEnterHook)
         .onStateExit(mocks.stateExitHook)
         .onTransition(mocks.transitionHook)
-      .initialState('state1')
+      .initialState(tagFor('state1'))
         .onEnter(mocks.stateEntryAction)
         .onExit(mocks.stateExitAction)
-        .on('event1').selfTransition().withAction(mocks.transitionAction)
+        .on(tagFor('event1')).selfTransition().withAction(mocks.transitionAction)
       .start();
 
     mocks.reset();
 
-    stateMachine.handle('event1');
+    await stateMachine.handle(tagFor('event1'));
 
-    const context = { stateMachine, event: 'event1' };
+    const context = { stateMachine, event: tagFor('event1') };
 
     expect(mocks.calledHandlers).toEqual([
-      ['stateExitHook', 'state1', context],
-      ['stateExitAction', 'state1', context],
-      ['transitionHook', 'state1', 'state1', context],
-      ['transitionAction', 'state1', 'state1', context],
-      ['stateEnterHook', 'state1', context],
-      ['stateEntryAction', 'state1', context],
+      ['stateExitHook', tagFor('state1'), context],
+      ['stateExitAction', tagFor('state1'), context],
+      ['transitionHook', tagFor('state1'), tagFor('state1'), context],
+      ['transitionAction', tagFor('state1'), tagFor('state1'), context],
+      ['stateEnterHook', tagFor('state1'), context],
+      ['stateEntryAction', tagFor('state1'), context],
     ]);
   });
 
-  it('does not execute onStateChange hooks', () => {
+  forAllTagTypesIt('does not execute onStateChange hooks', async () => {
     const stateChangeHook = jasmine.createSpy('stateChangeHook');
 
-    Finity
+    const stateMachine = await Finity
       .configure()
       .global().onStateChange(stateChangeHook)
-      .initialState('state1')
-        .on('event1').selfTransition()
-      .start()
-      .handle('event1');
+      .initialState(tagFor('state1'))
+        .on(tagFor('event1')).selfTransition()
+      .start();
+
+    await stateMachine.handle(tagFor('event1'));
 
     expect(stateChangeHook).not.toHaveBeenCalled();
   });

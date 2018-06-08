@@ -2,29 +2,33 @@ import Finity from '../../src';
 import HandlerMocks from '../support/HandlerMocks';
 import stateMachineMatcher from '../support/stateMachineMatcher';
 
-describe('transition', () => {
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
+describe('heirarchial transition', () => {
   describe('when the target state is a submachine state', () => {
-    it('sets the state of the submachine to the submachine\'s initial state', () => {
+    forAllTagTypesIt('sets the state of the submachine to the submachine\'s initial state', async () => {
       const submachineConfig = Finity
         .configure()
-          .initialState('state21')
+          .initialState(tagFor('state21'))
         .getConfig();
 
-      const stateMachine = Finity
+      const stateMachine = await Finity
         .configure()
-          .initialState('state1')
-            .on('event1').transitionTo('state2')
-          .state('state2')
+          .initialState(tagFor('state1'))
+            .on(tagFor('event1')).transitionTo(tagFor('state2'))
+          .state(tagFor('state2'))
             .submachine(submachineConfig)
-        .start()
-        .handle('event1');
+        .start();
 
-      expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state21']);
+      await stateMachine.handle(tagFor('event1'));
+
+      expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state2'), tagFor('state21')]);
     });
   });
 
   describe('when the source and target states are submachine states', () => {
-    it('executes actions and global hooks in the correct order with the correct parameters', () => {
+    forAllTagTypesIt('executes actions and global hooks in the correct order with the correct parameters', async () => {
       const mocks = new HandlerMocks();
 
       const withGlobalHooks = configurator =>
@@ -38,34 +42,34 @@ describe('transition', () => {
       const submachine1Config = withGlobalHooks(
         Finity
           .configure()
-            .initialState('state11')
+            .initialState(tagFor('state11'))
             .onExit(mocks.stateExitAction)
       ).getConfig();
 
       const submachine2Config = withGlobalHooks(
         Finity
           .configure()
-            .initialState('state21')
+            .initialState(tagFor('state21'))
             .onEnter(mocks.stateEntryAction)
       ).getConfig();
 
-      const stateMachine = withGlobalHooks(
+      const stateMachine = await (withGlobalHooks(
         Finity
           .configure()
-            .initialState('state1')
+            .initialState(tagFor('state1'))
               .submachine(submachine1Config)
-              .on('event1').transitionTo('state2').withAction(mocks.transitionAction)
+              .on(tagFor('event1')).transitionTo(tagFor('state2')).withAction(mocks.transitionAction)
               .onExit(mocks.stateExitAction)
-            .state('state2')
+            .state(tagFor('state2'))
               .submachine(submachine2Config)
               .onEnter(mocks.stateEntryAction)
-      ).start();
+      ).start());
 
       mocks.reset();
 
-      stateMachine.handle('event1');
+      await stateMachine.handle(tagFor('event1'));
 
-      expect(stateMachine.getStateHierarchy()).toEqual(['state2', 'state21']);
+      expect(stateMachine.getStateHierarchy()).toEqual([tagFor('state2'), tagFor('state21')]);
 
       const context1 = {
         stateMachine: stateMachineMatcher(),
@@ -73,7 +77,7 @@ describe('transition', () => {
 
       const context2 = {
         stateMachine,
-        event: 'event1',
+        event: tagFor('event1'),
       };
 
       const context3 = {
@@ -81,17 +85,17 @@ describe('transition', () => {
       };
 
       expect(mocks.calledHandlers).toEqual([
-        ['stateExitHook', 'state11', context1],
-        ['stateExitAction', 'state11', context1],
-        ['stateExitHook', 'state1', context2],
-        ['stateExitAction', 'state1', context2],
-        ['transitionHook', 'state1', 'state2', context2],
-        ['transitionAction', 'state1', 'state2', context2],
-        ['stateEnterHook', 'state2', context2],
-        ['stateEntryAction', 'state2', context2],
-        ['stateChangeHook', 'state1', 'state2', context2],
-        ['stateEnterHook', 'state21', context3],
-        ['stateEntryAction', 'state21', context3],
+        ['stateExitHook', tagFor('state11'), context1],
+        ['stateExitAction', tagFor('state11'), context1],
+        ['stateExitHook', tagFor('state1'), context2],
+        ['stateExitAction', tagFor('state1'), context2],
+        ['transitionHook', tagFor('state1'), tagFor('state2'), context2],
+        ['transitionAction', tagFor('state1'), tagFor('state2'), context2],
+        ['stateEnterHook', tagFor('state2'), context2],
+        ['stateEntryAction', tagFor('state2'), context2],
+        ['stateChangeHook', tagFor('state1'), tagFor('state2'), context2],
+        ['stateEnterHook', tagFor('state21'), context3],
+        ['stateEntryAction', tagFor('state21'), context3],
       ]);
     });
   });

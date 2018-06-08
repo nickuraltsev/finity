@@ -1,1 +1,4 @@
-export default from './Finity';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'babel-polyfill';
+
+export { default } from './Finity';

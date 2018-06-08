@@ -1,53 +1,54 @@
 import Finity from '../../src';
 
+// eslint-disable-next-line no-unused-vars
+import { tagFor, it, describe, beforeEach, afterEach, describeForAllTagTypes, forAllTagTypesIt } from '../support/forAllTagTypes';
+
 describe('time trigger', () => {
-  beforeEach(() => jasmine.clock().install());
-
-  afterEach(() => jasmine.clock().uninstall());
-
   describe('when defined for the initial state', () => {
-    it('executes the correct transition on timeout', () => {
-      const stateMachine = Finity
+    forAllTagTypesIt('executes the correct transition on timeout', async () => {
+      const stateMachine = await Finity
         .configure()
-        .initialState('state1').onTimeout(100).transitionTo('state2')
+        .initialState(tagFor('state1')).onTimeout(100).transitionTo(tagFor('state2'))
         .start();
 
-      expect(stateMachine.getCurrentState()).toBe('state1');
+      expect(stateMachine.getCurrentState()).toBe(tagFor('state1'));
 
-      jasmine.clock().tick(100);
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-      expect(stateMachine.getCurrentState()).toBe('state2');
+      expect(stateMachine.getCurrentState()).toBe(tagFor('state2'));
     });
 
-    it('executes no transition when the state has been exited', () => {
-      const stateMachine = Finity
+    forAllTagTypesIt('executes no transition when the state has been exited', async () => {
+      const stateMachine = await Finity
         .configure()
-        .initialState('state1')
-          .on('event1').transitionTo('state2')
-          .onTimeout(100).transitionTo('state3')
-        .start()
-        .handle('event1');
+        .initialState(tagFor('state1'))
+          .on(tagFor('event1')).transitionTo(tagFor('state2'))
+          .onTimeout(100).transitionTo(tagFor('state3'))
+        .start();
 
-      jasmine.clock().tick(100);
+      await stateMachine.handle(tagFor('event1'));
 
-      expect(stateMachine.getCurrentState()).toBe('state2');
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(stateMachine.getCurrentState()).toBe(tagFor('state2'));
     });
   });
 
   describe('when defined for a non-initial state', () => {
-    it('executes the correct transition on timeout', () => {
-      const stateMachine = Finity
+    forAllTagTypesIt('executes the correct transition on timeout', async () => {
+      const stateMachine = await Finity
         .configure()
-        .initialState('state1').on('event1').transitionTo('state2')
-        .state('state2').onTimeout(100).transitionTo('state3')
-        .start()
-        .handle('event1');
+        .initialState(tagFor('state1')).on(tagFor('event1')).transitionTo(tagFor('state2'))
+        .state(tagFor('state2')).onTimeout(100).transitionTo(tagFor('state3'))
+        .start();
 
-      expect(stateMachine.getCurrentState()).toBe('state2');
+      await stateMachine.handle(tagFor('event1'));
 
-      jasmine.clock().tick(100);
+      expect(stateMachine.getCurrentState()).toBe(tagFor('state2'));
 
-      expect(stateMachine.getCurrentState()).toBe('state3');
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(stateMachine.getCurrentState()).toBe(tagFor('state3'));
     });
   });
 });

@@ -7,7 +7,7 @@
 - [x] Promise triggers
 - [x] Hierarchical state machines
 - [x] Ignoring events
-- [ ] Async transitions *(in progress)*
+- [x] Async transitions
 - [ ] Persistence support
 
 ## Documentation
@@ -21,3 +21,4 @@
 - [ ] Execution order of entry, exit, and transition actions and global hooks
 - [ ] Recursive events & event queue
 - [ ] API reference
+- [ ] Async transitions

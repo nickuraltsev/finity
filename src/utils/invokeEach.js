@@ -1,3 +1,3 @@
-export default function invokeEach(fns, ...args) {
-  fns.forEach(fn => fn(...args));
+export default async function invokeEach(fns, ...args) {
+  return await Promise.all(fns.map(async fn => (await fn(...args))));
 }
