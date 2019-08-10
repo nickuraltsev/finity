@@ -39,7 +39,7 @@
     "jasmine": "^3.1.0",
     "jasmine-spec-reporter": "^4.2.1",
     "eslint": "^4.18.2",
-    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-airbnb": "^18.0.0",
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-react": "^7.7.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
